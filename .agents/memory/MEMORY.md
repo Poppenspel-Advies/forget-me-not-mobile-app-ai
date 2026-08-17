@@ -1,0 +1,1 @@
+- [Expo web root sizing](expo-web-root-sizing.md) — Gesture-handler roots may need explicit flex sizing for the Expo web preview to render the route.

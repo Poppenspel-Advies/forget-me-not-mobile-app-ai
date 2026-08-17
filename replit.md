@@ -1,6 +1,6 @@
-# [Project name]
+# ForgetMeNot AI
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+ForgetMeNot AI is a mobile personal omission prediction engine that helps people notice what they are likely to forget before it becomes a problem.
 
 ## Run & Operate
 
@@ -22,23 +22,31 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/forgetmenot-ai/app/index.tsx` — mobile screens, navigation, and first-build interactions.
+- `artifacts/forgetmenot-ai/constants/colors.ts` — ForgetMeNot semantic color tokens.
+- `artifacts/forgetmenot-ai/assets/images/` — generated globe, memory, prediction, and app icon artwork.
+- `artifacts/forgetmenot-ai/docs/ARCHITECTURE.md` — product and implementation evolution notes.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The first build is frontend-first and uses local state so core product interactions work immediately in Expo Go.
+- A single root route owns the full product surface to keep navigation lightweight while the product concept is validated.
+- Five everyday destinations are always available; prediction, action, memory, and contact views are focused secondary screens.
+- The black/pink/cyan/green/gold palette is semantic: pink draws attention, cyan shows context, green indicates prevention, and gold signals care/practicality.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+The app gives users a daily AI signal overview, a context-aware events view, note/photo/voice capture entry points, a conversational second brain, an omission radar, preventive action checklist, private signal map, and a feedback channel.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- The product identity is ForgetMeNot AI: a Personal Omission Prediction Engine, not a traditional reminder app.
+- The visual language should stay black with bright pink, cyan, fluorescent green, and gold, and should reuse the F-inside-a-globe motif.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The Expo app is served through the managed `artifacts/forgetmenot-ai: expo` workflow.
+- Use Expo Go-compatible device APIs when replacing the first-build local capture and profile placeholders.
 
 ## Pointers
 
