@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
+import { useAnalyzeCapture, type CaptureAnalysis } from '@workspace/api-client-react';
 import colors from '@/constants/colors';
 
 type Screen =
@@ -34,6 +35,8 @@ type CapturedItem = {
   detail: string;
   tag: string;
   color: string;
+  likelyOmission?: string;
+  confidence?: number;
 };
 
 const theme = colors.light;
@@ -353,12 +356,42 @@ function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: Screen)
   const [mode, setMode] = useState<'note' | 'photo' | 'voice'>('note');
   const [text, setText] = useState('');
   const [saved, setSaved] = useState(false);
-  const save = () => {
-    if (!text.trim()) return;
+  const [analysis, setAnalysis] = useState<CaptureAnalysis | null>(null);
+  const [analysisError, setAnalysisError] = useState('');
+  const analyzeMutation = useAnalyzeCapture();
+  const captureContent = text.trim() || (mode === 'photo'
+    ? 'A visual context capture from the user that may contain an object, place, or note worth remembering.'
+    : 'A voice context capture from the user containing a thought they want ForgetMeNot to keep visible.');
+  const analyze = () => {
+    if (mode === 'note' && !text.trim()) return;
     tap();
-    onCapture({ id: Date.now().toString(), title: text.trim(), detail: 'Added just now · ready for inference', tag: mode.toUpperCase(), color: mode === 'note' ? theme.green : mode === 'photo' ? theme.cyan : theme.gold });
+    setAnalysisError('');
+    analyzeMutation.mutate(
+      { data: { content: captureContent, source: mode } },
+      {
+        onSuccess: (result) => setAnalysis(result),
+        onError: () => setAnalysisError('I could not reach Gemini. Check the API server and try again.'),
+      },
+    );
+  };
+  const save = () => {
+    if (!analysis) {
+      analyze();
+      return;
+    }
+    tap();
+    onCapture({
+      id: Date.now().toString(),
+      title: analysis.signal,
+      detail: `${analysis.likelyOmission} · ${analysis.confidence}% likely`,
+      tag: analysis.category.toUpperCase(),
+      color: analysis.category === 'people' || analysis.category === 'personal' ? theme.pink : analysis.category === 'practical' || analysis.category === 'travel' ? theme.gold : theme.cyan,
+      likelyOmission: analysis.likelyOmission,
+      confidence: analysis.confidence,
+    });
     setSaved(true);
     setText('');
+    setAnalysis(null);
   };
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.screen}>
@@ -372,7 +405,7 @@ function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: Screen)
         </View>
         <View style={styles.captureModeRow}>
           {([['note', 'edit-3', 'Note'], ['photo', 'camera', 'Photo'], ['voice', 'mic', 'Voice']] as const).map(([id, icon, label]) => (
-            <Pressable key={id} testID={`capture-mode-${id}`} onPress={() => { tap(); setMode(id); }} style={[styles.captureMode, mode === id && styles.captureModeActive]}>
+            <Pressable key={id} testID={`capture-mode-${id}`} onPress={() => { tap(); setMode(id); setAnalysis(null); setAnalysisError(''); }} style={[styles.captureMode, mode === id && styles.captureModeActive]}>
               <Feather name={icon as keyof typeof Feather.glyphMap} size={18} color={mode === id ? theme.background : theme.mutedForeground} />
               <Text style={[styles.captureModeLabel, mode === id && styles.captureModeLabelActive]}>{label}</Text>
             </Pressable>
@@ -391,9 +424,19 @@ function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: Screen)
             <Text style={styles.mediaAction}>{mode === 'photo' ? 'OPEN CAMERA' : 'START RECORDING'}</Text>
           </Pressable>
         )}
-        <Pressable testID="save-signal" onPress={save} disabled={mode === 'note' && !text.trim()} style={({ pressed }) => [styles.primaryButton, (mode === 'note' && !text.trim()) && styles.disabledButton, pressed && styles.pressed]}>
-          <Text style={styles.primaryButtonText}>{saved ? 'Signal added' : 'Add to my signal map'}</Text>
-          <Feather name={saved ? 'check' : 'arrow-up-right'} size={18} color={theme.background} />
+        {analysis ? (
+          <View style={styles.analysisCard}>
+            <View style={styles.analysisHeader}><View style={styles.analysisBadge}><Feather name="star" size={15} color={theme.cyan} /></View><View style={styles.analysisHeaderCopy}><Text style={styles.analysisEyebrow}>GEMINI SIGNAL READ</Text><Text style={styles.analysisTitle}>{analysis.signal}</Text></View><Text style={styles.analysisConfidence}>{analysis.confidence}%</Text></View>
+            <Text style={styles.analysisLabel}>YOU MIGHT FORGET</Text>
+            <Text style={styles.analysisOmission}>{analysis.likelyOmission}</Text>
+            <Text style={styles.analysisExplanation}>{analysis.explanation}</Text>
+            <View style={styles.analysisAction}><Feather name="shield" size={14} color={theme.green} /><Text style={styles.analysisActionText}>{analysis.preventiveAction}</Text></View>
+          </View>
+        ) : null}
+        {analysisError ? <Text style={styles.analysisError}>{analysisError}</Text> : null}
+        <Pressable testID="save-signal" onPress={save} disabled={analyzeMutation.isPending || (mode === 'note' && !text.trim())} style={({ pressed }) => [styles.primaryButton, (analyzeMutation.isPending || (mode === 'note' && !text.trim())) && styles.disabledButton, pressed && styles.pressed]}>
+          <Text style={styles.primaryButtonText}>{saved ? 'Signal added' : analyzeMutation.isPending ? 'Reading your signal…' : analysis ? 'Save to my signal map' : 'Analyze with Gemini'}</Text>
+          <Feather name={saved ? 'check' : analyzeMutation.isPending ? 'loader' : analysis ? 'check' : 'arrow-up-right'} size={18} color={theme.background} />
         </Pressable>
         {saved ? <Text style={styles.savedText}>Your context is now part of the pattern. I’ll look for what it connects to.</Text> : null}
         <Pressable onPress={() => { tap(); onNavigate('memory'); }} style={styles.secondaryLink}><Text style={styles.secondaryLinkText}>See everything you’ve given me</Text><Feather name="arrow-right" size={16} color={theme.cyan} /></Pressable>
@@ -659,6 +702,19 @@ const styles = StyleSheet.create({
   mediaTitle: { color: theme.text, fontSize: 16, fontWeight: '700' },
   mediaCopy: { color: theme.mutedForeground, fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 6, maxWidth: 235 },
   mediaAction: { color: theme.cyan, fontSize: 9, fontWeight: '700', letterSpacing: 1.2, marginTop: 14 },
+  analysisCard: { backgroundColor: `${theme.cyan}0D`, borderWidth: 1, borderColor: `${theme.cyan}45`, borderRadius: 15, padding: 14, marginTop: 14 },
+  analysisHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  analysisBadge: { width: 33, height: 33, borderRadius: 10, backgroundColor: `${theme.cyan}1A`, alignItems: 'center', justifyContent: 'center' },
+  analysisHeaderCopy: { flex: 1 },
+  analysisEyebrow: { color: theme.cyan, fontSize: 8, letterSpacing: 1.1, fontWeight: '700', marginBottom: 4 },
+  analysisTitle: { color: theme.text, fontSize: 13, fontWeight: '700' },
+  analysisConfidence: { color: theme.green, fontSize: 16, fontWeight: '700' },
+  analysisLabel: { color: theme.mutedForeground, fontSize: 8, letterSpacing: 1.15, fontWeight: '700', marginTop: 16 },
+  analysisOmission: { color: theme.text, fontSize: 15, lineHeight: 20, fontWeight: '700', marginTop: 5 },
+  analysisExplanation: { color: theme.mutedForeground, fontSize: 11, lineHeight: 16, marginTop: 6 },
+  analysisAction: { flexDirection: 'row', alignItems: 'center', gap: 7, borderTopWidth: 1, borderTopColor: `${theme.cyan}30`, marginTop: 12, paddingTop: 10 },
+  analysisActionText: { color: theme.green, flex: 1, fontSize: 11, lineHeight: 15, fontWeight: '600' },
+  analysisError: { color: theme.destructive, fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 11 },
   primaryButton: { height: 51, backgroundColor: theme.pink, borderRadius: 11, marginTop: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9 },
   primaryButtonText: { color: theme.background, fontSize: 13, fontWeight: '700' },
   disabledButton: { opacity: 0.35 },

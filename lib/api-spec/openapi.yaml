@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: capture
+    description: Capture signal processing
 paths:
   /healthz:
     get:
@@ -24,6 +26,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /capture/analyze:
+    post:
+      operationId: analyzeCapture
+      tags: [capture]
+      summary: Analyze a captured personal signal
+      description: Uses Gemini to turn an unstructured capture into a likely omission, confidence score, explanation, and preventive action.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaptureAnalysisInput"
+      responses:
+        "200":
+          description: Structured capture analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaptureAnalysis"
+        "400":
+          description: Invalid capture
+        "502":
+          description: AI provider unavailable
 components:
   schemas:
     HealthStatus:
@@ -33,4 +58,42 @@ components:
           type: string
       required:
         - status
+    CaptureAnalysisInput:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        source:
+          type: string
+          enum: [note, photo, voice]
+      required:
+        - content
+        - source
+    CaptureAnalysis:
+      type: object
+      properties:
+        signal:
+          type: string
+        likelyOmission:
+          type: string
+        explanation:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 100
+        preventiveAction:
+          type: string
+        category:
+          type: string
+          enum: [personal, practical, people, travel, work, object, other]
+      required:
+        - signal
+        - likelyOmission
+        - explanation
+        - confidence
+        - preventiveAction
+        - category
 
