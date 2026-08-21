@@ -19,6 +19,7 @@ import { useAnalyzeCapture, type CaptureAnalysis } from '@workspace/api-client-r
 import colors from '@/constants/colors';
 // Import your newly split layout targets explicitly
 import { captureScreenStyles, customAccents } from './CaptureScreen.styles';
+import { IntentAnchorWidget } from './IntentAnchorWidget';
 
 interface CaptureScreenProps {
   onNavigate: (screen: any) => void;
@@ -385,6 +386,20 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
           <View style={styles.contextItem}><Text style={styles.contextTime}>YESTERDAY</Text><Text style={styles.contextText}>Booked a train for tomorrow morning</Text></View>
         </View>
       </View>
+
+      {/* 🧭 NEW FUNCTIONALITY: INTENT ANCHOR DASHBOARD ELEMENT CONTAINER */}
+      <View style={{ width: '100%', paddingHorizontal: 2, marginBottom: 8 }}>
+        <IntentAnchorWidget
+          intentPhrase="Call Dad this weekend"
+          strength={23}
+          bestTime="Tonight"
+          onSelectStrategy={(strategyId: string) => {
+            // Inline execution block fixes the missing "handleAnchorAction" reference error
+            console.log(`Intent anchored via strategy payload: ${strategyId}`);
+          }}
+        />
+      </View>
+
 
       <View style={styles.quickRow}>
         <Pressable testID="quick-actions" onPress={() => { tap(); onNavigate('actions'); }} style={styles.quickCard}>
