@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import {
   Animated,
   Image,
@@ -17,6 +17,18 @@ import * as Haptics from 'expo-haptics';
 import { Feather } from '@expo/vector-icons';
 import { useAnalyzeCapture, type CaptureAnalysis } from '@workspace/api-client-react';
 import colors from '@/constants/colors';
+// Import your newly split layout targets explicitly
+import { captureScreenStyles, customAccents } from './CaptureScreen.styles';
+
+interface CaptureScreenProps {
+  onNavigate: (screen: any) => void;
+  onCapture: (item: any) => void;
+}
+
+// Define the hardcoded valid tags requested
+type TagOption = 'People' | 'Places' | 'Things';
+
+
 
 type Screen =
   | 'home'
@@ -92,8 +104,89 @@ const events = [
 ];
 
 function tap() {
-  void Haptics.selectionAsync();
+  // Optional chaining safely drops execution if the native module is absent (like on Web)
+  Haptics?.selectionAsync?.().catch(() => {
+    // Suppress any background warnings gracefully
+  });
 }
+
+// --- ANIMATED CHIP COMPONENT ---
+function AnimatedTagChip({ tag, isActive, onPress }: { tag: TagOption; isActive: boolean; onPress: () => void }) {
+  const scaleValue = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.spring(scaleValue, {
+      toValue: isActive ? 1.02 : 1,
+      friction: 6,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  }, [isActive]);
+
+  let iconName: keyof typeof Feather.glyphMap = 'box';
+  let activeBg = 'rgba(0, 240, 255, 0.15)';
+  let activeBorder = customAccents.cyan;
+  let activeColor = customAccents.cyan;
+
+  if (tag === 'People') {
+    iconName = 'user';
+    activeBg = 'rgba(255, 0, 127, 0.15)';
+    activeBorder = customAccents.pink;
+    activeColor = customAccents.pink;
+  } else if (tag === 'Places') {
+    iconName = 'map-pin';
+    activeBg = 'rgba(255, 191, 0, 0.15)';
+    activeBorder = customAccents.gold;
+    activeColor = customAccents.gold;
+  }
+
+  return (
+    <Animated.View style={[captureScreenStyles.chipWrapper, { transform: [{ scale: scaleValue }] }]}>
+      <Pressable
+        onPress={onPress}
+        style={[
+          captureScreenStyles.tagChip,
+          isActive ? { backgroundColor: activeBg, borderColor: activeBorder } : captureScreenStyles.tagChipInactive
+        ]}
+      >
+        <Feather name={iconName} size={15} color={isActive ? activeColor : '#A3A3A3'} style={captureScreenStyles.chipIcon} />
+        <Text style={[captureScreenStyles.tagChipText, isActive ? { color: activeColor, fontWeight: '700' } : captureScreenStyles.tagChipTextInactive]}>
+          {tag}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+
+// Global UI Layout Wrapper
+export function CategoryContextSelector({
+  selectedTag,
+  setSelectedTag,
+}: {
+  selectedTag: TagOption;
+  setSelectedTag: (tag: TagOption) => void;
+}) {
+  return (
+    <View style={styles.tagSelectorContainer}>
+      <Text style={styles.tagSelectorTitle}>Select Category Context</Text>
+      <View style={styles.tagSelectorRow}>
+        {(['People', 'Places', 'Things'] as TagOption[]).map((tag) => (
+          <AnimatedTagChip
+            key={tag}
+            tag={tag}
+            isActive={selectedTag === tag}
+            onPress={() => {
+              if (typeof tap === 'function') tap();
+              setSelectedTag(tag);
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 
 function FGlobe({ size = 50, showWord = false }: { size?: number; showWord?: boolean }) {
   return (
@@ -352,98 +445,203 @@ function EventsScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) 
   );
 }
 
-function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: Screen) => void; onCapture: (item: CapturedItem) => void }) {
+// --- MAIN CAPTURE SCREEN COMPONENT ---
+export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: string) => void; onCapture: (item: any) => void }) {
   const [mode, setMode] = useState<'note' | 'photo' | 'voice'>('note');
   const [text, setText] = useState('');
   const [saved, setSaved] = useState(false);
   const [analysis, setAnalysis] = useState<CaptureAnalysis | null>(null);
   const [analysisError, setAnalysisError] = useState('');
+  const [selectedTag, setSelectedTag] = useState<TagOption>('Things');
+
   const analyzeMutation = useAnalyzeCapture();
-  const captureContent = text.trim() || (mode === 'photo'
-    ? 'A visual context capture from the user that may contain an object, place, or note worth remembering.'
-    : 'A voice context capture from the user containing a thought they want ForgetMeNot to keep visible.');
-  const analyze = () => {
-    if (mode === 'note' && !text.trim()) return;
-    tap();
-    setAnalysisError('');
-    analyzeMutation.mutate(
-      { data: { content: captureContent, source: mode } },
-      {
-        onSuccess: (result) => setAnalysis(result),
-        onError: () => setAnalysisError('I could not reach Gemini. Check the API server and try again.'),
-      },
-    );
+
+  // Local style helper fallback object reference mapping
+  const theme = colors?.light || {
+    background: '#0A0A0A',
+    card: '#171717',
+    border: '#262626',
+    text: '#FFFFFF',
+    mutedForeground: '#737373',
+    cyan: '#00f0ff'
   };
+
+  const captureContent = text.trim() || (mode === 'photo'
+      ? 'A visual context capture from the user that may contain an object, place, or note worth remembering.'
+      : 'A voice context capture from the user containing a thought they want ForgetMeNot to keep visible.');
+
   const save = () => {
     if (!analysis) {
-      analyze();
+      if (mode === 'note' && !text.trim()) return;
+      tap();
+      setAnalysisError('');
+      analyzeMutation.mutate(
+        { data: { content: captureContent, source: mode, contextTag: selectedTag.toLowerCase() } },
+        {
+          onSuccess: (result) => {
+            setAnalysis(result);
+
+            // ✅ FIX: Extract category from Gemini response safely
+            const incoming = result?.category?.toLowerCase();
+
+            if (incoming === 'people' || incoming === 'personal') {
+              setSelectedTag('People');
+            } else if (incoming === 'places' || incoming === 'travel') {
+              setSelectedTag('Places');
+            } else if (incoming === 'things') {
+              setSelectedTag('Things');
+            } else {
+              // ✅ CRITICAL FIX: If Gemini's response is undefined/unrecognized,
+              // PRESERVE the tag the user already tapped instead of forcing 'Things'
+              setSelectedTag(selectedTag);
+            }
+          },
+          onError: () => setAnalysisError('I could not reach Gemini. Check the API server and try again.'),
+        },
+      );
       return;
     }
+
     tap();
+
+    // Assign color layouts based on selected categories
+    const activeColor = selectedTag === 'People'
+      ? customAccents.pink
+      : selectedTag === 'Places'
+        ? customAccents.gold
+        : customAccents.cyan;
+
     onCapture({
       id: Date.now().toString(),
-      title: analysis.signal,
-      detail: `${analysis.likelyOmission} · ${analysis.confidence}% likely`,
-      tag: analysis.category.toUpperCase(),
-      color: analysis.category === 'people' || analysis.category === 'personal' ? theme.pink : analysis.category === 'practical' || analysis.category === 'travel' ? theme.gold : theme.cyan,
-      likelyOmission: analysis.likelyOmission,
-      confidence: analysis.confidence,
+      title: analysis.signal || text.trim() || `New ${selectedTag} Context`,
+      detail: `${analysis.likelyOmission || 'Context entry logged'} · ${analysis.confidence || 95}% likely`,
+
+      // ✅ FIX: Safely passes down the user's manual choice or corrected response string
+      tag: selectedTag.toUpperCase(),
+      color: activeColor,
+      likelyOmission: analysis.likelyOmission || 'Context entry logged',
+      confidence: analysis.confidence || 95,
     });
+
     setSaved(true);
     setText('');
     setAnalysis(null);
   };
+
+
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.screen}>
-      <ScreenHeader title="Capture a signal" subtitle="Messy is welcome. Context is the point." onBack={() => onNavigate('home')} />
       <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
+
+        {/* --- HERO HEADER BANNER --- */}
         <View style={styles.captureHero}>
-          <Image source={require('@/assets/images/memory-orb.jpg')} style={styles.captureImage} />
+          <Image source={{ uri: 'https://unsplash.com' }} style={styles.captureImage} />
           <View style={styles.captureImageOverlay} />
-          <View style={styles.captureHeroCopy}><Text style={styles.captureEyebrow}>A LITTLE SOMETHING</Text><Text style={styles.captureTitle}>What should your{"\n"}future self know?</Text></View>
-          <View style={styles.captureGlow}><FGlobe size={54} /></View>
+          <View style={styles.captureHeroCopy}>
+            <Text style={styles.captureEyebrow}>A LITTLE SOMETHING</Text>
+            <Text style={styles.captureTitle}>What should your future self know?</Text>
+          </View>
         </View>
+
+        {/* --- CATEGORY SELECTOR CHIPS --- */}
+        <View style={captureScreenStyles.tagSelectorContainer}>
+          <Text style={captureScreenStyles.tagSelectorTitle}>Select Category Context</Text>
+          <View style={captureScreenStyles.tagSelectorRow}>
+            {(['People', 'Places', 'Things'] as TagOption[]).map((tag) => (
+              <AnimatedTagChip
+                key={tag}
+                tag={tag}
+                isActive={selectedTag === tag}
+                onPress={() => { tap(); setSelectedTag(tag); }}
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* --- INPUT MODE SELECTION ROW --- */}
         <View style={styles.captureModeRow}>
           {([['note', 'edit-3', 'Note'], ['photo', 'camera', 'Photo'], ['voice', 'mic', 'Voice']] as const).map(([id, icon, label]) => (
-            <Pressable key={id} testID={`capture-mode-${id}`} onPress={() => { tap(); setMode(id); setAnalysis(null); setAnalysisError(''); }} style={[styles.captureMode, mode === id && styles.captureModeActive]}>
-              <Feather name={icon as keyof typeof Feather.glyphMap} size={18} color={mode === id ? theme.background : theme.mutedForeground} />
+            <Pressable key={id} onPress={() => { tap(); setMode(id); setAnalysis(null); setAnalysisError(''); }} style={[styles.captureMode, mode === id && styles.captureModeActive]}>
+              <Feather name={icon} size={16} color={mode === id ? theme.background : '#A3A3A3'} />
               <Text style={[styles.captureModeLabel, mode === id && styles.captureModeLabelActive]}>{label}</Text>
             </Pressable>
           ))}
         </View>
-        {mode === 'note' ? (
-          <View style={styles.inputWrap}>
-            <TextInput testID="capture-input" multiline value={text} onChangeText={setText} placeholder="“The thing I’ll definitely remember later…”" placeholderTextColor={theme.mutedForeground} style={styles.captureInput} />
-            <Text style={styles.inputHint}>ForgetMeNot will connect this to your calendar, places, people, and patterns.</Text>
-          </View>
-        ) : (
-          <Pressable onPress={() => { tap(); setSaved(true); }} style={styles.mediaCapture}>
-            <View style={styles.mediaIcon}><Feather name={mode === 'photo' ? 'camera' : 'mic'} size={26} color={mode === 'photo' ? theme.cyan : theme.gold} /></View>
-            <Text style={styles.mediaTitle}>{mode === 'photo' ? 'Point at the context' : 'Speak the context'}</Text>
-            <Text style={styles.mediaCopy}>{mode === 'photo' ? 'Use your camera to capture an object, note, or scene.' : 'Hold to record a thought before it disappears.'}</Text>
-            <Text style={styles.mediaAction}>{mode === 'photo' ? 'OPEN CAMERA' : 'START RECORDING'}</Text>
-          </Pressable>
-        )}
+
+        {/* --- INTERACTIVE ACTION FORM VIEWS --- */}
+                {mode === 'note' ? (
+                  // ✅ RESTORED: Standard Text Input fields block
+                  <View style={styles.inputWrap}>
+                    <TextInput
+                      multiline
+                      value={text}
+                      onChangeText={setText}
+                      placeholder="“The thing I’ll definitely remember later…”"
+                      placeholderTextColor={theme.mutedForeground}
+                      style={styles.captureInput}
+                    />
+                    <Text style={styles.inputHint}>ForgetMeNot will connect this to your calendar, places, people, and patterns.</Text>
+                  </View>
+                ) : (
+                  // ✅ RESTORED: Styled Media Camera & Audio Record interface block
+                  <Pressable onPress={() => { tap(); setSaved(true); }} style={styles.mediaCapture}>
+                    <View style={styles.mediaIcon}>
+                      <Feather
+                        name={mode === 'photo' ? 'camera' : 'mic'}
+                        size={26}
+                        color={mode === 'photo' ? customAccents.cyan : customAccents.gold}
+                      />
+                    </View>
+                    <Text style={styles.mediaTitle}>
+                      {mode === 'photo' ? 'Point at the context' : 'Speak the context'}
+                    </Text>
+                    <Text style={styles.mediaCopy}>
+                      {mode === 'photo'
+                        ? 'Use your camera to capture an object, note, or scene.'
+                        : 'Hold to record a thought before it disappears.'}
+                    </Text>
+                    <Text style={[styles.mediaAction, { color: mode === 'photo' ? customAccents.cyan : customAccents.gold }]}>
+                      {mode === 'photo' ? 'OPEN CAMERA' : 'START RECORDING'}
+                    </Text>
+                  </Pressable>
+                )}
+
+        {/* ✅ FIX: Integrated Gemini Read-out analytics diagnostic card view dashboard layout */}
         {analysis ? (
           <View style={styles.analysisCard}>
-            <View style={styles.analysisHeader}><View style={styles.analysisBadge}><Feather name="star" size={15} color={theme.cyan} /></View><View style={styles.analysisHeaderCopy}><Text style={styles.analysisEyebrow}>GEMINI SIGNAL READ</Text><Text style={styles.analysisTitle}>{analysis.signal}</Text></View><Text style={styles.analysisConfidence}>{analysis.confidence}%</Text></View>
+            <View style={styles.analysisHeader}>
+              <View style={styles.analysisBadge}><Feather name="star" size={15} color={theme.cyan || customAccents.cyan} /></View>
+              <View style={styles.analysisHeaderCopy}>
+                <Text style={styles.analysisEyebrow}>GEMINI SIGNAL READ</Text>
+                <Text style={styles.analysisTitle}>{analysis.signal}</Text>
+              </View>
+              <Text style={styles.analysisConfidence}>{analysis.confidence}%</Text>
+            </View>
             <Text style={styles.analysisLabel}>YOU MIGHT FORGET</Text>
             <Text style={styles.analysisOmission}>{analysis.likelyOmission}</Text>
             <Text style={styles.analysisExplanation}>{analysis.explanation}</Text>
-            <View style={styles.analysisAction}><Feather name="shield" size={14} color={theme.green} /><Text style={styles.analysisActionText}>{analysis.preventiveAction}</Text></View>
+            <View style={styles.analysisAction}>
+              <Feather name="shield" size={14} color={customAccents.green} />
+              <Text style={styles.analysisActionText}>{analysis.preventiveAction}</Text>
+            </View>
           </View>
         ) : null}
+
         {analysisError ? <Text style={styles.analysisError}>{analysisError}</Text> : null}
-        <Pressable testID="save-signal" onPress={save} disabled={analyzeMutation.isPending || (mode === 'note' && !text.trim())} style={({ pressed }) => [styles.primaryButton, (analyzeMutation.isPending || (mode === 'note' && !text.trim())) && styles.disabledButton, pressed && styles.pressed]}>
-          <Text style={styles.primaryButtonText}>{saved ? 'Signal added' : analyzeMutation.isPending ? 'Reading your signal…' : analysis ? 'Save to my signal map' : 'Analyze with Gemini'}</Text>
-          <Feather name={saved ? 'check' : analyzeMutation.isPending ? 'loader' : analysis ? 'check' : 'arrow-up-right'} size={18} color={theme.background} />
+
+        {/* --- MAIN INTERACTION CTA CONTROL --- */}
+        <Pressable onPress={save} style={styles.primaryButton}>
+          <Text style={styles.primaryButtonText}>
+            {analyzeMutation.isPending ? 'Reading your signal…' : analysis ? 'Save to my signal map' : 'Analyze with Gemini'}
+          </Text>
+          <Feather name="arrow-up-right" size={16} color={theme.background} />
         </Pressable>
-        {saved ? <Text style={styles.savedText}>Your context is now part of the pattern. I’ll look for what it connects to.</Text> : null}
-        <Pressable onPress={() => { tap(); onNavigate('memory'); }} style={styles.secondaryLink}><Text style={styles.secondaryLinkText}>See everything you’ve given me</Text><Feather name="arrow-right" size={16} color={theme.cyan} /></Pressable>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
+
 
 function ChatScreen() {
   const [messages, setMessages] = useState([{ id: '1', from: 'ai', text: 'I’m looking between the lines. What’s on your mind?' }]);
@@ -549,9 +747,9 @@ function ContactScreen({ onBack }: { onBack: () => void }) {
   return <KeyboardAvoidingView behavior="padding" style={styles.screen}><ScreenHeader title="Talk to us" subtitle="We’re listening for better signals." onBack={onBack} />
     <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
       <View style={styles.contactHero}><FGlobe size={78} /><Text style={styles.contactHeroTitle}>A good assistant{"\n"}keeps learning.</Text><Text style={styles.contactHeroCopy}>Tell us what ForgetMeNot helped you notice — or what it should have.</Text></View>
-      {!sent ? <><View style={styles.contactInputWrap}><Text style={styles.contactInputLabel}>YOUR NOTE</Text><TextInput testID="contact-input" multiline value={message} onChangeText={setMessage} placeholder="I wish ForgetMeNot could…" placeholderTextColor={theme.mutedForeground} style={styles.contactInput} /></View><Pressable testID="send-contact" onPress={() => { if (message.trim()) { tap(); setSent(true); } }} style={[styles.primaryButton, !message.trim() && styles.disabledButton]}><Text style={styles.primaryButtonText}>Send to the team</Text><Feather name="send" size={16} color={theme.background} /></Pressable></> : <View style={styles.sentCard}><View style={styles.sentIcon}><Feather name="check" size={24} color={theme.background} /></View><Text style={styles.sentTitle}>Signal received.</Text><Text style={styles.sentCopy}>Thanks for making the product a little more human. We’ll be in touch soon.</Text><Pressable onPress={onBack} style={styles.secondaryButton}><Text style={styles.secondaryButtonText}>Back to your space</Text></Pressable></View>}
-      <View style={styles.contactDetails}><Text style={styles.contactDetailTitle}>Prefer email?</Text><Text style={styles.contactEmail}>hello@forgetmenot.ai</Text><Text style={styles.contactHours}>Usually replies within one quiet day.</Text></View>
-    </ScrollView>
+            {!sent ? <><View style={styles.contactInputWrap}><Text style={styles.contactInputLabel}>YOUR NOTE</Text><TextInput testID="contact-input" multiline value={message} onChangeText={setMessage} placeholder="I wish ForgetMeNot could…" placeholderTextColor={theme.mutedForeground} style={styles.contactInput} /></View><Pressable testID="send-contact" onPress={() => { if (message.trim()) { tap(); setSent(true); } }} style={[styles.primaryButton, !message.trim() && styles.disabledButton]}><Text style={styles.primaryButtonText}>Send to the team</Text><Feather name="send" size={16} color={theme.background} /></Pressable></> : <View style={styles.sentCard}><View style={styles.sentIcon}><Feather name="check" size={24} color={theme.background} /></View><Text style={styles.sentTitle}>Signal received.</Text><Text style={styles.sentCopy}>Thanks for making the product a little more human. We’ll be in touch soon.</Text><Pressable onPress={onBack} style={styles.secondaryButton}><Text style={styles.secondaryButtonText}>Back to your space</Text></Pressable></View>}
+            <View style={styles.contactDetails}><Text style={styles.contactDetailTitle}>Prefer email?</Text><Text style={styles.contactEmail}>hello@forgetmenot.ai</Text><Text style={styles.contactHours}>Usually replies within one quiet day.</Text></View>
+        </ScrollView>
   </KeyboardAvoidingView>;
 }
 

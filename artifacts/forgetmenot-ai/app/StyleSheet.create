@@ -1,0 +1,46 @@
+const styles = StyleSheet.create({
+  tagSelectorContainer: {
+    width: '100%',
+    marginTop: 12,
+    marginBottom: 28, // Distinct, clean layout spacing before mode rows
+    paddingHorizontal: 4,
+  },
+  tagSelectorTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#E5E7EB', // Crisp light-gray accessible typography
+    textTransform: 'uppercase',
+    marginBottom: 12,
+    letterSpacing: 1.2,
+  },
+  tagSelectorRow: {
+    flexDirection: 'row',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  tagChip: {
+    flexDirection: 'row', // Aligns internal icon alongside label text string
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    borderWidth: 1.5,
+    marginHorizontal: 4,
+  },
+  tagChipInactive: {
+    borderColor: '#374151',      // Explicit dark charcoal visibility boundaries
+    backgroundColor: '#1F2937',  // Medium background block contrast
+  },
+  chipIcon: {
+    marginRight: 6, // Snug structural spacing separating icon art from plain string
+  },
+  tagChipText: {
+    fontSize: 14,
+    letterSpacing: 0.3,
+  },
+  tagChipTextInactive: {
+    color: '#D1D5DB',            // High visibility color fallback for web layouts
+    fontWeight: '600',
+  },
+});
