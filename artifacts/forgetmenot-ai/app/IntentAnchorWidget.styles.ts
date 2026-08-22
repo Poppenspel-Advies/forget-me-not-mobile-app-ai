@@ -19,6 +19,8 @@ export const artStyles = StyleSheet.create({
     alignItems: 'stretch',
     gap: 16,
   },
+
+  // --- Left Half: Core Tracker ---
   trackerSideColumn: {
     flex: 1.1,
     justifyContent: 'space-between',
@@ -96,18 +98,20 @@ export const artStyles = StyleSheet.create({
     color: '#FFFFFF',
     lineHeight: 20,
   },
+
+  // 🧭 Concentric Arc Layer Spacing
   miniConcentricTrack: {
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
   },
   outerArcGlow: {
     position: 'absolute',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     borderWidth: 2.5,
     borderColor: '#ff007f',
     borderBottomColor: 'transparent',
@@ -116,14 +120,15 @@ export const artStyles = StyleSheet.create({
   },
   innerArcGlow: {
     position: 'absolute',
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: '#ffbf00',
     borderTopColor: 'transparent',
     transform: [{ rotate: '30deg' }],
   },
+
   signalPillRow: {
     flexDirection: 'column',
     gap: 4,
@@ -145,6 +150,8 @@ export const artStyles = StyleSheet.create({
     color: '#ffbf00',
     marginLeft: 4,
   },
+
+  // --- Right Half: Layout Controls ---
   conceptSideColumn: {
     flex: 0.9,
     backgroundColor: '#151518',
@@ -169,7 +176,7 @@ export const artStyles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  // 🌟 FIX: Updated Graphical View targeting a scatter dot network pattern map grid
+  // Dynamic Scatter Grid Fixes
   graphicVectorBox: {
     width: '100%',
     height: 46,
@@ -196,10 +203,6 @@ export const artStyles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    shadowColor: '#FFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 2,
   },
 
   footerActionContainer: {
@@ -207,7 +210,7 @@ export const artStyles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#1E1E22',
+    borderColor: '#1E1E22',
     paddingTop: 12,
     marginTop: 14,
   },
@@ -230,7 +233,7 @@ export const artStyles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Modal Drawer
+  // Modal Drawer Layout Configuration
   backdropOverlay: {
     flex: 1,
     backgroundColor: 'rgba(5, 5, 6, 0.85)',

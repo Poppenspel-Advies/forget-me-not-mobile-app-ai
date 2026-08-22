@@ -20,6 +20,8 @@ import colors from '@/constants/colors';
 // Import your newly split layout targets explicitly
 import { captureScreenStyles, customAccents } from './CaptureScreen.styles';
 import { IntentAnchorWidget } from './IntentAnchorWidget';
+import { RippleShieldWidget } from './RippleShieldWidget'; // Adjust the relative path if you saved the widget file in a separate components folder
+
 
 interface CaptureScreenProps {
   onNavigate: (screen: any) => void;
@@ -320,6 +322,25 @@ function BottomNav({ screen, onNavigate }: { screen: Screen; onNavigate: (next: 
 function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => void; captured: CapturedItem[] }) {
   const insets = useSafeAreaInsets();
   const pulse = useRef(new Animated.Value(0)).current;
+  // 🌟 1. MOCK STATE HOOKS: Track card dismissals dynamically on layout
+    const [anchorActive, setAnchorActive] = useState(true);
+    const [shieldActive, setShieldActive] = useState(true);
+
+    // 🌟 2. ANIMATED GLIDE WRAPPERS: Control entrance sliding offsets upon app startup
+    const startUpFade = useRef(new Animated.Value(0)).current;
+    const anchorSlideY = useRef(new Animated.Value(40)).current;
+    const shieldSlideY = useRef(new Animated.Value(60)).current;
+
+     useEffect(() => {
+        // Sequentially cascade widgets upwards into focal layout ranges smoothly
+        Animated.parallel([
+          Animated.timing(startUpFade, { toValue: 1, duration: 600, useNativeDriver: Platform.OS !== 'web' }),
+          Animated.spring(anchorSlideY, { toValue: 0, tension: 35, friction: 8, useNativeDriver: Platform.OS !== 'web' }),
+          Animated.spring(shieldSlideY, { toValue: 0, tension: 30, friction: 8, useNativeDriver: Platform.OS !== 'web' }),
+        ]).start();
+      }, []);
+
+
   React.useEffect(() => {
     Animated.loop(
       Animated.sequence([
@@ -387,18 +408,36 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
         </View>
       </View>
 
-      {/* 🧭 NEW FUNCTIONALITY: INTENT ANCHOR DASHBOARD ELEMENT CONTAINER */}
-      <View style={{ width: '100%', paddingHorizontal: 2, marginBottom: 8 }}>
-        <IntentAnchorWidget
-          intentPhrase="Call Dad this weekend"
-          strength={23}
-          bestTime="Tonight"
-          onSelectStrategy={(strategyId: string) => {
-            // Inline execution block fixes the missing "handleAnchorAction" reference error
-            console.log(`Intent anchored via strategy payload: ${strategyId}`);
-          }}
-        />
-      </View>
+       {/* 🧭 INTENT ANCHOR CONTAINER CONTAINER WITH SLIDE ENTRANCE */}
+            {anchorActive && (
+              <Animated.View style={{ opacity: startUpFade, transform: [{ translateY: anchorSlideY }] }}>
+                <IntentAnchorWidget
+                  phrase="Call Dad this weekend"
+                  score={23}
+                  windowTime="Tonight"
+                  onSelectStrategy={() => {
+                    // Dismisses the active intention widget instantly on choice confirm selection
+                    setAnchorActive(true);
+                  }}
+                />
+              </Animated.View>
+            )}
+
+
+          {/* 🔮 RIPPLE SHIELD CONTAINER CONTAINER WITH TIMED DELAY SLIDE ENTRANCE */}
+            {shieldActive && (
+              <Animated.View style={{ opacity: startUpFade, transform: [{ translateY: shieldSlideY }] }}>
+                <RippleShieldWidget
+                  omissionItem="Passport"
+                  riskScore={94}
+                  onPreventRipple={() => {
+                    // 🌟 1. Dismisses the card immediately from your view feed layout
+                    setShieldActive(true);
+                  }}
+                />
+              </Animated.View>
+            )}
+
 
 
       <View style={styles.quickRow}>
