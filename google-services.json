@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "437897334000",
+    "project_id": "forget-me-not-ai",
+    "storage_bucket": "forget-me-not-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437897334000:android:903ddb354759eb71224635",
+        "android_client_info": {
+          "package_name": "com.us.rpordlab.forgetmenotai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb7M7caBKxbMM0Flv_gCf54Ojx-3KhRWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
