@@ -23,6 +23,7 @@ import colors from '@/constants/colors';
 import { captureScreenStyles, customAccents } from './CaptureScreen.styles';
 import { IntentAnchorWidget } from './IntentAnchorWidget';
 import { RippleShieldWidget } from './RippleShieldWidget'; // Adjust the relative path if you saved the widget file in a separate components folder
+import { MemoryScreen } from './MemoryScreen';
 
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
 // ✅ THE FIX: Pushes up one directory level (../) then enters the config subfolder
@@ -362,6 +363,8 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     const startUpFade = useRef(new Animated.Value(0)).current;
     const anchorSlideY = useRef(new Animated.Value(40)).current;
     const shieldSlideY = useRef(new Animated.Value(60)).current;
+    // 🌟 THE ROUTER STATE MANAGER: Tracks which viewport panel should be mounted active on screen
+
 
      useEffect(() => {
         // Sequentially cascade widgets upwards into focal layout ranges smoothly
@@ -396,6 +399,7 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
           <Text style={styles.avatarText}>A</Text>
         </Pressable>
       </View>
+
 
       <ImageBackground source={require('@/assets/images/ai-globe.jpg')} imageStyle={styles.heroImage} style={styles.heroCard}>
         <View style={styles.heroOverlay} />
@@ -613,6 +617,8 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
 
       // Initialize document allocation tracking parameters
       let databaseDocumentId = Date.now().toString();
+      // 🌟 SYNC USER TARGET: Aligned cleanly with your active DB log user channel token string
+      const targetUserId = "Admin_ForgetMeNotAI";
 
       try {
         console.log('🔮 Initalizing active Firestore telemetry stream thread...');
@@ -623,6 +629,12 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
           omission_item: analysis.likelyOmission || 'Context entry logged',
           status: "active_obsession", // Keeps entry pinned to your live home view cards
           created_at: serverTimestamp(),
+          // 🌟 THE CRITICAL VECTOR CATEGORY FIX:
+          // Explicitly saves 'PEOPLE', 'PLACES', or 'THINGS' into a root data parameter
+          tag: selectedTag.toUpperCase(),
+          // 🌟 USER DATA DATA CAPTURE: Saves what the user typed or what Gemini analyzed dynamically
+          title: text.trim() || analysis.signal || `New ${selectedTag} Signal`,
+          detail: analysis.explanation || "Active context map tracking sequence deployed.",
 
           // Personal Consequence Formula (PCF) Core Variables Matrix
           metrics: {
@@ -896,17 +908,7 @@ function ActionsScreen({ onBack }: { onBack: () => void }) {
   </View>;
 }
 
-function MemoryScreen({ onBack, captured }: { onBack: () => void; captured: CapturedItem[] }) {
-  return <View style={styles.screen}><ScreenHeader title="Signal map" subtitle="Everything you’ve let me notice" onBack={onBack} />
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
-      <View style={styles.memoryHero}><Image source={require('@/assets/images/memory-orb.jpg')} style={styles.memoryImage} /><View style={styles.memoryOverlay} /><View style={styles.memoryHeroCopy}><Text style={styles.memoryScore}>142</Text><Text style={styles.memoryScoreLabel}>signals in your orbit</Text></View><View style={styles.memoryGlobe}><FGlobe size={58} /></View></View>
-      <View style={styles.memoryTabs}><Text style={styles.memoryTabActive}>All signals</Text><Text style={styles.memoryTab}>People</Text><Text style={styles.memoryTab}>Places</Text><Text style={styles.memoryTab}>Things</Text></View>
-      <SectionTitle eyebrow="JUST NOW" title="Fresh context" action="Capture" />
-      {captured.map((item) => <View key={item.id} style={styles.memoryRow}><View style={[styles.memoryDot, { backgroundColor: item.color }]} /><View style={styles.memoryCopy}><Text style={styles.memoryTitle}>{item.title}</Text><Text style={styles.memoryDetail}>{item.detail}</Text></View><Pill label={item.tag} color={item.color} /></View>)}
-      <View style={styles.memoryNotice}><Feather name="lock" size={17} color={theme.cyan} /><Text style={styles.memoryNoticeText}>Your signal map belongs to you. ForgetMeNot doesn’t sell or share your context.</Text></View>
-    </ScrollView>
-  </View>;
-}
+
 
 function ContactScreen({ onBack }: { onBack: () => void }) {
   const [sent, setSent] = useState(false);
