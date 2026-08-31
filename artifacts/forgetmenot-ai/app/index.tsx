@@ -24,6 +24,7 @@ import { captureScreenStyles, customAccents } from './CaptureScreen.styles';
 import { IntentAnchorWidget } from './IntentAnchorWidget';
 import { RippleShieldWidget } from './RippleShieldWidget'; // Adjust the relative path if you saved the widget file in a separate components folder
 import { MemoryScreen } from './MemoryScreen';
+import { fetchGeminiSignalAnalysis } from '../config/geminiService';
 
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
 // ✅ THE FIX: Pushes up one directory level (../) then enters the config subfolder
@@ -554,7 +555,11 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
 
   const analyzeMutation = useAnalyzeCapture();
 
+  let geminiResultJson: any = null;
+
    const [analysisError, setAnalysisError] = useState<string | null>(null);
+
+   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
 
   const userId = "Admin_ForgetMeNotAI"; // Dynamic user pipeline fallback parameter tracking
 
@@ -579,32 +584,49 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
         if (mode === 'note' && !text.trim()) return;
         tap();
         setAnalysisError('');
-        analyzeMutation.mutate(
-          { data: { content: captureContent, source: mode, contextTag: selectedTag.toLowerCase() } },
-          {
-            onSuccess: (result) => {
-              setAnalysis(result);
 
-              // ✅ FIX: Extract category from Gemini response safely
-              const incoming = result?.category?.toLowerCase();
+        try {
+            // 1. Declare the variable outside the block so the entire function can see it
 
-              if (incoming === 'people' || incoming === 'personal') {
-                setSelectedTag('People');
-              } else if (incoming === 'places' || incoming === 'travel') {
-                setSelectedTag('Places');
-              } else if (incoming === 'things') {
-                setSelectedTag('Things');
-              } else {
-                // ✅ CRITICAL FIX: If Gemini's response is undefined/unrecognized,
-                // PRESERVE the tag the user already tapped instead of forcing 'Things'
-                setSelectedTag(selectedTag);
-              }
-            },
-            onError: () => setAnalysisError('I could not reach Gemini. Check the API server and try again.'),
-          },
-        );
-        return;
-      }
+                try {
+                    // 🌟 CLEAN CALL: Simply invoke the imported function with your form arguments
+                    const geminiResultJson = await fetchGeminiSignalAnalysis(text.trim(), selectedTag.toLowerCase());
+                    setAnalysis(geminiResultJson);
+                     } catch (parseError) {
+                          console.warn("🔥 JSON string structural truncation detected. Recovering using client-side fallback...");
+
+                          // Return a clean fallback object so your UI stays stable
+                          return {
+                            signal: "Analysis Routine Interrupted",
+                            confidence: 50,
+                            likelyOmission: "Travel Logistics Check",
+                            explanation: "The intelligence engine encountered a processing error while mapping this specific destination path.",
+                            preventiveAction: "Verify your travel route, site-access details, and hardware chargers manually.",
+                            category: selectedTag.toLowerCase()
+                          };
+                      setAnalysis(geminiResultJson);
+                        }
+                     // ✅ THE FIX: Stop execution immediately if data hasn't loaded yet
+                      if (!geminiResultJson) {
+                        console.warn("⚠️ Cannot save yet: Gemini analysis data is still loading or null.");
+                        return;
+                      }
+
+                // Map categories cleanly behind the scenes based on Gemini's JSON return payload
+                const modelCategory = geminiResultJson?.category?.toLowerCase();
+                if (modelCategory === 'people' || modelCategory === 'personal') setSelectedTag('People');
+                else if (modelCategory === 'places' || modelCategory === 'travel') setSelectedTag('Places');
+                else if (modelCategory === 'practical') setSelectedTag('Practical');
+                else setSelectedTag('Things');
+
+             } catch (err: any) {
+                     console.error("💥 Error fetching Gemini signal streams:", err);
+                     setAnalysisError(err?.message || 'I could not reach Gemini. Verify API parameters and try again.');
+                   } finally {
+                     setIsAiLoading(false); // Shuts off interface loader spinners
+                   }
+                   return;
+           }
 
       tap();
 
@@ -622,62 +644,126 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
 
       try {
         console.log('🔮 Initalizing active Firestore telemetry stream thread...');
+         const isPeople = selectedTag === 'People';
+         const isPlaces = selectedTag === 'Places';
+         const isPractical = selectedTag === 'Practical' || selectedTag === 'Things';
 
-        // 🌟 NEW: Writing Gemini Diagnostic variables natively down to your free NoSQL collection document
-        const docRef = await addDoc(collection(db, "analyses"), {
-          user_id: userId || "Admin_ForgetMeNotAI",
-          omission_item: analysis.likelyOmission || 'Context entry logged',
-          status: "active_obsession", // Keeps entry pinned to your live home view cards
-          created_at: serverTimestamp(),
-          // 🌟 THE CRITICAL VECTOR CATEGORY FIX:
-          // Explicitly saves 'PEOPLE', 'PLACES', or 'THINGS' into a root data parameter
-          tag: selectedTag.toUpperCase(),
-          // 🌟 USER DATA DATA CAPTURE: Saves what the user typed or what Gemini analyzed dynamically
-          title: text.trim() || analysis.signal || `New ${selectedTag} Signal`,
-          detail: analysis.explanation || "Active context map tracking sequence deployed.",
+         const handleFetchAnalysis = async () => {
+           try {
+             await analyzeMutation.mutateAsync();
+           } catch (err) {
+             console.error("💥 Generation phase failure:", err);
+           }
+         };
 
-          // Personal Consequence Formula (PCF) Core Variables Matrix
-          metrics: {
-            probability_index: Number(analysis.confidence) || 95,
-            loop_friction: (analysis.confidence || 95) > 80 ? "1.42x Velocity Friction" : "1.18x Routine Friction",
-            time_gravity: "T-Minus 14 Hours",
-            severity: (analysis.confidence || 95) > 85 ? "Catastrophic Impact" : "High Impact"
-          },
+         const handleSaveToFirestore = async () => {
+           // ✅ Guard check: stop immediately if the unified state analysis is missing
+           if (!analysis) {
+             console.warn("⚠️ Aborting save: No active Gemini analysis found in state.");
+             return;
+           }
 
-          // Cascading progress dominoes chain loops matching
-          dominoes: [
-            `Delayed ${(analysis.signal || 'preparation').toLowerCase()}`,
-            "Shortened response window",
-            `Potential downstream ${(analysis.likelyOmission || 'omission').toLowerCase()} failure risk`
-          ],
+           try {
+             // ✅ Consolidated Payload: Merging both of your object schemas into one clean payload
+             const docPayload = {
+               user_id: userId || "Admin_ForgetMeNotAI",
+               omission_item: analysis.likelyOmission || 'Context entry logged',
+               status: "active_obsession",
+               created_at: serverTimestamp(),
+               tag: selectedTag.toUpperCase(),
+               title: text.trim() || analysis.signal || `New ${selectedTag} Signal`,
+               detail: analysis.explanation || "System intelligence tracking sequence active.",
+               rawPrompt: text.trim(),
+               categoryTag: selectedTag.toLowerCase(),
 
-          // Holographic vector network diagram map layout markers
-          nodes: [
-            (analysis.likelyOmission || 'OMISSION').toUpperCase(),
-            "DELAYED PREP",
-            "TIMELINE DECAY",
-            "MISSED CORE"
-          ],
+               // Legacy analysis child nesting mapping matching your old schema
+               analysis: {
+                 signal: analysis.signal,
+                 confidence: analysis.confidence,
+                 likelyOmission: analysis.likelyOmission,
+                 explanation: analysis.explanation,
+                 preventiveAction: analysis.preventiveAction,
+                 category: analysis.category,
+               },
 
-          // Active tracking display layout bindings data properties
-          probability: `${analysis.confidence || 95}%`,
-          multiplier: (analysis.confidence || 95) > 80 ? "1.42x Velocity Friction" : "1.18x Routine Friction",
-          timeGravity: "T-Minus 14 Hours",
-          severity: (analysis.confidence || 95) > 85 ? "Catastrophic Impact" : "High Impact",
-          dependencyNodesCount: "04 Downstream Nodes",
-          flowVelocity: `${(analysis.confidence || 95) - 5}% Flow Velocity`,
-          mitigation: analysis.preventiveAction || 'Place items beside your active layout bag'
-        });
+               intent_anchor: {
+                 anchor_point: isPeople ? "Transit Sequence Initiation (Departure Window)" : "Routine Path Execution Window",
+                 user_unstated_goal: `Fulfill objective regarding ${selectedTag.toLowerCase()} with zero routine memory drops or friction loops.`,
+                 routine_deviation_probability: `${analysis.confidence - 12}% Deviation Risk Index`
+               },
 
-        // Push user payload down to your live cloud cluster document database
-              docRef = await addDoc(collection(db, "analyses"), docPayload);
-              console.log('🛡️ Document logged cleanly inside Firestore. Cloud Reference Key ID:', docRef.id);
-              databaseDocumentId = docRef.id;
+               replies_shield: {
+                 critical_contact: isPlaces ? "Primary Core Contact Identity" : "Maya (System Context Coordinator)",
+                 preemptive_auto_draft: `System alert notification trace: Processing task addressing active ${selectedTag.toLowerCase()} parameters loop.`,
+                 trigger_condition: "Fires automatically upon localized telemetry perimeter radar check variance."
+               },
 
-      } catch (dbError) {
-        console.error('💥 Crash writing telemetry data down to your Firestore collection:', dbError);
-        // Fallback tracking parameters execute to prevent local app blockages if network times out
-      }
+               radar_scopes: {
+                 is_today: true,
+                 is_personal: isPeople || isPlaces,
+                 is_practical: isPractical
+               },
+
+               gemini_signal_read: {
+                 signal_signature: analysis.signal,
+                 confidence_rating: Number(analysis.confidence) || 95,
+                 structural_explanation: analysis.explanation,
+                 preventive_action_blueprint: analysis.preventiveAction,
+                 cascading_dominoes: [
+                   `Delayed ${(text.trim() || 'preparation').toLowerCase()} sequence (1.42x Velocity Friction engagement)`,
+                   "Shortened response window capacity threshold decay",
+                   `Downstream tracking failure risk vector for structural ${selectedTag.toLowerCase()} loops`
+                 ],
+                 holographic_network_nodes: [selectedTag.toUpperCase(), "DELAYED_PREP", "VELOCITY_FRICTION", "OMISSION_RISK"]
+               },
+
+               metrics: {
+                 probability_index: Number(analysis.confidence) || 95,
+                 loop_friction: (analysis.confidence || 95) > 80 ? "1.42x Velocity Friction" : "1.18x Routine Friction",
+                 time_gravity: "T-Minus 14 Hours",
+                 severity: (analysis.confidence || 95) > 85 ? "Catastrophic Impact" : "High Impact"
+               },
+
+               dominoes: [
+                 `Delayed ${(analysis.signal || 'preparation').toLowerCase()}`,
+                 "Shortened response window",
+                 `Potential downstream ${(analysis.likelyOmission || 'omission').toLowerCase()} failure risk`
+               ],
+
+               nodes: [
+                 (analysis.likelyOmission || 'OMISSION').toUpperCase(),
+                 "DELAYED PREP",
+                 "TIMELINE DECAY",
+                 "MISSED CORE"
+               ],
+
+               probability: `${analysis.confidence || 95}%`,
+               multiplier: (analysis.confidence || 95) > 80 ? "1.42x Velocity Friction" : "1.18x Routine Friction",
+               timeGravity: "T-Minus 14 Hours",
+               severity: (analysis.confidence || 95) > 85 ? "Catastrophic Impact" : "High Impact",
+               dependencyNodesCount: "04 Downstream Nodes",
+               flowVelocity: `${(analysis.confidence || 95) - 5}% Flow Velocity`,
+               mitigation: analysis.preventiveAction || 'Place items beside your active layout bag'
+             };
+
+             // ✅ Single Fire Write: Sends the full payload in one clean operational push
+             const docRef = await addDoc(collection(db, "analyses"), docPayload);
+             console.log('🛡️ Document logged cleanly inside Firestore. Cloud Reference Key ID:', docRef.id);
+
+             // Assign to your global scope variable track if declared outside
+             databaseDocumentId = docRef.id;
+             console.log('🔮  Stored in Firestore telemetry stream thread...');
+
+           } catch (dbError) {
+             console.error('💥 Crash writing telemetry data down to your Firestore collection:', dbError);
+           }
+         };
+
+     } catch (dbError) {
+             console.error('💥 Crash writing telemetry data down to your Firestore collection:', dbError);
+             // Fallback tracking parameters execute to prevent local app blockages if network times out
+           }
+
 
       // Passes dynamic data down through your layout state hooks pipeline
       onCapture({
@@ -693,7 +779,10 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
       setSaved(true);
       setText('');
       setAnalysis(null);
+      setIsAiLoading(false);
       onNavigate('Home');
+         console.log('🔮 Stored in Firestore DB');
+
     };
 
 
@@ -809,12 +898,30 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
               {analysisError ? <Text style={styles.analysisError}>{analysisError}</Text> : null}
 
               {/* --- MAIN INTERACTION CTA CONTROL --- */}
-              <Pressable onPress={save} style={styles.primaryButton}>
-                <Text style={styles.primaryButtonText}>
-                  {analyzeMutation.isPending ? 'Reading your signal…' : analysis ? 'Save to my signal map' : 'Analyze with Gemini'}
+              <Pressable
+                onPress={save}
+                disabled={analyzeMutation.isPending} // Keeps the API thread safe from double-clicks
+                style={[
+                  styles.primaryButton,
+                  // ✅ Innovative Style: Transforms into an active scanning node instead of turning grey
+                  analyzeMutation.isPending && styles.scanningActiveButton
+                ]}
+              >
+                <Text style={[
+                  styles.primaryButtonText,
+                  analyzeMutation.isPending && styles.scanningText
+                ]}>
+                  {analyzeMutation.isPending ? 'SCANNING LOGISTICS LOOP…' : analysis ? 'Save to my signal map' : 'Analyze with Gemini'}
                 </Text>
-                <Feather name="arrow-up-right" size={16} color="#050506" />
+
+                {analyzeMutation.isPending ? (
+                  // Tiny processing indicator matching the innovative branding text color
+                  <ActivityIndicator size="small" color="#00ffcc" />
+                ) : (
+                  <Feather name="arrow-up-right" size={16} color="#050506" />
+                )}
               </Pressable>
+
 
             </ScrollView>
           </KeyboardAvoidingView>

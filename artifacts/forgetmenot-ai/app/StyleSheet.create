@@ -142,4 +142,105 @@ const styles = StyleSheet.create({
          lineHeight: 28,
        },
 
+       primaryButton: {
+         backgroundColor: '#00ffcc', // Assuming your original bright active color
+         transform: [{ scale: 1 }],
+         borderWidth: 1,
+         borderColor: 'transparent',
+         // ... your other layout rules
+       },
+       scanningActiveButton: {
+         backgroundColor: '#0a0a0f',       // Swaps background to dark cyber canvas
+         borderColor: '#00ffcc',           // Gives it a glowing neon accent border perimeter
+         borderWidth: 1,
+         transform: [{ scale: 0.97 }],     // Squeezes button slightly to show active compression engagement
+         shadowColor: '#00ffcc',           // Active neon ambient drop glow mapping
+         shadowOffset: { width: 0, height: 0 },
+         shadowOpacity: 0.4,
+         shadowRadius: 10,
+         elevation: 5,
+       },
+       scanningText: {
+         color: '#00ffcc',                 // Flips the text from dark to neon glowing electric blue
+         letterSpacing: 1.5,               // Spreads typography for matrix data theme look
+         fontWeight: '900',
+       },
+       modalOverlayContainer: {
+         backgroundColor: '#16161a',       // Soft dark grey background panel instead of total pitch black
+         borderRadius: 12,
+         padding: 20,
+         borderWidth: 1,
+         borderColor: '#26262b',
+         marginVertical: 16,
+       },
+       formFieldBlock: {
+         marginBottom: 16,                 // Disperses text rows cleanly
+       },
+       inputLabelText: {
+         color: '#00ffcc',                 // Glowing cyber emerald labels to call out metrics contexts
+         fontSize: 11,
+         fontWeight: '700',
+         letterSpacing: 1.2,
+         marginBottom: 6,
+       },
+       modalEditableInputField: {
+         backgroundColor: '#1e1e24',       // Raised visible canvas card for typing
+         borderColor: '#00ffcc',           // Active highlighted accent indicator perimeter
+         borderWidth: 1,
+         borderRadius: 8,
+         color: '#ffffff',                 // High-contrast clean white text
+         padding: 14,
+         fontSize: 14,
+         minHeight: 50,
+         textAlignVertical: 'top',
+       },
+       modalInputField: {
+         backgroundColor: '#1a1a1f',       // Recessed surface box
+         borderColor: '#2d2d34',
+         borderWidth: 1,
+         borderRadius: 8,
+         color: '#e4e4e7',                 // High contrast text
+         padding: 14,
+         fontSize: 14,
+         minHeight: 60,
+         textAlignVertical: 'top',
+       },
+       disabledReadOnlyField: {
+         backgroundColor: '#111114',       // Sinks back deeper into screen background hierarchy
+         borderColor: '#202024',
+         color: '#8a8f98',                 // Dims typography to convey a locked state cleanly
+         opacity: 0.7,
+       },
+       modalButtonsRow: {
+         flexDirection: 'row',
+         justifyContent: 'space-between',
+         gap: 12,
+         marginTop: 10,
+       },
+       cancelBtn: {
+         flex: 1,
+         backgroundColor: '#202024',
+         borderRadius: 8,
+         paddingVertical: 16,
+         alignItems: 'center',
+       },
+       cancelBtnText: {
+         color: '#ffffff',
+         fontWeight: 'bold',
+         fontSize: 15,
+       },
+       saveBtn: {
+         flex: 1,
+         backgroundColor: '#00ffcc',       // Bright green action indicator
+         borderRadius: 8,
+         paddingVertical: 16,
+         alignItems: 'center',
+       },
+       saveBtnText: {
+         color: '#000000',
+         fontWeight: 'bold',
+         fontSize: 15,
+       }
+
+
 });
