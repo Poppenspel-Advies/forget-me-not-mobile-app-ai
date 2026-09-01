@@ -25,6 +25,7 @@ import { IntentAnchorWidget } from './IntentAnchorWidget';
 import { RippleShieldWidget } from './RippleShieldWidget'; // Adjust the relative path if you saved the widget file in a separate components folder
 import { MemoryScreen } from './MemoryScreen';
 import { fetchGeminiSignalAnalysis } from '../config/geminiService';
+import ActionsScreen from './ActionsScreen';
 
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
 // ✅ THE FIX: Pushes up one directory level (../) then enters the config subfolder
@@ -249,7 +250,10 @@ function ScreenHeader({
   onBack?: () => void;
   right?: React.ReactNode;
 }) {
-  const insets = useSafeAreaInsets();
+  // ✅ THE FIX: Safely fallback to 0 margins if the hook returns undefined inside this context block
+  const safeInsets = useSafeAreaInsets();
+  const insets = safeInsets || { top: 0, bottom: 0, left: 0, right: 0 };
+
   return (
     <View style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top + 12 }]}>
       <View style={styles.headerRow}>
@@ -296,8 +300,8 @@ function Pill({ label, color = theme.cyan }: { label: string; color?: string }) 
   );
 }
 
-function PredictionCard({ item, onPress }: { item: (typeof predictions)[number]; onPress: () => void }) {
-  return (
+function PredictionCard({ item, onPress }: { item: any; onPress: () => void }) {
+    return (
     <Pressable testID={`prediction-${item.title}`} onPress={() => { tap(); onPress(); }} style={({ pressed }) => [styles.predictionCard, pressed && styles.pressed]}>
       <View style={styles.predictionTop}>
         <View style={[styles.predictionIcon, { backgroundColor: `${item.color}18` }]}>
@@ -998,23 +1002,6 @@ function PredictionScreen({ onBack, onNavigate }: { onBack: () => void; onNaviga
     </View>
   );
 }
-
-function ActionsScreen({ onBack }: { onBack: () => void }) {
-  const [done, setDone] = useState<string[]>([]);
-  const actions = [
-    { id: 'train', title: 'Put your travel card by the door', detail: 'For tomorrow’s early train', color: theme.gold, icon: 'sunrise' },
-    { id: 'lens', title: 'Add a return note for the lens', detail: 'Before Saturday afternoon', color: theme.cyan, icon: 'package' },
-    { id: 'dad', title: 'Start a Sunday call thread', detail: 'Your usual check-in is coming up', color: theme.pink, icon: 'heart' },
-  ];
-  return <View style={styles.screen}><ScreenHeader title="Prevent the omission" subtitle="Tiny actions. Better future-you." onBack={onBack} />
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
-      <View style={styles.actionsIntro}><Text style={styles.actionsKicker}>THE LAST MILE</Text><Text style={styles.actionsTitle}>Make the invisible{"\n"}easy to handle.</Text><Text style={styles.actionsCopy}>A prediction only helps when it becomes a small, kind action.</Text></View>
-      {actions.map((action) => { const completed = done.includes(action.id); return <Pressable key={action.id} onPress={() => { tap(); setDone((current) => completed ? current.filter((id) => id !== action.id) : [...current, action.id]); }} style={[styles.actionRow, completed && styles.actionRowDone]}><View style={[styles.actionIcon, { backgroundColor: `${action.color}18` }]}><Feather name={action.icon as keyof typeof Feather.glyphMap} size={20} color={action.color} /></View><View style={styles.actionCopy}><Text style={[styles.actionTitle, completed && styles.actionTitleDone]}>{action.title}</Text><Text style={styles.actionDetail}>{action.detail}</Text></View><View style={[styles.actionCheck, completed && styles.actionCheckDone]}>{completed ? <Feather name="check" size={15} color={theme.background} /> : <Feather name="plus" size={16} color={theme.mutedForeground} />}</View></Pressable>; })}
-      <View style={styles.donePanel}><View style={styles.donePanelTop}><Text style={styles.donePanelTitle}>{done.length}/3 made visible</Text><Text style={styles.donePanelPercent}>{Math.round((done.length / 3) * 100)}%</Text></View><View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${(done.length / 3) * 100}%` }]} /></View><Text style={styles.donePanelCopy}>{done.length === 3 ? 'Nothing hiding today. Nice work.' : 'No pressure. One small action is enough to change the shape of a day.'}</Text></View>
-    </ScrollView>
-  </View>;
-}
-
 
 
 function ContactScreen({ onBack }: { onBack: () => void }) {
