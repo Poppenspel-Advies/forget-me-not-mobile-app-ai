@@ -26,6 +26,9 @@ import { RippleShieldWidget } from './RippleShieldWidget'; // Adjust the relativ
 import { MemoryScreen } from './MemoryScreen';
 import { fetchGeminiSignalAnalysis } from '../config/geminiService';
 import ActionsScreen from './ActionsScreen';
+import TransitWeatherWidget from './TransitWeatherWidget';
+import PredictiveLoopWidget from './PredictiveLoopWidget';
+
 
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
 // ✅ THE FIX: Pushes up one directory level (../) then enters the config subfolder
@@ -358,9 +361,9 @@ function BottomNav({ screen, onNavigate }: { screen: Screen; onNavigate: (next: 
 }
 
 function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => void; captured: CapturedItem[] }) {
-  const insets = useSafeAreaInsets();
-  const pulse = useRef(new Animated.Value(0)).current;
-  // 🌟 1. MOCK STATE HOOKS: Track card dismissals dynamically on layout
+    const insets = useSafeAreaInsets();
+    const pulse = useRef(new Animated.Value(0)).current;
+    // 🌟 1. MOCK STATE HOOKS: Track card dismissals dynamically on layout
     const [anchorActive, setAnchorActive] = useState(true);
     const [shieldActive, setShieldActive] = useState(true);
 
@@ -369,7 +372,8 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     const anchorSlideY = useRef(new Animated.Value(40)).current;
     const shieldSlideY = useRef(new Animated.Value(60)).current;
     // 🌟 THE ROUTER STATE MANAGER: Tracks which viewport panel should be mounted active on screen
-
+    // ✅ THE DIRECT FIX: Initialize local state tracking directly inside this screen sandbox
+    const [dbSignals, setDbSignals] = useState<any[]>([]);
 
      useEffect(() => {
         // Sequentially cascade widgets upwards into focal layout ranges smoothly
@@ -380,6 +384,10 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
         ]).start();
       }, []);
 
+        console.log("🔑 API KEY CHECK:", {
+          google: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ? "LOADED" : "MISSING",
+          weather: process.env.EXPO_PUBLIC_OPENWEATHER_API_KEY ? "LOADED" : "MISSING"
+        });
 
   React.useEffect(() => {
     Animated.loop(
@@ -422,19 +430,45 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
         </Animated.View>
       </ImageBackground>
 
-      <SectionTitle eyebrow="AI SIGNALS" title="You might forget…" action="See all" onAction={() => onNavigate('prediction')} />
-      <PredictionCard item={predictions[0]} onPress={() => onNavigate('prediction')} />
-      <View style={styles.miniPredictionRow}>
-        {predictions.slice(1).map((item) => (
-          <Pressable key={item.title} onPress={() => { tap(); onNavigate('prediction'); }} style={styles.miniPrediction}>
-            <View style={[styles.miniIcon, { backgroundColor: `${item.color}18` }]}>
-              <Feather name={item.icon as keyof typeof Feather.glyphMap} size={17} color={item.color} />
-            </View>
-            <Text style={styles.miniTitle} numberOfLines={1}>{item.title}</Text>
-            <Text style={[styles.miniScore, { color: item.color }]}>{item.score} likely</Text>
-          </Pressable>
-        ))}
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
+             {/* ============================================================== */}
+             {/* 🌤️ 🚆 MOUNT TRANSIT WEATHER WIDGET HERE                        */}
+             {/* ============================================================== */}
+             <TransitWeatherWidget onNavigate={(screenKey) => onNavigate(screenKey)} />
+
+             {/* --- AI SIGNALS CONSOLIDATED LIVE COLLECTION SECTION --- */}
+             <SectionTitle
+               eyebrow="AI SIGNALS"
+               title="You might forget…"
+               action="See all"
+               onAction={() => onNavigate('prediction')}
+             />
+             {/* ✅ THE FIX: Render the Predictive Loop Widget ALWAYS so it is never hidden */}
+             <PredictiveLoopWidget
+               signals={dbSignals}
+               onPress={() => onNavigate('prediction')}
+             />
+
+             {dbSignals.length === 0 ? (
+               <View style={styles.emptyViewBox}>
+                 <Text style={styles.emptyViewText}>No predictive loop anomalies tracked yet.</Text>
+               </View>
+             ) : (
+               <View>
+                 <PredictionCard
+                   item={{
+                     title: dbSignals[0].title || dbSignals[0].analysis?.signal || "Active Sync Anomaly",
+                     detail: dbSignals[0].detail || dbSignals[0].analysis?.explanation || "Tracking active metrics...",
+                     color: dbSignals[0].color || '#00ffcc',
+                     probability: `${dbSignals[0].analysis?.confidence || 95}% likely`
+                   }}
+                   onPress={() => onNavigate('prediction')}
+                 />
+               </View>
+             )}
+           </ScrollView>
+
+
 
       <SectionTitle eyebrow="YOUR SIGNALS" title="Recent context" action="Open memory" onAction={() => onNavigate('memory')} />
       <View style={styles.contextCard}>
@@ -1293,4 +1327,56 @@ const styles = StyleSheet.create({
   contactDetailTitle: { color: theme.mutedForeground, fontSize: 10, letterSpacing: 1, fontWeight: '700' },
   contactEmail: { color: theme.cyan, fontSize: 15, fontWeight: '700', marginTop: 8 },
   contactHours: { color: theme.mutedForeground, fontSize: 10, marginTop: 5 },
+  // 🎨 Update your StyleSheet entries for the PredictionCard component:
+  predictionCard: {
+    backgroundColor: '#16161a',       // 👈 FIXED: Lighter dark grey card surface (was blending into black)
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#26262b',           // Clean subtle boundary border
+  },
+  cardTitleText: {
+    color: '#ffffff',                 // 👈 FIXED: Force solid white title text
+    fontSize: 17,
+    fontWeight: '800',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  cardDetailText: {
+    color: '#a1a1aa',                 // 👈 FIXED: High contrast light slate description text
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  cardProbabilityText: {
+    color: '#00ffcc',                 // 👈 FIXED: Neon cyan highlight for probability index
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  emptyViewBox: {
+    backgroundColor: '#16161a',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#26262b',
+  },
+  emptyViewText: {
+    color: '#a1a1aa',                 // Visible light text for empty states
+    fontSize: 13,
+    textAlign: 'center',
+  },
+// 1. In your HomeScreen styles:
+innerScroll: {
+  paddingHorizontal: 16,
+  paddingTop: 8,
+  paddingBottom: 24, // 👈 Reduced from high padding down to 24px
+},
+
+// 2. In your PredictiveLoopWidget.tsx styles:
+container: {
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginVertical: 4,  // 👈 Reduced from 14px to tighten top/bottom spacing
+},
 });
