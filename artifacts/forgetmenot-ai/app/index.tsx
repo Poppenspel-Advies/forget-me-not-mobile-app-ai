@@ -28,6 +28,8 @@ import { fetchGeminiSignalAnalysis } from '../config/geminiService';
 import ActionsScreen from './ActionsScreen';
 import TransitWeatherWidget from './TransitWeatherWidget';
 import PredictiveLoopWidget from './PredictiveLoopWidget';
+// ✅ Add this line at the top asset import block section of app/index.tsx
+import PredictionScreen from './PredictionScreen'; // Update path if stored inside /components folder
 
 
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
@@ -1023,19 +1025,6 @@ function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void })
   );
 }
 
-function PredictionScreen({ onBack, onNavigate }: { onBack: () => void; onNavigate: (screen: Screen) => void }) {
-  const [filter, setFilter] = useState('All signals');
-  return (
-    <View style={styles.screen}><ScreenHeader title="Omission radar" subtitle="The things hiding in plain sight" onBack={onBack} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
-        <View style={styles.radarSummary}><View style={styles.radarCircle}><Text style={styles.radarScore}>03</Text><Text style={styles.radarCaption}>signals</Text></View><View style={styles.radarSummaryCopy}><Text style={styles.radarTitle}>A clear day,{"\n"}with a few edges.</Text><Text style={styles.radarBody}>These are not reminders. They’re possibilities worth making visible.</Text></View></View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContent}>{['All signals', 'Today', 'Personal', 'Practical'].map((item) => <Pressable key={item} onPress={() => { tap(); setFilter(item); }} style={[styles.filter, filter === item && styles.filterActive]}><Text style={[styles.filterText, filter === item && styles.filterTextActive]}>{item}</Text></Pressable>)}</ScrollView>
-        {predictions.map((item) => <PredictionCard item={item} key={item.title} onPress={() => onNavigate('actions')} />)}
-        <View style={styles.predictionFoot}><Feather name="shield" size={18} color={theme.green} /><Text style={styles.predictionFootText}>Your predictions stay private and get sharper with your feedback.</Text></View>
-      </ScrollView>
-    </View>
-  );
-}
 
 
 function ContactScreen({ onBack }: { onBack: () => void }) {
@@ -1062,6 +1051,7 @@ export default function Home() {
       case 'capture': return <CaptureScreen onNavigate={navigate} onCapture={(item) => { setCaptured((items) => [item, ...items]); setScreen('memory'); }} />;
       case 'chat': return <ChatScreen />;
       case 'profile': return <ProfileScreen onNavigate={navigate} />;
+      case 'radar':
       case 'prediction': return <PredictionScreen onBack={() => navigate('home')} onNavigate={navigate} />;
       case 'actions': return <ActionsScreen onBack={() => navigate('home')} />;
       case 'memory': return <MemoryScreen onBack={() => navigate('home')} captured={captured} />;
