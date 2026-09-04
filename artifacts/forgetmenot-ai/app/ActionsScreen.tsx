@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 // Wrap your outermost <Home> or root container inside <SafeAreaProvider>...</SafeAreaProvider>
-import { View, ScrollView, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Text, Pressable, StyleSheet, ActivityIndicator, Image, ImageBackground } from 'react-native';
 import { Feather } from '@expo/vector-icons'; // Ensure your icon packs are imported cleanly
 import { db } from '../config/firebaseConfig'; // Ensure path aligns with your directory mappings
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
@@ -133,9 +133,26 @@ function ActionsScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <View style={styles.screen}>
+    <View style={{ zIndex: 20, position: 'relative', width: '100%' }}>
       <ScreenHeader title="Prevent the omission" subtitle="Tiny actions. Better future-you." onBack={onBack} />
+   </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
+            {/* 🌌 MASTER ROOT BACKGROUND IMAGE COVER CANVAS WRAPPER */}
+             <ImageBackground
+               source={require('../assets/images/ActionOmissionForgetMeNotAI.png')} // Or pointer target path asset row
+               // ✅ Uses absolute styles to separate it from the scroll hierarchy bounds entirely
+               style={StyleSheet.absoluteFillObject}
+                resizeMode="cover"
+               />
+      {/* 2️⃣ MATTE SCRIM OVERLAY: Dimming filter layer */}
+      <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(5, 5, 6, 0.65)' }]} />
+
+      <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        // ✅ FIXED: Forces full content size measurement expansion bounds to re-engage active scrolling tracks
+                        contentContainerStyle={[styles.innerScroll, { flexGrow: 1 }]}
+                        style={{ flex: 1 }}
+                      >
         <View style={styles.actionsIntro}>
           <Text style={styles.actionsKicker}>THE LAST MILE</Text>
           <Text style={styles.actionsTitle}>Make the invisible{"\n"}easy to handle.</Text>
@@ -383,6 +400,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
+// ✅ ADDED: Forces full coverage background expansion properties
+  radarScreenBackgroundImageCanvas: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  // ✅ ADDED: Translucent matte layer ensures text reads clearly on all screens
+  scrimDimmerOverlayFilter: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 5, 6, 0.88)',
+  },
+
 });
 
 export default ActionsScreen;

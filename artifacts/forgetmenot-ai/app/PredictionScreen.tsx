@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ScrollView, Text, Pressable, ActivityIndicator, StyleSheet, Image, ImageBackground } from 'react-native';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { db } from '../config/firebaseConfig'; // Ensure this matches your file structures
@@ -172,9 +172,28 @@ export default function PredictionScreen({ onBack, onNavigate }: { onBack: () =>
 
   return (
     <View style={styles.screen}>
+     <View style={{ zIndex: 20, position: 'relative', width: '100%' }}>
       <ScreenHeader title="Omission radar" subtitle="The things hiding in plain sight" onBack={onBack} />
+   </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
+     {/* 🌌 MASTER ROOT BACKGROUND IMAGE COVER CANVAS WRAPPER */}
+          <ImageBackground
+            source={require('../assets/images/OmissionRadarScreen_ForgetMeNotAI.png')} // Or pointer target path asset row
+            // ✅ Uses absolute styles to separate it from the scroll hierarchy bounds entirely
+            style={StyleSheet.absoluteFillObject}
+             resizeMode="cover"
+            />
+      {/* Transparent matte scrim layer that sits directly on top of the image */}
+            {/* Transparent matte scrim layer that sits directly on top of the image */}
+
+    {/* 2️⃣ MATTE SCRIM OVERLAY: Dimming filter layer */}
+    <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(5, 5, 6, 0.65)' }]} />
+      <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  // ✅ FIXED: Forces full content size measurement expansion bounds to re-engage active scrolling tracks
+                  contentContainerStyle={[styles.innerScroll, { flexGrow: 1 }]}
+                  style={{ flex: 1 }}
+                >
 
         {/* DYNAMIC RADAR RING METRIC PANEL SUMMARY */}
         <View style={styles.radarSummary}>
@@ -236,6 +255,7 @@ export default function PredictionScreen({ onBack, onNavigate }: { onBack: () =>
 
       </ScrollView>
     </View>
+
   );
 }
 
@@ -425,5 +445,17 @@ const cardStyles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 0.5,
-  }
+  },
+  // ✅ ADDED: Forces full coverage background expansion properties
+  radarScreenBackgroundImageCanvas: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  // ✅ ADDED: Translucent matte layer ensures text reads clearly on all screens
+  scrimDimmerOverlayFilter: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 5, 6, 0.88)',
+  },
+
 });

@@ -30,12 +30,14 @@ import TransitWeatherWidget from './TransitWeatherWidget';
 import PredictiveLoopWidget from './PredictiveLoopWidget';
 // ✅ Add this line at the top asset import block section of app/index.tsx
 import PredictionScreen from './PredictionScreen'; // Update path if stored inside /components folder
+// ✅ Add this line at the top asset import block section of app/index.tsx
+import ChatScreen from './ChatScreen';
 
 
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
 // ✅ THE FIX: Pushes up one directory level (../) then enters the config subfolder
 import { db } from '../config/firebaseConfig';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 
 interface CaptureScreenProps {
   onNavigate: (screen: any) => void;
@@ -306,28 +308,69 @@ function Pill({ label, color = theme.cyan }: { label: string; color?: string }) 
 }
 
 function PredictionCard({ item, onPress }: { item: any; onPress: () => void }) {
-    return (
-    <Pressable testID={`prediction-${item.title}`} onPress={() => { tap(); onPress(); }} style={({ pressed }) => [styles.predictionCard, pressed && styles.pressed]}>
+  // 1️⃣ ACCENT COLOR FALLBACK
+  const activeColor = item.color || '#00ffcc';
+
+  // 2️⃣ ✅ DIRECT VARIABLE RECONCILIATION LAYER
+  // Remaps your incoming database field arrays straight onto your card's exact property expectations!
+  const computedTitle = item.title || "Active Sync Anomaly";
+  const computedCopy = item.copy || item.detail || "Monitoring active parameter loops.";
+  const computedMeta = item.meta || (item.tag || "PRACTICAL").toUpperCase();
+  const computedScore = item.score || item.probability || "95%";
+
+  // 3️⃣ ✅ WEB-SAFE AUTOMATIC ICON LOOKUP INTERCEPTOR
+  let computedIconName: keyof typeof Feather.glyphMap = "package";
+
+  if (computedMeta === 'PEOPLE' || computedMeta === 'PERSONAL') {
+    computedIconName = "heart";
+  } else if (computedMeta === 'PLACES' || computedMeta === 'TRAVEL') {
+    computedIconName = "sunrise";
+  } else if (computedMeta === 'PRACTICAL' || computedMeta === 'THINGS' || computedMeta === 'WORK') {
+    // 💼 Centers the briefcase icon perfectly matching your team meeting log trace paths!
+    computedIconName = "briefcase";
+  }
+
+  return (
+    <Pressable
+      testID={`prediction-${computedTitle}`}
+      onPress={() => {
+        if (typeof tap === 'function') tap();
+        onPress();
+      }}
+      style={({ pressed }) => [styles.predictionCard, pressed && styles.pressed]}
+    >
       <View style={styles.predictionTop}>
-        <View style={[styles.predictionIcon, { backgroundColor: `${item.color}18` }]}>
-          <Feather name={item.icon as keyof typeof Feather.glyphMap} size={19} color={item.color} />
+
+        {/* 🟢 FIXED ICON BADGE: Corrected width, heights, and passes the dynamically computed icon key string */}
+        <View style={[styles.predictionIcon, { backgroundColor: `${activeColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }]}>
+          <Feather
+            name={computedIconName}
+            size={19}
+            color={activeColor}
+          />
         </View>
+
         <View style={styles.predictionHeading}>
-          <Text style={styles.cardTitle}>{item.title}</Text>
-          <Text style={styles.cardMeta}>{item.meta}</Text>
+          <Text style={styles.cardTitle}>{computedTitle}</Text>
+          <Text style={styles.cardMeta}>{computedMeta}</Text>
         </View>
+
         <View style={styles.scoreWrap}>
-          <Text style={[styles.score, { color: item.color }]}>{item.score}</Text>
+          <Text style={[styles.score, { color: activeColor }]}>{computedScore}</Text>
           <Text style={styles.scoreLabel}>LIKELY</Text>
         </View>
+
       </View>
-      <Text style={styles.cardCopy}>{item.copy}</Text>
+
+      <Text style={styles.cardCopy}>{computedCopy}</Text>
+
       <View style={styles.predictionFooter}>
         <Text style={styles.predictionHint}>Prevent this omission</Text>
-        <View style={[styles.smallArrow, { backgroundColor: item.color }]}>
+        <View style={[styles.smallArrow, { backgroundColor: activeColor }]}>
           <Feather name="arrow-up-right" size={14} color={theme.background} />
         </View>
       </View>
+
     </Pressable>
   );
 }
@@ -368,6 +411,7 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     // 🌟 1. MOCK STATE HOOKS: Track card dismissals dynamically on layout
     const [anchorActive, setAnchorActive] = useState(true);
     const [shieldActive, setShieldActive] = useState(true);
+    const userId = "Admin_ForgetMeNotAI";
 
     // 🌟 2. ANIMATED GLIDE WRAPPERS: Control entrance sliding offsets upon app startup
     const startUpFade = useRef(new Animated.Value(0)).current;
@@ -376,6 +420,72 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     // 🌟 THE ROUTER STATE MANAGER: Tracks which viewport panel should be mounted active on screen
     // ✅ THE DIRECT FIX: Initialize local state tracking directly inside this screen sandbox
     const [dbSignals, setDbSignals] = useState<any[]>([]);
+
+    // 2. Ensure your real-time useEffect query updates this state automatically:
+    useEffect(() => {
+      // ==============================================================
+      // 🧭 HYDRATED SNAPSHOT LISTENER (AUTO-CALCULATES TAG & COLOR)
+      // ==============================================================
+      const q = query(collection(db, "analyses"), where("user_id", "==", userId));
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        // ✅ 1. Check if we are actually getting documents from Firestore
+        console.log("➡️ SNAPSHOT TRIGGERED. TOTAL RECEIVED DOCUMENTS:", snapshot.docs.length);
+
+        if (snapshot.docs.length === 0) {
+          console.log("❌ ZERO RECORDS: No matching documents found for user:", userId);
+          setDbSignals([]);
+          return;
+        }
+
+        const hydratedDocs = snapshot.docs.map((doc, idx) => {
+          const rawData = doc.data();
+
+          // 🔬 PRINT THE UNCHANGED INCOMING RECORD FOR DIAGNOSTICS
+          if (idx === 0) {
+            console.log("----------------------------------------");
+            console.log("🔍 INSPECTING FIRST DOCUMENT ID:", doc.id);
+            console.log("📦 RAW FIRESTORE DATA PAYLOAD:", JSON.stringify(rawData, null, 2));
+          }
+
+          // 2. Resolve tag parameters
+          let inferredTag = (rawData.tag || rawData.categoryTag || rawData.analysis?.category || "PRACTICAL").toUpperCase();
+          if (inferredTag === 'PERSONAL') inferredTag = 'PEOPLE';
+          if (inferredTag === 'TRAVEL') inferredTag = 'PLACES';
+
+          // 3. Resolve accent layout colors
+          let computedColor = '#00ffcc';
+          if (inferredTag === 'PEOPLE') computedColor = '#ff007f';
+          else if (inferredTag === 'PLACES') computedColor = '#ffd700';
+
+            console.log("🔍 INSPECTING inferredTag:", inferredTag);
+
+          const rawConfidence = rawData.analysis?.confidence || rawData.metrics?.probability_index || 95;
+
+          const formattedObj = {
+            id: doc.id,
+            ...rawData,
+            title: rawData.title || rawData.analysis?.signal || "Active Sync Anomaly",
+            detail: rawData.detail || rawData.analysis?.explanation || "Tracking active metrics...",
+            tag: inferredTag,
+            color: computedColor,
+            probability: `${rawConfidence}% likely`
+          };
+
+          if (idx === 0) {
+            console.log("✨ HYDRATED COMPONENT OUTPUT ITEM:", JSON.stringify(formattedObj, null, 2));
+            console.log("----------------------------------------");
+          }
+
+          return formattedObj;
+        });
+
+        setDbSignals(hydratedDocs);
+      });
+
+      return () => unsubscribe();
+
+    }, [userId]);
 
      useEffect(() => {
         // Sequentially cascade widgets upwards into focal layout ranges smoothly
@@ -390,6 +500,7 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
           google: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ? "LOADED" : "MISSING",
           weather: process.env.EXPO_PUBLIC_OPENWEATHER_API_KEY ? "LOADED" : "MISSING"
         });
+
 
   React.useEffect(() => {
     Animated.loop(
@@ -459,18 +570,18 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
                <View>
                  <PredictionCard
                    item={{
-                     title: dbSignals[0].title || dbSignals[0].analysis?.signal || "Active Sync Anomaly",
-                     detail: dbSignals[0].detail || dbSignals[0].analysis?.explanation || "Tracking active metrics...",
-                     color: dbSignals[0].color || '#00ffcc',
-                     probability: `${dbSignals[0].analysis?.confidence || 95}% likely`
+                     // ✅ FIXED: Look up index [0] on your state array loop variables across ALL parameters
+                     title: dbSignals[0]?.title || dbSignals[0]?.analysis?.signal || "Active Sync Anomaly",
+                     detail: dbSignals[0]?.detail || dbSignals[0]?.analysis?.explanation || "Tracking active metrics...",
+                     color: dbSignals[0]?.color || '#00ffcc',
+                     probability: dbSignals[0]?.probability || `${dbSignals[0]?.analysis?.confidence || 95}% likely`,
+                     tag: dbSignals[0]?.tag || dbSignals[0]?.categoryTag || "PRACTICAL"
                    }}
                    onPress={() => onNavigate('prediction')}
                  />
                </View>
              )}
            </ScrollView>
-
-
 
       <SectionTitle eyebrow="YOUR SIGNALS" title="Recent context" action="Open memory" onAction={() => onNavigate('memory')} />
       <View style={styles.contextCard}>
@@ -516,17 +627,69 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
             )}
 
 
-
       <View style={styles.quickRow}>
-        <Pressable testID="quick-actions" onPress={() => { tap(); onNavigate('actions'); }} style={styles.quickCard}>
-          <Feather name="check-square" size={19} color={theme.green} />
-          <Text style={styles.quickNumber}>03</Text>
-          <Text style={styles.quickLabel}>Actions to prevent</Text>
+        {/* 🌌 DYNAMIC ORBITAL QUICK ACTIONS LINK CARD */}
+        <Pressable
+          testID="quick-actions"
+          onPress={() => {
+            if (typeof tap === 'function') tap();
+            onNavigate('actions');
+          }}
+          style={({ pressed }) => [styles.quickCardWrapper, pressed && { opacity: 0.9 }]}
+        >
+          <ImageBackground
+            // ✅ Uses your local asset texture image background safely
+            source={require('../assets/images/ActionOmissionForgetMeNotAI.png')}
+            style={styles.quickCardBackground}
+            imageStyle={styles.quickCardImageRadius}
+          >
+            {/* Cinematic dark frosted overlay to guarantee readable copy contrasts */}
+            <View style={styles.quickCardScrimOverlay}>
+              <View style={styles.quickCardHeaderRow}>
+                <View style={styles.badgeIndicatorPill}>
+                  <Text style={styles.badgeIndicatorPillText}>
+                    {/* ✅ DYNAMIC COUNT: Displays padded total records natively */}
+                    {dbSignals.length < 10 ? `0${dbSignals.length}` : dbSignals.length} ACTIVE CHECKPOINTS
+                  </Text>
+                </View>
+                <Feather name="arrow-up-right" size={16} color="#00ffcc" />
+              </View>
+
+              <Text style={styles.quickCardMainTitle}>Launch Action Blueprint</Text>
+              <Text style={styles.quickCardSubCopy}>Convert invisible predictive anomalies into immediate kind steps.</Text>
+            </View>
+          </ImageBackground>
         </Pressable>
-        <Pressable testID="quick-chat" onPress={() => { tap(); onNavigate('chat'); }} style={[styles.quickCard, styles.quickCardPink]}>
-          <Feather name="message-circle" size={19} color={theme.pink} />
-          <Text style={styles.quickNumber}>Ask</Text>
-          <Text style={styles.quickLabel}>Your second brain</Text>
+        {/* 🌌 IMMERSIVE HIGH-CONTRAST CHAT SHEET INTERACTION CARD */}
+        <Pressable
+          testID="quick-chat"
+          onPress={() => {
+            if (typeof tap === 'function') tap();
+            onNavigate('chat');
+          }}
+          style={({ pressed }) => [styles.quickChatCardWrapper, pressed && { opacity: 0.9 }]}
+        >
+          <ImageBackground
+            source={require('../assets/images/CoffeeAI_HomePage.png')}
+            style={styles.quickChatCardBackground}
+            // ✅ THE DIRECT FIX: Pass the alignment overrides to focus on the lower half texture
+            imageStyle={[styles.quickChatCardImageRadius, styles.imageLastHalfFocus]}
+          >
+            {/* Cinematic translucent dark frosted scrim to make text easily readable */}
+            <View style={styles.quickChatCardScrimOverlay}>
+
+              <View style={styles.quickChatHeaderRow}>
+                <View style={styles.chatActionIconCircleBadge}>
+                  <Feather name="message-circle" size={18} color="#ff007f" />
+                </View>
+                <Feather name="coffee" size={14} color="#ff007f" />
+              </View>
+
+              <Text style={styles.quickChatMainTitleText}>Ask Coffee AI</Text>
+              <Text style={styles.quickChatSubLabelText}>Your secondary contextual memory brain.</Text>
+
+            </View>
+          </ImageBackground>
         </Pressable>
       </View>
       {captured.length > 2 ? <Text style={styles.captureCount}>{captured.length} pieces of context feeding your signal map</Text> : null}
@@ -969,7 +1132,7 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
 }
 
 
-function ChatScreen() {
+/* function ChatScreen() {
   const [messages, setMessages] = useState([{ id: '1', from: 'ai', text: 'I’m looking between the lines. What’s on your mind?' }]);
   const [text, setText] = useState('');
   const send = () => {
@@ -997,7 +1160,7 @@ function ChatScreen() {
       </View>
     </KeyboardAvoidingView>
   );
-}
+} */
 
 function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
   const [connected, setConnected] = useState(true);
@@ -1049,7 +1212,9 @@ export default function Home() {
     switch (screen) {
       case 'events': return <EventsScreen onNavigate={navigate} />;
       case 'capture': return <CaptureScreen onNavigate={navigate} onCapture={(item) => { setCaptured((items) => [item, ...items]); setScreen('memory'); }} />;
-      case 'chat': return <ChatScreen />;
+      case 'chat':
+        // ✅ Instructs the framework to change view context to 'home' when clicking back
+      return <ChatScreen onBack={() => navigate('home')} />;
       case 'profile': return <ProfileScreen onNavigate={navigate} />;
       case 'radar':
       case 'prediction': return <PredictionScreen onBack={() => navigate('home')} onNavigate={navigate} />;
@@ -1369,4 +1534,236 @@ container: {
   justifyContent: 'center',
   marginVertical: 4,  // 👈 Reduced from 14px to tighten top/bottom spacing
 },
+quickCardWrapper: {
+  borderRadius: 14,
+  overflow: 'hidden',
+  borderWidth: 1,
+  borderColor: '#1c1c1f',
+  marginVertical: 8,              // ✅ Tightened to reduce down space gaps
+},
+quickCardBackground: {
+  width: '100%',
+  minHeight: 120,
+},
+quickCardImageRadius: {
+  borderRadius: 13,
+},
+quickCardScrimOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(5, 5, 6, 0.78)', // Heavy contrast dark vignette filter mask
+  padding: 16,
+  justifyContent: 'center',
+},
+quickCardHeaderRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 8,
+},
+badgeIndicatorPill: {
+  backgroundColor: 'rgba(0, 255, 204, 0.08)',
+  paddingHorizontal: 10,
+  paddingVertical: 4,
+  borderRadius: 20,
+  borderWidth: 1,
+  borderColor: 'rgba(0, 255, 204, 0.25)',
+},
+badgeIndicatorPillText: {
+  color: '#00ffcc',               // Glowing cyber emerald count text weights
+  fontSize: 10,
+  fontWeight: '900',
+  letterSpacing: 1.2,
+},
+quickCardMainTitle: {
+  color: '#ffffff',
+  fontSize: 18,
+  fontWeight: '800',
+  marginBottom: 4,
+},
+quickCardSubCopy: {
+  color: '#8a8f98',
+  fontSize: 12,
+  lineHeight: 16,
+},
+quickChatCardWrapper: {
+  borderRadius: 14,
+  overflow: 'hidden',
+  borderWidth: 1,
+  borderColor: '#1c1c1f',
+  marginVertical: 6,                 // ✅ Tightened up to align with your vertical layouts
+},
+quickChatCardBackground: {
+  width: '100%',
+  minHeight: 110,
+},
+quickChatCardImageRadius: {
+  borderRadius: 13,
+},
+quickChatCardScrimOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(5, 5, 6, 0.82)', // Heavy matte overlay ensures white and pink text stands out
+  padding: 16,
+  justifyContent: 'center',
+},
+quickChatHeaderRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 10,
+},
+chatActionIconCircleBadge: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: 'rgba(255, 0, 127, 0.08)', // Faded cyber pink highlight core bubble
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderWidth: 1,
+  borderColor: 'rgba(255, 0, 127, 0.2)',
+},
+quickChatMainTitleText: {
+  color: '#ffffff',
+  fontSize: 18,
+  fontWeight: '800',
+  marginBottom: 2,
+},
+quickChatSubLabelText: {
+  color: '#8a8f98',
+  fontSize: 12,
+  fontWeight: '500',
+},
+// Add this property directly inside your StyleSheet.create block:
+imageLastHalfFocus: {
+  // ✅ Shifts the positioning context up by 50% to extract only the last half frame
+  top: '-50%',
+  height: '200%',
+  position: 'absolute',
+},
+// ✅ THE GRID FLEX CONTAINER: Forces items to align horizontally side-by-side
+  quickRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 12,                    // Spacing gap between both cards
+    marginVertical: 10,
+    paddingHorizontal: 16,      // Matches your screen content bounds
+  },
+
+  // ✅ CARD 1 CONTAINER: Expands equally across the horizontal line
+  quickCardWrapper: {
+    flex: 1,                    // 👈 Mandated: splits row width evenly
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#1c1c1f',
+  },
+
+  // ✅ CARD 2 CONTAINER: Expands equally across the horizontal line
+  quickChatCardWrapper: {
+    flex: 1,                    // 👈 Mandated: splits row width evenly
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#1c1c1f',
+  },
+
+  // ✅ BACKGROUND CONFIGS: Forces uniform proportions for both image spaces
+  quickCardBackground: {
+    width: '100%',
+    minHeight: 130,             // Controls identical height layout tracking bounds
+  },
+  quickChatCardBackground: {
+    width: '100%',
+    minHeight: 130,             // Controls identical height layout tracking bounds
+  },
+
+  quickCardImageRadius: {
+    borderRadius: 13,
+  },
+  quickChatCardImageRadius: {
+    borderRadius: 13,
+  },
+
+  // CROPPING OFFSET VECTOR: Focuses your specified background resource on its lower section
+  imageLastHalfFocus: {
+    top: '-50%',
+    height: '200%',
+    position: 'absolute',
+  },
+
+  // METADATA SCRIM OVERLAYS: Protects text contrast visibility
+  quickCardScrimOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 5, 6, 0.76)',
+    padding: 14,
+    justifyContent: 'space-between', // Pushes headers up and text titles down cleanly
+  },
+  quickChatCardScrimOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 5, 6, 0.80)',
+    padding: 14,
+    justifyContent: 'space-between', // Pushes headers up and text titles down cleanly
+  },
+
+  // INTERIOR TYPOGRAPHY ELEMENTS RULES
+  quickCardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  quickChatHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  badgeIndicatorPill: {
+    backgroundColor: 'rgba(0, 255, 204, 0.08)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 255, 204, 0.25)',
+  },
+  badgeIndicatorPillText: {
+    color: '#00ffcc',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  chatActionIconCircleBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 0, 127, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 0, 127, 0.2)',
+  },
+  quickCardMainTitle: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 2,
+  },
+  quickCardSubCopy: {
+    color: '#8a8f98',
+    fontSize: 11,
+    lineHeight: 14,
+  },
+  quickChatMainTitleText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 2,
+  },
+  quickChatSubLabelText: {
+    color: '#8a8f98',
+    fontSize: 11,
+    lineHeight: 14,
+  },
+
+
 });
