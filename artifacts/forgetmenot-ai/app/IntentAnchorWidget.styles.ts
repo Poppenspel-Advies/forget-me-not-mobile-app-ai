@@ -242,18 +242,166 @@ export const artStyles = StyleSheet.create({
   dismissArea: {
     flex: 1,
   },
+
   sheetContainer: {
-    width: '100%',
-    maxHeight: SCREEN_HEIGHT * 0.75,
-    backgroundColor: '#111113',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderWidth: 1,
-    borderColor: '#222226',
-    borderBottomWidth: 0,
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    position: 'absolute',
+    top: 0,                           // ✅ FIXED: Stretches all the way up to eliminate the top gap
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '100%',                   // ✅ FIXED: Expands over the full viewport boundary line
+    backgroundColor: 'rgba(10, 10, 12, 0.96)', // Immersive deep cyber matte glass backdrop
+    paddingHorizontal: 24,
+    paddingTop: 48,
+    overflow: 'hidden',
   },
+
+hudHeaderControlRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  width: '100%',
+  marginBottom: 24,
+  zIndex: 15,
+},
+
+liveSystemRadarGlitchPulseRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 4,
+},
+
+neonLiveRadarGlitchPulseDot: {
+  width: 6,
+  height: 6,
+  borderRadius: 3,
+  backgroundColor: '#39FF14',
+  marginRight: 6,
+},
+hudTelemetrySystemKicker: {
+  color: '#8a8f98',
+  fontSize: 8,
+  fontWeight: '900',
+  letterSpacing: 2,
+},
+hudCircleCloseButtonTouchTarget: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: 'rgba(255, 0, 127, 0.05)',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderWidth: 1,
+  borderColor: 'rgba(255, 0, 127, 0.2)',
+},
+// ✨ CYBERNETIC INTEGRATED GRAPHICS STYLE ENGINE RULES
+cyberRadarGraphIllustrationCenterContainer: {
+  width: '100%',
+  height: 180,
+  backgroundColor: '#0d0d0f',
+  borderRadius: 14,
+  borderWidth: 1,
+  borderColor: '#1c1c1f',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: 20,
+  position: 'relative',
+  overflow: 'hidden',
+},
+radarOuterCircularGlowTrackRing: {
+  width: 130,
+  height: 130,
+  borderRadius: 65,
+  borderWidth: 1,
+  borderColor: 'rgba(0, 240, 255, 0.15)',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+radarInnerCircularDashedSweepingRing: {
+  width: 100,
+  height: 100,
+  borderRadius: 50,
+  borderWidth: 1.5,
+  borderColor: 'rgba(0, 240, 255, 0.25)',
+  borderStyle: 'dashed',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+radarCoreVectorMatrixTargetOrb: {
+  width: 36,
+  height: 36,
+  borderRadius: 18,
+  backgroundColor: 'rgba(0, 240, 255, 0.08)',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderWidth: 1,
+  borderColor: 'rgba(0, 240, 255, 0.4)',
+},
+radarDataCrosshairHorizontalLine: {
+  position: 'absolute',
+  width: '80%',
+  height: 1,
+  backgroundColor: 'rgba(255, 255, 255, 0.04)',
+},
+radarDataCrosshairVerticalLine: {
+  position: 'absolute',
+  height: 130,
+  width: 1,
+  backgroundColor: 'rgba(255, 255, 255, 0.04)',
+},
+radarTelemetryDataNodeBlipParticle: {
+  position: 'absolute',
+  width: 6,
+  height: 6,
+  borderRadius: 3,
+},
+radarGraphVectorOverlayLabelCaption: {
+  position: 'absolute',
+  bottom: 12,
+  color: 'rgba(0, 240, 255, 0.4)',
+  fontSize: 8,
+  fontWeight: '900',
+  letterSpacing: 1.2,
+},
+// DECORATIVE HUD ARCHITECTURE BACKDROP STRINGS
+hudBackgroundMatrixLine: {
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  width: 1,
+  backgroundColor: 'rgba(255, 255, 255, 0.015)',
+},
+hudHorizontalGridLine: {
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  height: 1,
+  backgroundColor: 'rgba(255, 255, 255, 0.015)',
+},
+hudCornerPin: {
+  position: 'absolute',
+  width: 14,
+  height: 14,
+  borderColor: 'rgba(0, 240, 255, 0.25)',
+},
+hudFooterDismissActionPillButton: {
+  flexDirection: 'row',
+  backgroundColor: '#00f0ff',
+  paddingVertical: 14,
+  borderRadius: 10,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: 12,
+  marginBottom: 24,
+  gap: 8,
+},
+hudFooterDismissActionPillButtonText: {
+  color: '#050506',
+  fontSize: 12,
+  fontWeight: '900',
+  letterSpacing: 1.2,
+},
+
   dragHandleBar: {
     width: 32,
     height: 3,
@@ -262,12 +410,7 @@ export const artStyles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 20,
   },
-  sheetTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
+
   sheetSubtitle: {
     fontSize: 10,
     fontWeight: '700',
@@ -320,4 +463,70 @@ export const artStyles = StyleSheet.create({
     fontWeight: '700',
     color: '#A1A1AA',
   },
+
+sheetTitle: {
+  color: '#ffffff',
+  fontSize: 18,
+  fontWeight: '800',
+},
+
+scrollContent: {
+  flex: 1,
+  marginTop: 14,
+},
+// 🎨 ✅ THE COMPLETE INTERIOR TEXT ROW BOXES STYLING FIX: Update inside your stylesheet object
+techSection: {
+  backgroundColor: '#16161a',       // Lighter dark background for the parameter boxes
+  borderRadius: 12,
+  padding: 16,                      // Generous internal space to prevent text crowding
+  marginBottom: 14,
+  borderWidth: 1,
+  borderColor: '#26262b',           // Clean edge boundary lines
+  width: '100%',
+},
+techRowHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 8,
+  marginBottom: 8,                  // Spacing between header title and description copy
+},
+techTitle: {
+  color: '#ffffff',                 // High contrast crisp white section headings
+  fontSize: 14,
+  fontWeight: '700',
+},
+techDesc: {
+  color: '#a1a1aa',                 // Soft readable silver gray for telemetry readings text
+  fontSize: 13,
+  lineHeight: 20,                   // Balanced height spacing so lines do not run into each other
+  fontWeight: '500',
+},
+
+// 🎨 Append these properties to complete the animated frame tracks layer:
+radarSweeperLineArmPivotContainer: {
+  position: 'absolute',
+  width: 130,
+  height: 130,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+radarSweeperLineGlowArmPointer: {
+  position: 'absolute',
+  top: 0,                           // Anchors to the upper radius half
+  width: 2,
+  height: 65,                       // Extends perfectly from center anchor to edge track
+  backgroundColor: '#00f0ff',
+  // Adds a sleek trailing vector appearance
+  boxShadow: '0px 0px 8px #00f0ff, -2px 0px 4px rgba(0, 240, 255, 0.4)',
+},
+radarPulseWaveRingEcho: {
+  position: 'absolute',
+  width: 100,
+  height: 100,
+  borderRadius: 50,
+  borderWidth: 2,
+  borderColor: 'rgba(0, 240, 255, 0.4)',
+},
+
+
 });

@@ -56,6 +56,8 @@
     "zod-validation-error": "^3.4.0"
   },
   "dependencies": {
+    "@react-native-firebase/app": "^26.3.3",
+    "@react-native-firebase/firestore": "^26.3.3",
     "firebase": "^12.18.0"
   }
 }

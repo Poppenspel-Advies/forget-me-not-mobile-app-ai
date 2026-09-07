@@ -21,7 +21,7 @@ import { useAnalyzeCapture, type CaptureAnalysis } from '@workspace/api-client-r
 import colors from '@/constants/colors';
 // Import your newly split layout targets explicitly
 import { captureScreenStyles, customAccents } from './CaptureScreen.styles';
-import { IntentAnchorWidget } from './IntentAnchorWidget';
+import { IntentAnchorWidget, DBIntentAnchor } from './IntentAnchorWidget';
 import { RippleShieldWidget } from './RippleShieldWidget'; // Adjust the relative path if you saved the widget file in a separate components folder
 import { MemoryScreen } from './MemoryScreen';
 import { fetchGeminiSignalAnalysis } from '../config/geminiService';
@@ -32,17 +32,26 @@ import PredictiveLoopWidget from './PredictiveLoopWidget';
 import PredictionScreen from './PredictionScreen'; // Update path if stored inside /components folder
 // ✅ Add this line at the top asset import block section of app/index.tsx
 import ChatScreen from './ChatScreen';
-
-
+import firestore from '@react-native-firebase/firestore';
+import { initializeApp, getApps } from 'firebase/app';
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
 // ✅ THE FIX: Pushes up one directory level (../) then enters the config subfolder
 import { db } from '../config/firebaseConfig';
-import { collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot as webOnSnapshot, getFirestore, collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import { subscribeToLatestAnalysis } from '../config/db';
 
 interface CaptureScreenProps {
   onNavigate: (screen: any) => void;
   onCapture: (item: any) => void;
 }
+
+interface IntentAnchorContainerProps {
+  // Pass the real-time Firestore analysis data down from your screen controller wrapper
+  analysisData: DBIntentAnchor;
+  anchorActive: boolean;
+  setAnchorActive: (active: boolean) => void;
+}
+
 
 interface CaptureScreenProps {
   onNavigate: (screen: string) => void;
@@ -54,6 +63,14 @@ interface CaptureScreenProps {
   };
   theme?: any;
   customAccents?: any;
+}
+
+let webDb: any;
+if (Platform.OS === 'web') {
+  if (getApps().length === 0) {
+    initializeApp(firebaseConfig);
+  }
+  webDb = getFirestore();
 }
 
 // Define the hardcoded valid tags requested
@@ -85,6 +102,7 @@ const theme = colors.light;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+const [analysisData, setAnalysisData] = useState<any>(null);
 
 const capturedSeed: CapturedItem[] = [
   {
@@ -409,7 +427,7 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     const insets = useSafeAreaInsets();
     const pulse = useRef(new Animated.Value(0)).current;
     // 🌟 1. MOCK STATE HOOKS: Track card dismissals dynamically on layout
-    const [anchorActive, setAnchorActive] = useState(true);
+   // const [anchorActive, setAnchorActive] = useState(true);
     const [shieldActive, setShieldActive] = useState(true);
     const userId = "Admin_ForgetMeNotAI";
 
@@ -420,6 +438,9 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     // 🌟 THE ROUTER STATE MANAGER: Tracks which viewport panel should be mounted active on screen
     // ✅ THE DIRECT FIX: Initialize local state tracking directly inside this screen sandbox
     const [dbSignals, setDbSignals] = useState<any[]>([]);
+    const [analysisData, setAnalysisData] = useState<any>(null);
+    const [anchorActive, setAnchorActive] = useState<boolean>(true); // Preserved component state control
+
 
     // 2. Ensure your real-time useEffect query updates this state automatically:
     useEffect(() => {
@@ -486,6 +507,48 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
       return () => unsubscribe();
 
     }, [userId]);
+
+useEffect(() => {
+  if (anchorActive && analysisData) {
+    Animated.parallel([
+      Animated.timing(startUpFade, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.timing(anchorSlideY, { toValue: 0, duration: 400, useNativeDriver: true })
+    ]).start();
+  }
+}, [anchorActive, analysisData]); // 🚀 Triggers instantly when data shifts from false to true
+
+
+    useEffect(() => {
+      // Triggers the subscription cleanly across web, ios, or android seamlessly
+      const unsubscribe = subscribeToLatestAnalysis((rawDbPayload) => {
+        console.log("🔥 Clean Database Data Arrived:", rawDbPayload);
+
+        if (rawDbPayload && rawDbPayload.analysis) {
+          const item = rawDbPayload.analysis;
+
+          // Parse data fields into the visual target slots for the Widget component card
+          setAnalysisData({
+            intent_anchor: {
+              anchor_point: item.signal || "Routine Path Execution Window",
+              routine_deviation_probability: `${item.confidence ?? 73}% Deviation Risk Index`,
+              user_unstated_goal: item.detail || item.explanation || "No target objective tracked."
+            },
+            metrics: {
+              total_loops: parseInt(item.dependencyNodesCount, 10) || 4,
+              memory_drops_prevented: 0,
+              system_health: item.categoryTag || "Active State Tracking"
+            }
+          });
+        }
+      });
+
+      return () => unsubscribe();
+    }, []);
+
+    console.log('Intent Anchor Visibility Debug:', {
+            anchorActive,
+            hasAnalysisData: !!analysisData
+      });
 
      useEffect(() => {
         // Sequentially cascade widgets upwards into focal layout ranges smoothly
@@ -596,21 +659,20 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
         </View>
       </View>
 
-       {/* 🧭 INTENT ANCHOR CONTAINER CONTAINER WITH SLIDE ENTRANCE */}
-            {anchorActive && (
-              <Animated.View style={{ opacity: startUpFade, transform: [{ translateY: anchorSlideY }] }}>
-                <IntentAnchorWidget
-                  phrase="Call Dad this weekend"
-                  score={23}
-                  windowTime="Tonight"
-                  onSelectStrategy={() => {
-                    // Dismisses the active intention widget instantly on choice confirm selection
-                    setAnchorActive(true);
-                  }}
-                />
-              </Animated.View>
-            )}
 
+       {/* 🧭 INTENT ANCHOR CONTAINER WITH SLIDE ENTRANCE */}
+       {anchorActive && analysisData && (
+         <Animated.View style={{ opacity: startUpFade, transform: [{ translateY: anchorSlideY }] }}>
+           <IntentAnchorWidget
+             analysisData={analysisData}
+             onSelectStrategy={(strategyId) => {
+               console.log('Dynamic Strategy Action triggered:', strategyId);
+               // Dismisses the active intention widget layout slide instantly on choice confirm
+               setAnchorActive(false);
+             }}
+           />
+         </Animated.View>
+       )}
 
           {/* 🔮 RIPPLE SHIELD CONTAINER CONTAINER WITH TIMED DELAY SLIDE ENTRANCE */}
             {shieldActive && (
@@ -1132,36 +1194,6 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
 }
 
 
-/* function ChatScreen() {
-  const [messages, setMessages] = useState([{ id: '1', from: 'ai', text: 'I’m looking between the lines. What’s on your mind?' }]);
-  const [text, setText] = useState('');
-  const send = () => {
-    if (!text.trim()) return;
-    tap();
-    const userText = text.trim();
-    setMessages((current) => [...current, { id: Date.now().toString(), from: 'user', text: userText }, { id: `${Date.now()}-ai`, from: 'ai', text: 'I’ll hold onto that. I’m checking it against your upcoming days and the context you’ve shared.' }]);
-    setText('');
-  };
-  return (
-    <KeyboardAvoidingView behavior="padding" style={styles.screen}>
-      <ScreenHeader title="Talk it through" subtitle="Your second brain, without the noise." right={<View style={styles.aiOnline}><View style={styles.liveDot} /><Text style={styles.aiOnlineText}>ONLINE</Text></View>} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.chatScroll}>
-        <View style={styles.chatIntro}><FGlobe size={84} /><Text style={styles.chatIntroTitle}>A thought is a signal.</Text><Text style={styles.chatIntroCopy}>Ask me what you might be missing, or leave a thought here for later.</Text></View>
-        {messages.map((message) => (
-          <View key={message.id} style={[styles.messageRow, message.from === 'user' && styles.messageRowUser]}>
-            {message.from === 'ai' ? <View style={styles.messageAvatar}><FGlobe size={26} /></View> : null}
-            <View style={[styles.messageBubble, message.from === 'user' ? styles.userBubble : styles.aiBubble]}><Text style={[styles.messageText, message.from === 'user' && styles.userMessageText]}>{message.text}</Text></View>
-          </View>
-        ))}
-      </ScrollView>
-      <View style={[styles.chatComposer, { paddingBottom: Platform.OS === 'web' ? 34 : 10 }]}>
-        <TextInput testID="chat-input" value={text} onChangeText={setText} onSubmitEditing={send} returnKeyType="send" placeholder="Tell me a thought…" placeholderTextColor={theme.mutedForeground} style={styles.chatInput} />
-        <Pressable testID="send-message" onPress={send} style={[styles.sendButton, !text.trim() && styles.sendButtonDisabled]}><Feather name="arrow-up" size={18} color={theme.background} /></Pressable>
-      </View>
-    </KeyboardAvoidingView>
-  );
-} */
-
 function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
   const [connected, setConnected] = useState(true);
   return (
@@ -1221,6 +1253,7 @@ export default function Home() {
       case 'actions': return <ActionsScreen onBack={() => navigate('home')} />;
       case 'memory': return <MemoryScreen onBack={() => navigate('home')} captured={captured} />;
       case 'contact': return <ContactScreen onBack={() => navigate('profile')} />;
+      case 'repliesShield': return <RippleShieldWidget onBack={() => navigate('home')} />;
       default: return <HomeScreen onNavigate={navigate} captured={captured} />;
     }
   })();
