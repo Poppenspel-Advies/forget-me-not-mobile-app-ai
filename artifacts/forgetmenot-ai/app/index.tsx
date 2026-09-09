@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import {
   Animated,
   Image,
@@ -12,11 +12,13 @@ import {
   Dimensions,
   TextInput,
   View,
+  ActivityIndicator,
   Image as RNImage,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 import { useAnalyzeCapture, type CaptureAnalysis } from '@workspace/api-client-react';
 import colors from '@/constants/colors';
 // Import your newly split layout targets explicitly
@@ -37,8 +39,16 @@ import { initializeApp, getApps } from 'firebase/app';
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
 // ✅ THE FIX: Pushes up one directory level (../) then enters the config subfolder
 import { db } from '../config/firebaseConfig';
-import { doc, onSnapshot as webOnSnapshot, getFirestore, collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import { doc, onSnapshot as webOnSnapshot, getFirestore, collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, limit, setDoc, getDoc } from 'firebase/firestore';
 import { subscribeToLatestAnalysis } from '../config/db';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  signOut
+} from 'firebase/auth';
 
 interface CaptureScreenProps {
   onNavigate: (screen: any) => void;
@@ -99,10 +109,11 @@ type CapturedItem = {
 };
 
 const theme = colors.light;
-
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const [analysisData, setAnalysisData] = useState<any>(null);
+
+export const authInstance = getAuth();
 
 const capturedSeed: CapturedItem[] = [
   {
@@ -434,13 +445,43 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     // 🌟 2. ANIMATED GLIDE WRAPPERS: Control entrance sliding offsets upon app startup
     const startUpFade = useRef(new Animated.Value(0)).current;
     const anchorSlideY = useRef(new Animated.Value(40)).current;
-    const shieldSlideY = useRef(new Animated.Value(60)).current;
+    const shieldSlideY = useRef(new Animated.Value(40)).current;
     // 🌟 THE ROUTER STATE MANAGER: Tracks which viewport panel should be mounted active on screen
     // ✅ THE DIRECT FIX: Initialize local state tracking directly inside this screen sandbox
     const [dbSignals, setDbSignals] = useState<any[]>([]);
     const [analysisData, setAnalysisData] = useState<any>(null);
     const [anchorActive, setAnchorActive] = useState<boolean>(true); // Preserved component state control
 
+    useFocusEffect(
+      useCallback(() => {
+        if (!shieldActive) return;
+
+        shieldSlideY.stopAnimation();
+        startUpFade.stopAnimation();
+
+        shieldSlideY.setValue(60);
+        startUpFade.setValue(0);
+
+        Animated.parallel([
+          Animated.timing(shieldSlideY, {
+            toValue: 0,
+            duration: 450,
+            useNativeDriver: true,
+          }),
+
+          Animated.timing(startUpFade, {
+            toValue: 1,
+            duration: 350,
+            useNativeDriver: true,
+          }),
+        ]).start();
+
+        return () => {
+          shieldSlideY.stopAnimation();
+          startUpFade.stopAnimation();
+        };
+      }, [shieldActive])
+    );
 
     // 2. Ensure your real-time useEffect query updates this state automatically:
     useEffect(() => {
@@ -574,6 +615,8 @@ useEffect(() => {
     ).start();
   }, [pulse]);
   const ringScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1.04] });
+
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -606,11 +649,18 @@ useEffect(() => {
         </Animated.View>
       </ImageBackground>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
+<View style={{ height: 18 }} />
+
+    {/* ✅ THE FIXED SCROLL CONTEXT CONTAINER: Forces full viewport re-calculations when returning from other screens */}
+      <View style={{ flex: 1, paddingHorizontal: 0 }}>
              {/* ============================================================== */}
              {/* 🌤️ 🚆 MOUNT TRANSIT WEATHER WIDGET HERE                        */}
              {/* ============================================================== */}
              <TransitWeatherWidget onNavigate={(screenKey) => onNavigate(screenKey)} />
+
+              {/* ✅ THE VISUAL VERTICAL SPACER LAYOUT BAR */}
+              <View style={{ height: 18 }} />
+
 
              {/* --- AI SIGNALS CONSOLIDATED LIVE COLLECTION SECTION --- */}
              <SectionTitle
@@ -644,7 +694,10 @@ useEffect(() => {
                  />
                </View>
              )}
-           </ScrollView>
+           </View>
+
+         {/* ✅ THE VISUAL VERTICAL SPACER LAYOUT BAR */}
+         <View style={{ height: 18 }} />
 
       <SectionTitle eyebrow="YOUR SIGNALS" title="Recent context" action="Open memory" onAction={() => onNavigate('memory')} />
       <View style={styles.contextCard}>
@@ -674,21 +727,34 @@ useEffect(() => {
          </Animated.View>
        )}
 
-          {/* 🔮 RIPPLE SHIELD CONTAINER CONTAINER WITH TIMED DELAY SLIDE ENTRANCE */}
-            {shieldActive && (
-              <Animated.View style={{ opacity: startUpFade, transform: [{ translateY: shieldSlideY }] }}>
-                <RippleShieldWidget
-                  omissionItem="Passport"
-                  riskScore={94}
-                  onPreventRipple={() => {
-                    // 🌟 1. Dismisses the card immediately from your view feed layout
-                    setShieldActive(true);
-                  }}
-                />
-              </Animated.View>
-            )}
+         {/* ✅ THE VISUAL VERTICAL SPACER LAYOUT BAR */}
+         <View style={{ height: 18 }} />
 
+{/* 🔮 RIPPLE SHIELD SYSTEM CONTAINER: FULL DYNAMIC HEIGHT ANCHOR */}
+{shieldActive && (
+  // ✅ FIX 1: This static wrapper acts as an unmoving anchor box in the layout tree
+  <View style={{ width: '100%', position: 'relative', display: 'flex', zIndex: 10 }}>
+    <Animated.View
+      style={{
+        opacity: startUpFade,
+        transform: [{ translateY: shieldSlideY }],
+        // ✅ FIX 2: Removed minHeight/height to let the child component naturally handle height calculations
+        width: '100%',
+        display: 'flex',
+      }}
+    >
+      <RippleShieldWidget
+        // ✅ FIX 3: Passed your pre-flattened Firestore document array title string safely from DB
+        omissionItem={dbSignals[0]?.title || "Active Context Risk"}
+        onPreventRipple={() => setShieldActive(false)}
+      />
+    </Animated.View>
+  </View>
+)}
+        {/* ✅ THE VISUAL VERTICAL SPACER LAYOUT BAR */}
+        <View style={{ height: 18 }} />
 
+ <View style={{ height: 24, width: '100%', clear: 'both' as any }} />
       <View style={styles.quickRow}>
         {/* 🌌 DYNAMIC ORBITAL QUICK ACTIONS LINK CARD */}
         <Pressable
@@ -1194,6 +1260,221 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
 }
 
 
+// ==============================================================
+// 🔐 HIGH-FIDELITY DYNAMIC AUTHENTICATION & PASSCODE GATE SYSTEM
+// ==============================================================
+function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) => void }) {
+  //const auth = authInstance || getAuth();
+
+  // ✅ FIXED: Safely look up the global instance variable or fall back to an active runtime initialization
+    const auth = typeof authInstance !== 'undefined' ? authInstance : getAuth();
+
+  const [authMode, setAuthMode] = useState<'LOGIN' | 'SIGNUP' | 'FORGOT' | 'PASSCODE_SETUP' | 'PASSCODE_VERIFY'>('LOGIN');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passcode, setPasscode] = useState('');
+  const [activeUser, setActiveUser] = useState<any>(null);
+  const [statusMessage, setStatusMessage] = useState({ text: '', isError: false });
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    return onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setActiveUser(user);
+        setIsProcessing(true);
+        try {
+          const docSnap = await getDoc(doc(db, "users", user.uid));
+          if (docSnap.exists() && docSnap.data().secure_passcode) {
+            setAuthMode('PASSCODE_VERIFY');
+          } else {
+            setAuthMode('PASSCODE_SETUP');
+          }
+        } catch (e) {
+          setAuthMode('PASSCODE_SETUP');
+        }
+        setIsProcessing(false);
+      } else {
+        setActiveUser(null);
+        setAuthMode('LOGIN');
+      }
+    });
+  }, []);
+
+  const clearMessages = () => setStatusMessage({ text: '', isError: false });
+
+  // ==============================================================
+  // 🟢 ✅ THE UNIFIED HANDLER BINDING ALL SUBMISSIONS SAFELY
+  // ==============================================================
+  const handleAuth = async () => {
+    setIsProcessing(true);
+    clearMessages();
+    try {
+      if (authMode === 'LOGIN') {
+        if (!email.trim() || !password.trim()) return;
+        await signInWithEmailAndPassword(auth, email.trim(), password.trim());
+      } else if (authMode === 'SIGNUP') {
+        if (!email.trim() || !password.trim()) return;
+        await createUserWithEmailAndPassword(auth, email.trim(), password.trim());
+        setStatusMessage({ text: "ACCOUNT ACCUMULATION SYSTEM SYNCHRONIZED.", isError: false });
+      } else if (authMode === 'FORGOT') {
+        if (!email.trim()) return;
+        await sendPasswordResetEmail(auth, email.trim());
+        setStatusMessage({ text: "Reset verification loop link sent to your inbox.", isError: false });
+        setTimeout(() => setAuthMode('LOGIN'), 3000);
+      } else if (authMode === 'PASSCODE_SETUP') {
+        if (passcode.length !== 4 || !activeUser) return;
+        await setDoc(doc(db, "users", activeUser.uid), {
+          email: activeUser.email,
+          secure_passcode: passcode,
+          updated_at: new Date().toISOString()
+        }, { merge: true });
+        onAuthComplete(activeUser.uid);
+      } else if (authMode === 'PASSCODE_VERIFY') {
+        if (passcode.length !== 4 || !activeUser) return;
+        const snap = await getDoc(doc(db, "users", activeUser.uid));
+        if (snap.exists() && snap.data().secure_passcode === passcode) {
+          onAuthComplete(activeUser.uid);
+        } else {
+          setStatusMessage({ text: "INVALID IDENTIFICATION KEY PIN. ENTRY REJECTED.", isError: true });
+          setPasscode('');
+        }
+      }
+    } catch (err: any) {
+      console.error("💥 Authentication exception encountered:", err);
+      setStatusMessage({ text: err.message || "Operation failed inside security pipeline.", isError: true });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView behavior="padding" style={styles.screen}>
+      <View style={[styles.innerScroll, { flex: 1, justifyContent: 'center', paddingHorizontal: 32 }]}>
+
+        {/* HUD Master Tech Branded Lockup */}
+        <View style={{ alignItems: 'center', marginBottom: 28 }}>
+          <FGlobe size={56} />
+          <Text style={[styles.brandName, { marginTop: 12, fontSize: 13 }]}>FORGETMENOT SECURITY</Text>
+          <Text style={{ color: '#62626a', fontSize: 9, letterSpacing: 1.5, marginTop: 4 }}>
+            IDENTITY MATRIX // ACCESS GATE ARMED
+          </Text>
+        </View>
+
+        {/* EMAIL & PASSWORD INPUT GROUP CONTROLS */}
+        {(authMode === 'LOGIN' || authMode === 'SIGNUP' || authMode === 'FORGOT') && (
+          <View style={styles.emptyViewBox}>
+            <TextInput
+              autoCapitalize="none"
+              keyboardType="email-address"
+              placeholder="Email Address"
+              placeholderTextColor="#52525b"
+              value={email}
+              onChangeText={(t) => { setEmail(t); clearMessages(); }}
+              style={{ color: '#fff', marginBottom: 12, borderBottomWidth: 1, borderBottomColor: '#222226', height: 40 }}
+              onSubmitEditing={handleAuth}
+            />
+            {authMode !== 'FORGOT' && (
+              <TextInput
+                secureTextEntry
+                autoCapitalize="none"
+                placeholder="Password Key"
+                placeholderTextColor="#52525b"
+                value={password}
+                onChangeText={(t) => { setPassword(t); clearMessages(); }}
+                style={{ color: '#fff', height: 40 }}
+                onSubmitEditing={handleAuth}
+              />
+            )}
+          </View>
+        )}
+
+        {/* PIN PASSCODE NUMERIC SEPARATOR ENTRY SHEET CONTAINER */}
+        {(authMode === 'PASSCODE_SETUP' || authMode === 'PASSCODE_VERIFY') && (
+          <View style={{ backgroundColor: '#16161a', borderRadius: 12, borderWidth: 1, borderColor: '#26262b', padding: 20, alignItems: 'center' }}>
+            <Text style={{ color: '#00ffcc', fontSize: 10, fontWeight: '900', letterSpacing: 1, marginBottom: 12, textAlign: 'center' }}>
+              {authMode === 'PASSCODE_SETUP' ? "REGISTER NEW 4-DIGIT QUICK ENTRY PIN" : "ENTER SECURE PIN TRANSLATION KEY"}
+            </Text>
+            <TextInput
+              secureTextEntry
+              maxLength={4}
+              keyboardType="number-pad"
+              placeholder="••••"
+              placeholderTextColor="#52525b"
+              value={passcode}
+              onChangeText={(t) => { setPasscode(t); clearMessages(); }}
+              style={{ color: '#00ffcc', fontSize: 24, letterSpacing: 8, textAlign: 'center', width: '60%', height: 44 }}
+              onSubmitEditing={handleAuth}
+            />
+          </View>
+        )}
+
+        {statusMessage.text ? (
+          <Text style={{ color: statusMessage.isError ? '#ff0055' : '#39FF14', fontSize: 11, fontWeight: '700', textAlign: 'center', marginTop: 12 }}>
+            {statusMessage.text}
+          </Text>
+        ) : null}
+
+        {/* PRIMARY SUBMIT ACTION BUTTON (Binds safely to your single handleAuth engine definition) */}
+        <Pressable
+          onPress={handleAuth}
+          disabled={isProcessing}
+          style={({ pressed }) => [
+            styles.primaryButton,
+            { marginTop: 20 },
+            isProcessing && { backgroundColor: '#1c1c1f' },
+            pressed && { opacity: 0.85 }
+          ]}
+        >
+          {isProcessing ? (
+            <ActivityIndicator size="small" color="#00ffcc" />
+          ) : (
+            <Text style={styles.primaryButtonText}>
+              {authMode === 'LOGIN' ? 'AUTHENTICATE USER NODE' :
+               authMode === 'SIGNUP' ? 'GENERATE NEW KEY MATRIX' :
+               authMode === 'FORGOT' ? 'TRIGGER RESET EMAIL' : 'CONFIRM ACCESS PIN'}
+            </Text>
+          )}
+        </Pressable>
+
+        {/* SHUTTLE ROUTING SHORTCUT LINKS FOOTER PANEL CONTAINER BAR */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 16, marginTop: 18 }}>
+          {authMode === 'LOGIN' && (
+            <>
+              <Pressable onPress={() => { setAuthMode('SIGNUP'); clearMessages(); }}><Text style={{ color: '#ff007f', fontSize: 12, fontWeight: '700' }}>Create Account</Text></Pressable>
+              <Pressable onPress={() => { setAuthMode('FORGOT'); clearMessages(); }}><Text style={{ color: '#ffd700', fontSize: 12, fontWeight: '600' }}>Forgot Password?</Text></Pressable>
+            </>
+          )}
+          {authMode === 'SIGNUP' && <Pressable onPress={() => { setAuthMode('LOGIN'); clearMessages(); }}><Text style={{ color: '#00ffcc', fontSize: 12, fontWeight: '700' }}>Existing Member Login</Text></Pressable>}
+          {authMode === 'FORGOT' && <Pressable onPress={() => { setAuthMode('LOGIN'); clearMessages(); }}><Text style={{ color: '#a1a1aa', fontSize: 12, fontWeight: '700' }}>Cancel Matrix Reset</Text></Pressable>}
+
+          {(authMode === 'PASSCODE_SETUP' || authMode === 'PASSCODE_VERIFY') && (
+            <>
+              <Pressable
+                onPress={() => {
+                  setAuthMode('PASSCODE_SETUP');
+                  setPasscode('');
+                  clearMessages();
+                  setStatusMessage({ text: "PIN MODE UNLOCKED. Input a new 4-digit code to update records.", isError: false });
+                }}
+              >
+                <Text style={{ color: '#ffd700', fontSize: 12, fontWeight: '700', textTransform: 'uppercase' }}>
+                  Reset Forgotten PIN
+                </Text>
+              </Pressable>
+              <View style={{ width: 1, height: 14, backgroundColor: '#26262b' }} />
+              <Pressable onPress={() => { signOut(auth); setPasscode(''); clearMessages(); }}><Text style={{ color: '#ff0055', fontSize: 11, fontWeight: '800' }}>DISCONNECT ACCOUNT (LOGOUT)</Text></Pressable>
+            </>
+          )}
+        </View>
+
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+
+
+
+
 function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
   const [connected, setConnected] = useState(true);
   return (
@@ -1238,9 +1519,26 @@ export default function Home() {
   const [screen, setScreen] = useState<Screen>('home');
   const [captured, setCaptured] = useState<CapturedItem[]>(capturedSeed);
   const navigate = (next: Screen) => setScreen(next);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  // ✅ FIXED: Instantiated with the exact matching variable names expected by your content loop checks!
+  const [activeSessionUserId, setActiveSessionUserId] = useState<string | null>(null);
   const currentNav = useMemo(() => ['home', 'events', 'capture', 'chat', 'profile'].includes(screen) ? screen : 'home', [screen]) as Screen;
   const secondary = screen === 'prediction' || screen === 'actions' || screen === 'memory' || screen === 'contact';
+
   const content = (() => {
+
+          // ==============================================================
+          // 🔐 FIXED: GUARANTEES PROP INTERPOLATION BINDING AT THE ROOT LEVEL
+          // ==============================================================
+          if (!activeSessionUserId) {
+            return (
+              <LoginGateScreen
+                // Ensure this maps EXACTLY to your state hook variable name setter function
+                onAuthComplete={(verifiedUid) => setActiveSessionUserId(verifiedUid)}
+              />
+            );
+          }
+
     switch (screen) {
       case 'events': return <EventsScreen onNavigate={navigate} />;
       case 'capture': return <CaptureScreen onNavigate={navigate} onCapture={(item) => { setCaptured((items) => [item, ...items]); setScreen('memory'); }} />;
@@ -1257,18 +1555,37 @@ export default function Home() {
       default: return <HomeScreen onNavigate={navigate} captured={captured} />;
     }
   })();
-  return <View style={styles.app}>{content}{!secondary ? <BottomNav screen={currentNav} onNavigate={navigate} /> : null}</View>;
+  return (
+     <View style={styles.app}>
+       {content}
+
+       {/* Only display the primary navigation panel bar if authenticated and active */}
+       {!secondary && isAuthenticated ? (
+         <BottomNav screen={currentNav} onNavigate={navigate} />
+       ) : null}
+     </View>
+   );
 }
 
 const styles = StyleSheet.create({
   app: { flex: 1, backgroundColor: theme.background },
-  screen: { flex: 1, backgroundColor: theme.background },
+  screen: {
+      flex: 1,
+      backgroundColor: '#050506',
+      width: '100%',
+      height: '100%',
+    },
   header: { paddingHorizontal: 20, paddingBottom: 14, backgroundColor: theme.background },
   headerRow: { minHeight: 42, flexDirection: 'row', alignItems: 'center', gap: 12 },
   headerCopy: { flex: 1 },
   headerTitle: { color: theme.text, fontSize: 21, fontWeight: '700', letterSpacing: -0.45 },
   headerSubtitle: { color: theme.mutedForeground, fontSize: 12, marginTop: 3 },
   headerSpacer: { width: 34 },
+  innerScroll: {
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      paddingBottom: 32, // Gives clean breathing room parameters at the layout bottom
+    },
   iconButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 18, backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border },
   brandLockup: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   brandName: { color: theme.text, fontSize: 12, fontWeight: '700', letterSpacing: 1.7 },
@@ -1327,7 +1644,17 @@ const styles = StyleSheet.create({
   contextItem: { gap: 4 },
   contextTime: { color: theme.mutedForeground, fontSize: 9, letterSpacing: 1.2, fontWeight: '700' },
   contextText: { color: theme.text, fontSize: 12, lineHeight: 16 },
-  quickRow: { flexDirection: 'row', gap: 10 },
+  // ✅ THE HORIZONTAL GRID ENFORCER: Blocks cards from crashing or shifting layout when screens re-mount
+    quickRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '100%',
+      gap: 12,
+      marginTop: 16,                 // ✅ Streamlined to maintain clean spacing gaps
+      marginBottom: 16,
+      display: 'flex',
+      zIndex: 5,
+    },
   quickCard: { flex: 1, backgroundColor: `${theme.green}0D`, borderRadius: 15, borderWidth: 1, borderColor: `${theme.green}35`, padding: 14 },
   quickCardPink: { backgroundColor: `${theme.pink}0D`, borderColor: `${theme.pink}35` },
   quickNumber: { color: theme.text, fontSize: 23, fontWeight: '700', marginTop: 14 },
@@ -1672,15 +1999,7 @@ imageLastHalfFocus: {
   height: '200%',
   position: 'absolute',
 },
-// ✅ THE GRID FLEX CONTAINER: Forces items to align horizontally side-by-side
-  quickRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    gap: 12,                    // Spacing gap between both cards
-    marginVertical: 10,
-    paddingHorizontal: 16,      // Matches your screen content bounds
-  },
+
 
   // ✅ CARD 1 CONTAINER: Expands equally across the horizontal line
   quickCardWrapper: {
@@ -1797,6 +2116,94 @@ imageLastHalfFocus: {
     fontSize: 11,
     lineHeight: 14,
   },
+// ✅ THE CRITICAL DIRECT FIX: Lock down a solid baseline height constraint
+  cardContainer: {
+    width: '100%',
+    height: 184,                    // 👈 Forces an explicit pixel layout boundary height box
+    backgroundColor: '#121214',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#1c1c1f',
+    overflow: 'hidden',
+    position: 'relative',
+    marginVertical: 8,
+  },
+
+// ✅ INNER LAYOUT ALIGNMENT: Ensures elements fill the locked container box perfectly
+  splitLayoutRow: {
+    flexDirection: 'row',
+    width: '100%',
+    height: 144,                    // 👈 Gives your internal left/right columns explicit height bounds
+  },
+
+// ✅ FOOTER POSITION ALIGNMENT: Hard-anchors your action line to the bottom of your locked height box
+  footerActionContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 40,                     // 👈 Locks the bottom control row properties down safely
+    borderTopWidth: 1,
+    borderColor: '#1c1c1f',
+    backgroundColor: '#16161a',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+  },
+
+// Update or merge these parameters inside your master styles block:
+quickRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  width: '100%',
+  gap: 12,
+  marginVertical: 14,             // Breathing room separator metrics
+  display: 'flex',
+  zIndex: 5,
+},
+quickCardWrapper: {
+  flex: 1,                        // Splits horizontal row width evenly 50/50
+  borderRadius: 14,
+  overflow: 'hidden',
+  borderWidth: 1,
+  borderColor: '#1c1c1f',
+},
+quickChatCardWrapper: {
+  flex: 1,                        // Splits horizontal row width evenly 50/50
+  borderRadius: 14,
+  overflow: 'hidden',
+  borderWidth: 1,
+  borderColor: '#1c1c1f',
+},
+quickCardBackground: {
+  width: '100%',
+  minHeight: 130,                 // Explicit uniform height tracking constraint parameters
+},
+quickCardImageRadius: {
+  borderRadius: 13,
+},
+quickChatCardImageRadius: {
+  borderRadius: 13,
+},
+imageLastHalfFocus: {
+  top: '-50%',
+  height: '200%',
+  position: 'absolute',
+},
+quickCardScrimOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(5, 5, 6, 0.76)',
+  padding: 14,
+  justifyContent: 'space-between',
+},
+quickChatCardScrimOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(5, 5, 6, 0.80)',
+  padding: 14,
+  justifyContent: 'space-between',
+},
+
 
 
 });

@@ -106,6 +106,7 @@ export function RippleShieldWidget({ onPreventRipple }: RippleShieldProps) {
   }
 
   return (
+
     <View style={rippleStyles.cardContainer}>
 
       {/* 🌌 Card Outer Main Background Asset Coupling */}
