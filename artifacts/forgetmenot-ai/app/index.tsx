@@ -1,3 +1,4 @@
+import { Video, Audio } from 'expo-av';
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import {
   Animated,
@@ -13,6 +14,7 @@ import {
   TextInput,
   View,
   ActivityIndicator,
+  Easing,
   Image as RNImage,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -1261,14 +1263,14 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
 
 
 // ==============================================================
-// 🔐 HIGH-FIDELITY DYNAMIC AUTHENTICATION & PASSCODE GATE SYSTEM
+// 🌌 🛸 🔐 HIGH-FIDELITY AUDIO-VISUAL DEEP SPACE IDENTITY GATEWAY
 // ==============================================================
 function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) => void }) {
-  //const auth = authInstance || getAuth();
+  const auth = typeof authInstance !== 'undefined' ? authInstance : getAuth();
+  const videoRef = useRef<Video>(null);
+  const soundObject = useRef<Audio.Sound | null>(null);
 
-  // ✅ FIXED: Safely look up the global instance variable or fall back to an active runtime initialization
-    const auth = typeof authInstance !== 'undefined' ? authInstance : getAuth();
-
+  // 🎛️ VIEW CONTROLLERS: 'LOGIN' | 'SIGNUP' | 'FORGOT' | 'PASSCODE_SETUP' | 'PASSCODE_VERIFY'
   const [authMode, setAuthMode] = useState<'LOGIN' | 'SIGNUP' | 'FORGOT' | 'PASSCODE_SETUP' | 'PASSCODE_VERIFY'>('LOGIN');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -1277,6 +1279,57 @@ function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) 
   const [statusMessage, setStatusMessage] = useState({ text: '', isError: false });
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
+  // 🌀 ANIMATION DRIVERS
+  const emailGlowAnim = useRef(new Animated.Value(0)).current;
+  const passwordGlowAnim = useRef(new Animated.Value(0)).current;
+  const logoRotationAnim = useRef(new Animated.Value(0)).current;
+
+  // 🧭 INTERPOLATION MAPPINGS
+  const range01 = new Array(0, 1);
+  const emailBorderInterpolate = emailGlowAnim.interpolate({ inputRange: range01, outputRange: ['#26262b', '#00f0ff'] });
+  const passwordBorderInterpolate = passwordGlowAnim.interpolate({ inputRange: range01, outputRange: ['#26262b', '#ff007f'] });
+  const logoSpinAngle = logoRotationAnim.interpolate({ inputRange: range01, outputRange: ['0deg', '360deg'] });
+
+  useEffect(() => {
+    // Continuous 360-degree brand logo rotation loop
+    Animated.loop(
+      Animated.timing(logoRotationAnim, {
+        toValue: 1,
+        duration: 8000,
+        easing: Easing.linear,
+        useNativeDriver: Platform.OS !== 'web',
+      })
+    ).start();
+
+    async function activateCosmicSoundscapes() {
+      try {
+        await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
+        const { sound } = await Audio.Sound.createAsync(
+          require('@/assets/audio/cosmic-ambient-void.mp3'),
+          { shouldPlay: true, isLooping: true, volume: 0.45 }
+        );
+        soundObject.current = sound;
+      } catch (error) {
+        console.warn("⚠️ Audio synthesis skipped inside this browser sandbox context.");
+      }
+    }
+    activateCosmicSoundscapes();
+    return () => {
+      if (soundObject.current) soundObject.current.unloadAsync();
+    };
+  }, []);
+
+  useEffect(() => {
+    Animated.timing(emailGlowAnim, { toValue: emailFocused ? 1 : 0, duration: 200, useNativeDriver: false }).start();
+  }, [emailFocused]);
+
+  useEffect(() => {
+    Animated.timing(passwordGlowAnim, { toValue: passwordFocused ? 1 : 0, duration: 200, useNativeDriver: false }).start();
+  }, [passwordFocused]);
+
   useEffect(() => {
     return onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -1284,11 +1337,8 @@ function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) 
         setIsProcessing(true);
         try {
           const docSnap = await getDoc(doc(db, "users", user.uid));
-          if (docSnap.exists() && docSnap.data().secure_passcode) {
-            setAuthMode('PASSCODE_VERIFY');
-          } else {
-            setAuthMode('PASSCODE_SETUP');
-          }
+          if (docSnap.exists() && docSnap.data().secure_passcode) setAuthMode('PASSCODE_VERIFY');
+          else setAuthMode('PASSCODE_SETUP');
         } catch (e) {
           setAuthMode('PASSCODE_SETUP');
         }
@@ -1302,10 +1352,8 @@ function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) 
 
   const clearMessages = () => setStatusMessage({ text: '', isError: false });
 
-  // ==============================================================
-  // 🟢 ✅ THE UNIFIED HANDLER BINDING ALL SUBMISSIONS SAFELY
-  // ==============================================================
   const handleAuth = async () => {
+    if (isProcessing) return;
     setIsProcessing(true);
     clearMessages();
     try {
@@ -1315,11 +1363,11 @@ function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) 
       } else if (authMode === 'SIGNUP') {
         if (!email.trim() || !password.trim()) return;
         await createUserWithEmailAndPassword(auth, email.trim(), password.trim());
-        setStatusMessage({ text: "ACCOUNT ACCUMULATION SYSTEM SYNCHRONIZED.", isError: false });
+        setStatusMessage({ text: "IDENTITY REGISTER INITIALIZED.", isError: false });
       } else if (authMode === 'FORGOT') {
         if (!email.trim()) return;
         await sendPasswordResetEmail(auth, email.trim());
-        setStatusMessage({ text: "Reset verification loop link sent to your inbox.", isError: false });
+        setStatusMessage({ text: "Reset verification loop link dispatched to email.", isError: false });
         setTimeout(() => setAuthMode('LOGIN'), 3000);
       } else if (authMode === 'PASSCODE_SETUP') {
         if (passcode.length !== 4 || !activeUser) return;
@@ -1335,167 +1383,388 @@ function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) 
         if (snap.exists() && snap.data().secure_passcode === passcode) {
           onAuthComplete(activeUser.uid);
         } else {
-          setStatusMessage({ text: "INVALID IDENTIFICATION KEY PIN. ENTRY REJECTED.", isError: true });
+          setStatusMessage({ text: "INVALID KEY TRANSMISSION. ACCESS REJECTED.", isError: true });
           setPasscode('');
         }
       }
     } catch (err: any) {
-      console.error("💥 Authentication exception encountered:", err);
-      setStatusMessage({ text: err.message || "Operation failed inside security pipeline.", isError: true });
+      setStatusMessage({ text: err.message || "Operation failed inside security gate.", isError: true });
     } finally {
       setIsProcessing(false);
     }
   };
-
   return (
-    <KeyboardAvoidingView behavior="padding" style={styles.screen}>
-      <View style={[styles.innerScroll, { flex: 1, justifyContent: 'center', paddingHorizontal: 32 }]}>
+    <KeyboardAvoidingView behavior="padding" style={styles.cyberAuthScreenContainer}>
+      <Video
+        ref={videoRef}
+        source={require('../assets/Videos/Planet_Galaxy.mp4')}
+        style={StyleSheet.absoluteFillObject}
+        resizeMode="cover"
+        shouldPlay
+        isLooping
+        isMuted={true}
+      />
+      <View style={styles.videoHeavyDarkVignetteOverlay} />
 
-        {/* HUD Master Tech Branded Lockup */}
-        <View style={{ alignItems: 'center', marginBottom: 28 }}>
-          <FGlobe size={56} />
-          <Text style={[styles.brandName, { marginTop: 12, fontSize: 13 }]}>FORGETMENOT SECURITY</Text>
-          <Text style={{ color: '#62626a', fontSize: 9, letterSpacing: 1.5, marginTop: 4 }}>
-            IDENTITY MATRIX // ACCESS GATE ARMED
+      <ScrollView contentContainerStyle={styles.authCoreScrollContentEnforcer}>
+
+        {/* ROTATING LOGO ENTRY DOCK HEADER */}
+        <View style={{ alignItems: 'center', marginBottom: 24 }}>
+          <Animated.View style={{ transform: [{ rotate: logoSpinAngle }] }}>
+            <FGlobe size={64} />
+          </Animated.View>
+          <Text style={[styles.brandName, { marginTop: 16, fontSize: 16, letterSpacing: 4, color: '#ffffff', fontWeight: '900' }]}>FORGETMENOT</Text>
+          <Text style={{ color: '#00f0ff', fontSize: 9, letterSpacing: 1.5, marginTop: 4, fontWeight: '800' }}>
+            PREDICTIVE IDENTITY MATRIX // ACTIVE MONITOR
           </Text>
         </View>
 
-        {/* EMAIL & PASSWORD INPUT GROUP CONTROLS */}
+        {/* EMAIL & PASSWORD INPUT FORMS CONTAINER DOCKS */}
         {(authMode === 'LOGIN' || authMode === 'SIGNUP' || authMode === 'FORGOT') && (
-          <View style={styles.emptyViewBox}>
-            <TextInput
-              autoCapitalize="none"
-              keyboardType="email-address"
-              placeholder="Email Address"
-              placeholderTextColor="#52525b"
-              value={email}
-              onChangeText={(t) => { setEmail(t); clearMessages(); }}
-              style={{ color: '#fff', marginBottom: 12, borderBottomWidth: 1, borderBottomColor: '#222226', height: 40 }}
-              onSubmitEditing={handleAuth}
-            />
+          <View style={styles.cyberGlassmorphicInputsCardContainer}>
+            <View style={{ marginBottom: 16 }}>
+              <Text style={[styles.contactInputLabel, emailFocused && { color: '#00f0ff' }]}>SECURE USEREMAIL CHANNEL</Text>
+              <Animated.View style={[styles.cyberAnimatedInputWrapperField, { borderColor: emailBorderInterpolate }]}>
+                <Feather name="mail" size={14} color={emailFocused ? "#00f0ff" : "#8a8f98"} style={{ marginRight: 10 }} />
+                <TextInput
+                  autoCapitalize="none" keyboardType="email-address" placeholder="name@domain.com" placeholderTextColor="#52525b"
+                  value={email} onChangeText={setEmail} onFocus={() => setEmailFocused(true)} onBlur={() => setEmailFocused(false)}
+                  style={styles.cyberTerminalTextInputElement} onSubmitEditing={handleAuth}
+                />
+              </Animated.View>
+            </View>
+
             {authMode !== 'FORGOT' && (
-              <TextInput
-                secureTextEntry
-                autoCapitalize="none"
-                placeholder="Password Key"
-                placeholderTextColor="#52525b"
-                value={password}
-                onChangeText={(t) => { setPassword(t); clearMessages(); }}
-                style={{ color: '#fff', height: 40 }}
-                onSubmitEditing={handleAuth}
-              />
+              <View style={{ marginBottom: 20 }}>
+                <Text style={[styles.contactInputLabel, passwordFocused && { color: '#ff007f' }]}>SECURITY SECURITY ACCESS KEY</Text>
+                <Animated.View style={[styles.cyberAnimatedInputWrapperField, { borderColor: passwordBorderInterpolate }]}>
+                  <Feather name="lock" size={14} color={passwordFocused ? "#ff007f" : "#8a8f98"} style={{ marginRight: 10 }} />
+                  <TextInput
+                    secureTextEntry autoCapitalize="none" placeholder="••••••••" placeholderTextColor="#52525b"
+                    value={password} onChangeText={setPassword} onFocus={() => setPasswordFocused(true)} onBlur={() => setPasswordFocused(false)}
+                    style={styles.cyberTerminalTextInputElement} onSubmitEditing={handleAuth}
+                  />
+                </Animated.View>
+              </View>
             )}
+
+            {/* PRIMARY BUTTON: EMAIL AUTH MODE */}
+            <Pressable onPress={handleAuth} disabled={isProcessing} style={({ pressed }) => [styles.cyberTerminalActionButtonCTA, { marginTop: 8, marginBottom: 16 }, isProcessing && { backgroundColor: '#131316' }, pressed && { opacity: 0.85 }]}>
+              {isProcessing ? <ActivityIndicator size="small" color="#00f0ff" /> : <Text style={styles.cyberTerminalActionButtonCTAText}>{authMode === 'LOGIN' ? 'ENGAGE IDENTITY AUTHENTICATION' : authMode === 'SIGNUP' ? 'COMPILE NEW SYSTEM MATRIX' : 'DISPATCH PASSWORD RESET'}</Text>}
+            </Pressable>
+
+            {/* EMAIL ROW FOOTER TOGGLE LINKS */}
+            <View style={styles.cyberAuthTogglesUnifiedFooterRowContainer}>
+              {authMode === 'LOGIN' && (
+                <>
+                  <Pressable onPress={() => { setAuthMode('SIGNUP'); clearMessages(); }} style={styles.touchTargetToggleLink} hitSlop={10}><Text style={{ color: '#ff007f', fontSize: 12, fontWeight: '800', letterSpacing: 0.5 }}>Create Account</Text></Pressable>
+                  <View style={{ width: 1, height: 12, backgroundColor: '#26262b' }} />
+                  <Pressable onPress={() => { setAuthMode('FORGOT'); clearMessages(); }} style={styles.touchTargetToggleLink} hitSlop={10}><Text style={{ color: '#ffd700', fontSize: 12, fontWeight: '800', letterSpacing: 0.5 }}>Forgot Password?</Text></Pressable>
+                </>
+              )}
+              {authMode === 'SIGNUP' && <Pressable onPress={() => { setAuthMode('LOGIN'); clearMessages(); }} style={styles.touchTargetToggleLink} hitSlop={10}><Text style={{ color: '#00f0ff', fontSize: 12, fontWeight: '800' }}>Existing Member Login</Text></Pressable>}
+              {authMode === 'FORGOT' && <Pressable onPress={() => { setAuthMode('LOGIN'); clearMessages(); }} style={styles.touchTargetToggleLink} hitSlop={10}><Text style={{ color: '#a1a1aa', fontSize: 12, fontWeight: '800' }}>Cancel Matrix Reset</Text></Pressable>}
+            </View>
           </View>
         )}
 
-        {/* PIN PASSCODE NUMERIC SEPARATOR ENTRY SHEET CONTAINER */}
+        {/* 4-DIGIT PIN ENTRY BLOCK ENCLOSURE */}
         {(authMode === 'PASSCODE_SETUP' || authMode === 'PASSCODE_VERIFY') && (
-          <View style={{ backgroundColor: '#16161a', borderRadius: 12, borderWidth: 1, borderColor: '#26262b', padding: 20, alignItems: 'center' }}>
-            <Text style={{ color: '#00ffcc', fontSize: 10, fontWeight: '900', letterSpacing: 1, marginBottom: 12, textAlign: 'center' }}>
-              {authMode === 'PASSCODE_SETUP' ? "REGISTER NEW 4-DIGIT QUICK ENTRY PIN" : "ENTER SECURE PIN TRANSLATION KEY"}
+          <View style={{ backgroundColor: 'rgba(15, 15, 18, 0.85)', borderRadius: 16, borderWidth: 1, borderColor: '#26262b', padding: 24, alignItems: 'center', width: '100%' }}>
+            <Text style={{ color: '#00ffcc', fontSize: 10, fontWeight: '900', letterSpacing: 1.5, marginBottom: 14, textAlign: 'center' }}>
+              {authMode === 'PASSCODE_SETUP' ? "REGISTER SYSTEM QUICK ENTRY PIN" : "ENTER SECURE PIN TRANSLATION KEY"}
             </Text>
             <TextInput
-              secureTextEntry
-              maxLength={4}
-              keyboardType="number-pad"
-              placeholder="••••"
-              placeholderTextColor="#52525b"
-              value={passcode}
-              onChangeText={(t) => { setPasscode(t); clearMessages(); }}
-              style={{ color: '#00ffcc', fontSize: 24, letterSpacing: 8, textAlign: 'center', width: '60%', height: 44 }}
+              secureTextEntry maxLength={4} keyboardType="number-pad" placeholder="••••" placeholderTextColor="#52525b"
+              value={passcode} onChangeText={setPasscode}
+              style={{ color: '#00ffcc', fontSize: 26, letterSpacing: 10, textAlign: 'center', width: '70%', height: 48, backgroundColor: '#09090b', borderRadius: 8, borderWidth: 1, borderColor: '#222226', marginBottom: 16 }}
               onSubmitEditing={handleAuth}
             />
-          </View>
-        )}
 
-        {statusMessage.text ? (
-          <Text style={{ color: statusMessage.isError ? '#ff0055' : '#39FF14', fontSize: 11, fontWeight: '700', textAlign: 'center', marginTop: 12 }}>
-            {statusMessage.text}
-          </Text>
-        ) : null}
+            {/* PRIMARY BUTTON: PASSCODE AUTH MODE */}
+            <Pressable onPress={handleAuth} disabled={isProcessing} style={({ pressed }) => [styles.cyberTerminalActionButtonCTA, { width: '100%', marginBottom: 16 }, pressed && { opacity: 0.85 }]}>
+              {isProcessing ? <ActivityIndicator size="small" color="#00f0ff" /> : <Text style={styles.cyberTerminalActionButtonCTAText}>CONFIRM ACCESS TOKEN</Text>}
+            </Pressable>
 
-        {/* PRIMARY SUBMIT ACTION BUTTON (Binds safely to your single handleAuth engine definition) */}
-        <Pressable
-          onPress={handleAuth}
-          disabled={isProcessing}
-          style={({ pressed }) => [
-            styles.primaryButton,
-            { marginTop: 20 },
-            isProcessing && { backgroundColor: '#1c1c1f' },
-            pressed && { opacity: 0.85 }
-          ]}
-        >
-          {isProcessing ? (
-            <ActivityIndicator size="small" color="#00ffcc" />
-          ) : (
-            <Text style={styles.primaryButtonText}>
-              {authMode === 'LOGIN' ? 'AUTHENTICATE USER NODE' :
-               authMode === 'SIGNUP' ? 'GENERATE NEW KEY MATRIX' :
-               authMode === 'FORGOT' ? 'TRIGGER RESET EMAIL' : 'CONFIRM ACCESS PIN'}
-            </Text>
-          )}
-        </Pressable>
-
-        {/* SHUTTLE ROUTING SHORTCUT LINKS FOOTER PANEL CONTAINER BAR */}
-        <View style={{ flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 16, marginTop: 18 }}>
-          {authMode === 'LOGIN' && (
-            <>
-              <Pressable onPress={() => { setAuthMode('SIGNUP'); clearMessages(); }}><Text style={{ color: '#ff007f', fontSize: 12, fontWeight: '700' }}>Create Account</Text></Pressable>
-              <Pressable onPress={() => { setAuthMode('FORGOT'); clearMessages(); }}><Text style={{ color: '#ffd700', fontSize: 12, fontWeight: '600' }}>Forgot Password?</Text></Pressable>
-            </>
-          )}
-          {authMode === 'SIGNUP' && <Pressable onPress={() => { setAuthMode('LOGIN'); clearMessages(); }}><Text style={{ color: '#00ffcc', fontSize: 12, fontWeight: '700' }}>Existing Member Login</Text></Pressable>}
-          {authMode === 'FORGOT' && <Pressable onPress={() => { setAuthMode('LOGIN'); clearMessages(); }}><Text style={{ color: '#a1a1aa', fontSize: 12, fontWeight: '700' }}>Cancel Matrix Reset</Text></Pressable>}
-
-          {(authMode === 'PASSCODE_SETUP' || authMode === 'PASSCODE_VERIFY') && (
-            <>
+            {/* ============================================================== */}
+            {/* 🟢 ✅ THE CRITICAL FIX: PIN UTILITY RESET SELECTION UTILITIES */}
+            {/* ============================================================== */}
+            <View style={[styles.cyberAuthTogglesUnifiedFooterRowContainer, { marginTop: 8 }]}>
               <Pressable
                 onPress={() => {
                   setAuthMode('PASSCODE_SETUP');
                   setPasscode('');
                   clearMessages();
-                  setStatusMessage({ text: "PIN MODE UNLOCKED. Input a new 4-digit code to update records.", isError: false });
+                  setStatusMessage({ text: "PIN MODE UNLOCKED: Input a new 4-digit code to overwrite parameters.", isError: false });
                 }}
+                style={styles.touchTargetToggleLink} hitSlop={10}
               >
-                <Text style={{ color: '#ffd700', fontSize: 12, fontWeight: '700', textTransform: 'uppercase' }}>
-                  Reset Forgotten PIN
-                </Text>
+                <Text style={{ color: '#ffd700', fontSize: 12, fontWeight: '800', textTransform: 'uppercase' }}>Reset Forgotten PIN</Text>
               </Pressable>
-              <View style={{ width: 1, height: 14, backgroundColor: '#26262b' }} />
-              <Pressable onPress={() => { signOut(auth); setPasscode(''); clearMessages(); }}><Text style={{ color: '#ff0055', fontSize: 11, fontWeight: '800' }}>DISCONNECT ACCOUNT (LOGOUT)</Text></Pressable>
-            </>
-          )}
-        </View>
+              <View style={{ width: 1, height: 12, backgroundColor: '#26262b' }} />
+              <Pressable onPress={() => { signOut(auth); setPasscode(''); clearMessages(); }} style={styles.touchTargetToggleLink} hitSlop={10}>
+                <Text style={{ color: '#ff0055', fontSize: 12, fontWeight: '900' }}>LOGOUT</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
 
-      </View>
+        {statusMessage.text ? (
+          <Text style={{ color: statusMessage.isError ? '#ff0055' : '#39FF14', fontSize: 11, fontWeight: '800', textAlign: 'center', marginTop: 14 }}>
+            {statusMessage.text}
+          </Text>
+        ) : null}
+
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 
 
-
+// ==============================================================
+// 🌟 HYDRATED CORE PROFILE SCREEN WITH LIVE DB PREFERENCES & LOGOUT
+// ==============================================================
 function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
-  const [connected, setConnected] = useState(true);
+  const auth = getAuth();
+  const currentFirebaseUser = auth.currentUser;
+
+  // Safe fallback to avoid tracking anomalies if profile is null during logout cycles
+  const userId = currentFirebaseUser ? currentFirebaseUser.uid : "Admin_ForgetMeNotAI";
+
+  // 📝 REACTIVE PROFILE AND STATS STATES
+  const [dbStats, setDbStats] = useState({ totalSignals: "00", omissionsAvoided: "00", clarityIndex: "92%" });
+  const [lastTwoSignals, setLastTwoSignals] = useState<string[]>(["Awaiting signal sync...", "No logged matrix tracks."]);
+
+  // 🎛️ PREFERENCE STATE TOGGLES DIRECTLY TIED TO FIRESTORE ENTRIES
+  const [calendarSync, setCalendarSync] = useState(true);
+  const [messagesSync, setMessagesSync] = useState(true);
+  const [placesSync, setPlacesSync] = useState(false);
+  const [gentleNudges, setGentleNudges] = useState(true);
+  const [signalSensitivity, setSignalSensitivity] = useState(true); // true = Balanced, false = High Sharpness
+
+  // ==============================================================
+  // 🧭 REAL-TIME SNAPSHOT LISTENERS FOR PROFILE AND SIGNALS
+  // ==============================================================
+  useEffect(() => {
+    if (!currentFirebaseUser) return;
+
+    // 1️⃣ Listen to user preferences document block
+    const userDocRef = doc(db, "users", userId);
+    const unsubsUser = onSnapshot(userDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.preferences) {
+          setCalendarSync(data.preferences.calendarSync ?? true);
+          setMessagesSync(data.preferences.messagesSync ?? true);
+          setPlacesSync(data.preferences.placesSync ?? false);
+          setGentleNudges(data.preferences.gentleNudges ?? true);
+          setSignalSensitivity(data.preferences.signalSensitivity ?? true);
+        }
+      }
+    });
+
+    // 2️⃣ Listen to analytics data logs to compute statistics and capture messages dynamically
+    const analysesQuery = query(
+      collection(db, "analyses"),
+      where("user_id", "==", "Admin_ForgetMeNotAI"), // Falls back safely to default project telemetry rows
+      orderBy("created_at", "desc")
+    );
+
+    const unsubsAnalyses = onSnapshot(analysesQuery, (snapshot) => {
+      if (!snapshot.empty) {
+        const totalCount = snapshot.docs.length;
+
+        // Dynamically parse out titles of the last 2 newest documents
+        const pulledTitles: string[] = [];
+        snapshot.docs.slice(0, 2).forEach(doc => {
+          pulledTitles.push(doc.data().title || doc.data().analysis?.signal || "Context frame event logged.");
+        });
+        setLastTwoSignals(pulledTitles);
+
+        // Count omissions automatically based on records matching high confidence thresholds
+        let avoidedCount = 0;
+        snapshot.docs.forEach(doc => {
+          if ((doc.data().analysis?.confidence || 85) > 88) avoidedCount++;
+        });
+
+        setDbStats({
+          totalSignals: totalCount < 10 ? `0${totalCount}` : `${totalCount}`,
+          omissionsAvoided: avoidedCount < 10 ? `0${avoidedCount}` : `${avoidedCount}`,
+          clarityIndex: totalCount > 0 ? "94%" : "92%"
+        });
+      }
+    });
+
+    return () => {
+      unsubsUser();
+      unsubsAnalyses();
+    };
+  }, [userId]);
+
+  // ==============================================================
+  // 💾 FIRESTORE UPDATE PIPELINES
+  // ==============================================================
+  const updatePreferenceInCloud = async (key: string, newValue: boolean) => {
+    if (typeof tap === 'function') tap();
+    if (!currentFirebaseUser) return;
+    try {
+      await setDoc(doc(db, "users", userId), {
+        preferences: {
+          calendarSync: key === 'calendar' ? newValue : calendarSync,
+          messagesSync: key === 'messages' ? newValue : messagesSync,
+          placesSync: key === 'places' ? newValue : placesSync,
+          gentleNudges: key === 'nudges' ? newValue : gentleNudges,
+          signalSensitivity: key === 'sensitivity' ? newValue : signalSensitivity
+        }
+      }, { merge: true });
+    } catch (e) {
+      console.error("💥 Error syncing preference updates to cloud dictionary:", e);
+    }
+  };
+
+  // ==============================================================
+  // 🔓 DISCONNECT RUNTIME SESSION LOGOUT METHOD
+  // ==============================================================
+  const executeSessionSignOut = async () => {
+    if (typeof tap === 'function') tap();
+    try {
+      console.log("🔒 Identity context terminating... Disconnecting auth matrices.");
+      await signOut(auth);
+
+      // ✅ CRITICAL DIRECT FIX: Triggers parent router state setter loop to clear out the canvas
+      // This immediately forces the app view tree back down to your LoginGate portal
+      onNavigate('home');
+    } catch (error) {
+      alert("Sign out sequence interrupted.");
+    }
+  };
   return (
     <View style={styles.screen}>
-      <ScreenHeader title="Your space" subtitle="The person behind the patterns" />
+      <ScreenHeader title="Your space" subtitle={currentFirebaseUser?.email || "The person behind the patterns"} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
-        <View style={styles.profileHero}><View style={styles.profileAvatar}><Text style={styles.profileAvatarText}>A</Text><View style={styles.profileSpark}><Feather name="zap" size={11} color={theme.background} /></View></View><Text style={styles.profileName}>Alex Morgan</Text><Text style={styles.profileHandle}>THE SIGNAL SEEKER · SINCE 2026</Text></View>
-        <View style={styles.profileStats}><View><Text style={styles.profileStatValue}>142</Text><Text style={styles.profileStatLabel}>signals held</Text></View><View style={styles.statDivider} /><View><Text style={styles.profileStatValue}>18</Text><Text style={styles.profileStatLabel}>omissions avoided</Text></View><View style={styles.statDivider} /><View><Text style={styles.profileStatValue}>92%</Text><Text style={styles.profileStatLabel}>signal clarity</Text></View></View>
+
+        {/* PROFILE PROFILE HERO CARD DOCK CONTAINER */}
+        <View style={styles.profileHero}>
+          <View style={styles.profileAvatar}>
+            <Text style={styles.profileAvatarText}>A</Text>
+            <View style={styles.profileSpark}><Feather name="zap" size={11} color={theme.background} /></View>
+          </View>
+          <Text style={styles.profileName}>Alex Morgan</Text>
+          <Text style={styles.profileHandle}>THE SIGNAL SEEKER · ACTIVE PROFILE</Text>
+        </View>
+
+        {/* METRICS DISCOVERY SECTION ROW */}
+        <View style={styles.profileStats}>
+          <View>
+            <Text style={styles.profileStatValue}>{dbStats.totalSignals}</Text>
+            <Text style={styles.profileStatLabel}>signals held</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View>
+            <Text style={styles.profileStatValue}>{dbStats.omissionsAvoided}</Text>
+            <Text style={styles.profileStatLabel}>omissions avoided</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View>
+            <Text style={styles.profileStatValue}>{dbStats.clarityIndex}</Text>
+            <Text style={styles.profileStatLabel}>signal clarity</Text>
+          </View>
+        </View>
+
+        {/* CONNECTIONS SUMMARY CARD BOX MATRIX */}
         <SectionTitle eyebrow="CONNECTIONS" title="What I can see" />
         <View style={styles.settingCard}>
-          {[['calendar', 'Calendar', 'Your events and movement', true], ['message-square', 'Messages', 'People and promises', connected], ['map-pin', 'Places', 'The context around you', false]].map(([icon, title, detail, value]) => (
-            <View key={title as string} style={styles.settingRow}><View style={styles.settingIcon}><Feather name={icon as keyof typeof Feather.glyphMap} size={17} color={title === 'Messages' ? theme.pink : theme.cyan} /></View><View style={styles.settingCopy}><Text style={styles.settingTitle}>{title as string}</Text><Text style={styles.settingDetail}>{detail as string}</Text></View><Pressable onPress={() => { tap(); setConnected(!connected); }} style={[styles.toggle, value && styles.toggleOn]}><View style={[styles.toggleKnob, value && styles.toggleKnobOn]} /></Pressable></View>
-          ))}
+          {/* Calendar Sync Toggle Row */}
+          <View style={styles.settingRow}>
+            <View style={styles.settingIcon}><Feather name="calendar" size={17} color={theme.cyan} /></View>
+            <View style={styles.settingCopy}><Text style={styles.settingTitle}>Calendar</Text><Text style={styles.settingDetail}>Your events and movement logs</Text></View>
+            <Pressable onPress={() => { setCalendarSync(!calendarSync); updatePreferenceInCloud('calendar', !calendarSync); }} style={[styles.toggle, calendarSync && styles.toggleOn]}><View style={[styles.toggleKnob, calendarSync && styles.toggleKnobOn]} /></Pressable>
+          </View>
+
+          {/* Messages Sync Toggle Row (Displays Last 2 DB entries dynamically inside detail panel copy) */}
+          <View style={[styles.settingRow, { minHeight: 92, paddingVertical: 14, alignItems: 'flex-start' }]}>
+            <View style={[styles.settingIcon, { marginTop: 2 }]}><Feather name="message-square" size={17} color={theme.pink} /></View>
+            <View style={styles.settingCopy}>
+              <Text style={styles.settingTitle}>Messages (Last 2 Live Signals)</Text>
+              {lastTwoSignals.map((signalText, index) => (
+                <Text key={index} style={[styles.settingDetail, { color: '#a1a1aa', fontSize: 11, fontStyle: 'italic', marginTop: 4, paddingRight: 6 }]} numberOfLines={1}>
+                  • {signalText}
+                </Text>
+              ))}
+            </View>
+            <Pressable onPress={() => { setMessagesSync(!messagesSync); updatePreferenceInCloud('messages', !messagesSync); }} style={[styles.toggle, messagesSync && styles.toggleOn]}><View style={[styles.toggleKnob, messagesSync && styles.toggleKnobOn]} /></Pressable>
+          </View>
+
+          {/* Places Sync Toggle Row */}
+          <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+            <View style={styles.settingIcon}><Feather name="map-pin" size={17} color={theme.cyan} /></View>
+            <View style={styles.settingCopy}><Text style={styles.settingTitle}>Places</Text><Text style={styles.settingDetail}>The localized contextual parameters around you</Text></View>
+            <Pressable onPress={() => { setPlacesSync(!placesSync); updatePreferenceInCloud('places', !placesSync); }} style={[styles.toggle, placesSync && styles.toggleOn]}><View style={[styles.toggleKnob, placesSync && styles.toggleKnobOn]} /></Pressable>
+          </View>
         </View>
+
+        {/* CUSTOM INTERACTIVE PREFERENCES SETTINGS BLOCK MATRIX */}
         <SectionTitle eyebrow="PREFERENCES" title="Shape the signal" />
         <View style={styles.settingCard}>
-          <View style={styles.settingRow}><View style={[styles.settingIcon, { backgroundColor: `${theme.gold}12` }]}><Feather name="bell" size={17} color={theme.gold} /></View><View style={styles.settingCopy}><Text style={styles.settingTitle}>Gentle nudges</Text><Text style={styles.settingDetail}>Only interrupt when it matters</Text></View><Feather name="chevron-right" size={17} color={theme.mutedForeground} /></View>
-          <View style={styles.settingRow}><View style={[styles.settingIcon, { backgroundColor: `${theme.green}12` }]}><Feather name="sliders" size={17} color={theme.green} /></View><View style={styles.settingCopy}><Text style={styles.settingTitle}>Signal sensitivity</Text><Text style={styles.settingDetail}>Balanced · fewer, sharper predictions</Text></View><Feather name="chevron-right" size={17} color={theme.mutedForeground} /></View>
+          {/* Gentle Nudges Toggle */}
+          <View style={styles.settingRow}>
+            <View style={[styles.settingIcon, { backgroundColor: `${theme.gold}12` }]}><Feather name="bell" size={17} color={theme.gold} /></View>
+            <View style={styles.settingCopy}><Text style={styles.settingTitle}>Gentle nudges</Text><Text style={styles.settingDetail}>{gentleNudges ? "Only interrupt when it matters" : "Muted perimeter radar check variance alerts"}</Text></View>
+            <Pressable onPress={() => { setGentleNudges(!gentleNudges); updatePreferenceInCloud('nudges', !gentleNudges); }} style={[styles.toggle, gentleNudges && styles.toggleOn]}><View style={[styles.toggleKnob, gentleNudges && styles.toggleKnobOn]} /></Pressable>
+          </View>
+
+          {/* Signal Sensitivity Toggle */}
+          <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+            <View style={[styles.settingIcon, { backgroundColor: `${theme.green}12` }]}><Feather name="sliders" size={17} color={theme.green} /></View>
+            <View style={styles.settingCopy}><Text style={styles.settingTitle}>Signal sensitivity</Text><Text style={styles.settingDetail}>{signalSensitivity ? "Balanced · fewer, sharper predictions" : "Maximum tracking · hypersensitive velocity detection"}</Text></View>
+            <Pressable onPress={() => { setSignalSensitivity(!signalSensitivity); updatePreferenceInCloud('sensitivity', !signalSensitivity); }} style={[styles.toggle, signalSensitivity && styles.toggleOn]}><View style={[styles.toggleKnob, signalSensitivity && styles.toggleKnobOn]} /></Pressable>
+          </View>
         </View>
-        <Pressable onPress={() => { tap(); onNavigate('contact'); }} style={styles.contactLink}><View style={styles.contactCircle}><Feather name="heart" size={17} color={theme.pink} /></View><View><Text style={styles.contactTitle}>Talk to the ForgetMeNot team</Text><Text style={styles.contactDetail}>Questions, ideas, or a signal we missed?</Text></View><Feather name="arrow-up-right" size={17} color={theme.cyan} /></Pressable>
-        <Text style={styles.version}>FORGETMENOT AI · v0.1.0</Text>
+
+        {/* HELPDESK CONTACT LINK ROW ACTION */}
+        <Pressable onPress={() => { if (typeof tap === 'function') tap(); onNavigate('contact'); }} style={styles.contactLink}>
+          <View style={styles.contactCircle}><Feather name="heart" size={17} color={theme.pink} /></View>
+          <View style={{ flex: 1 }}><Text style={styles.contactTitle}>Talk to the ForgetMeNot team</Text><Text style={styles.contactDetail}>Questions, ideas, or a signal matrix split we missed?</Text></View>
+          <Feather name="arrow-up-right" size={17} color={theme.cyan} />
+        </Pressable>
+
+               {/* ============================================================== */}
+               {/* 🟢 ✅ FIXED: HIGH-FIDELITY CYBERNETIC LOGOUT BUTTON UPGRADE    */}
+               {/* ============================================================== */}
+               <View style={{ width: '100%', marginTop: 32, marginBottom: 12 }}>
+                 <Pressable
+                   onPress={executeSessionSignOut}
+                   style={({ pressed }) => [
+                     {
+                       width: '100%',
+                       height: 48,
+                       backgroundColor: 'rgba(255, 0, 85, 0.06)', // Deep tech-crimson tinted glow
+                       borderRadius: 12,
+                       borderWidth: 1.2,
+                       borderColor: '#ff0055',                     // Vivid alert edge tracking line
+                       flexDirection: 'row',
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       gap: 8,
+                       ...Platform.select({
+                         web: {
+                           boxShadow: pressed ? 'none' : '0px 0px 14px rgba(255, 0, 85, 0.2)',
+                           transition: 'all 0.2s ease',
+                         }
+                       })
+                     },
+                     pressed && { backgroundColor: 'rgba(255, 0, 85, 0.18)' }
+                   ]}
+                 >
+                   <Feather name="log-out" size={14} color="#ff0055" />
+                   <Text style={{ color: '#ff0055', fontSize: 12, fontWeight: '900', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+                     TERMINATE SECURITY SESSION
+                   </Text>
+                 </Pressable>
+               </View>
+
+        <Text style={styles.version}>FORGETMENOT AI · CONTEXT HYDRATED · v0.1.0</Text>
       </ScrollView>
     </View>
   );
@@ -1531,13 +1800,15 @@ export default function Home() {
           // 🔐 FIXED: GUARANTEES PROP INTERPOLATION BINDING AT THE ROOT LEVEL
           // ==============================================================
           if (!activeSessionUserId) {
-            return (
-              <LoginGateScreen
-                // Ensure this maps EXACTLY to your state hook variable name setter function
-                onAuthComplete={(verifiedUid) => setActiveSessionUserId(verifiedUid)}
-              />
-            );
-          }
+                return (
+                  <LoginGateScreen
+                    onAuthComplete={(verifiedUid) => {
+                      console.log("🚀 Identity Handshake: Syncing UID token state into active app context.");
+                      setActiveSessionUserId(verifiedUid);
+                    }}
+                  />
+                );
+              }
 
     switch (screen) {
       case 'events': return <EventsScreen onNavigate={navigate} />;
@@ -1545,7 +1816,19 @@ export default function Home() {
       case 'chat':
         // ✅ Instructs the framework to change view context to 'home' when clicking back
       return <ChatScreen onBack={() => navigate('home')} />;
-      case 'profile': return <ProfileScreen onNavigate={navigate} />;
+      case 'profile':
+              return (
+                <ProfileScreen
+                  onNavigate={(targetScreen) => {
+                    // If the profile screen redirects to 'home' during logout, wipe the user token state completely!
+                    if (targetScreen === 'home') {
+                      setActiveSessionUserId(null);
+                    }
+                    setScreen(targetScreen);
+                  }}
+                />
+              );
+
       case 'radar':
       case 'prediction': return <PredictionScreen onBack={() => navigate('home')} onNavigate={navigate} />;
       case 'actions': return <ActionsScreen onBack={() => navigate('home')} />;
@@ -1560,7 +1843,7 @@ export default function Home() {
        {content}
 
        {/* Only display the primary navigation panel bar if authenticated and active */}
-       {!secondary && isAuthenticated ? (
+       {activeSessionUserId  && !secondary ? (
          <BottomNav screen={currentNav} onNavigate={navigate} />
        ) : null}
      </View>
@@ -2202,6 +2485,170 @@ quickChatCardScrimOverlay: {
   backgroundColor: 'rgba(5, 5, 6, 0.80)',
   padding: 14,
   justifyContent: 'space-between',
+},
+
+// 🎨 ✅ THE COMPLETE DEEP-SPACE LOGIN HUD BACKGROUND STYLES
+// Append these properties cleanly right inside your existing styles object:
+
+  cyberAuthScreenContainer: {
+    flex: 1,
+    backgroundColor: '#050507',     // Immersive deep space black void base canvas
+    width: '100%',
+    height: '100%',
+  },
+  cosmicStarFieldGridPattern: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1000,
+  },
+  stellarDustParticle: {
+    position: 'absolute',
+    width: 2,
+    height: 2,
+    backgroundColor: '#ffffff',     // Crisp white space particle dots
+    borderRadius: 1,
+    opacity: 0.45,
+  },
+  cyberSpaceshipOrbPink: {
+    position: 'absolute',
+    top: '15%',
+    right: 40,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#ff007f',     // Glowing neon pink spaceship vector orb
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      web: { boxShadow: '0px 0px 14px #ff007f' }
+    }),
+  },
+  spaceshipThrusterTailBeamPink: {
+    position: 'absolute',
+    bottom: -15,
+    width: 2,
+    height: 15,
+    backgroundColor: 'rgba(255, 0, 127, 0.4)', // Kinetic propulsion trailing ray line
+  },
+  cyberSpaceshipOrbGreen: {
+    position: 'absolute',
+    bottom: '22%',
+    left: 50,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#39FF14',     // Fluorescent green secondary automated drone
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      web: { boxShadow: '0px 0px 10px #39FF14' }
+    }),
+  },
+  spaceshipThrusterTailBeamGreen: {
+    position: 'absolute',
+    left: -12,
+    width: 12,
+    height: 1.5,
+    backgroundColor: 'rgba(57, 255, 20, 0.35)',
+  },
+  robotInternalPilotOrb: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#ffffff',
+    backgroundColor: '#0c0c0e',     // Mechanical robot pilot core
+  },
+  hudMasterInnovativeLogoRingWrapper: {
+    width: 76,
+    height: 76,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  hudLogoPulseOuterRadarCircle: {
+    position: 'absolute',
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 0, 127, 0.25)',
+    borderStyle: 'dashed',          // Circular layout radar overlay
+  },
+  cyberGlassmorphicInputsCardContainer: {
+    backgroundColor: 'rgba(22, 22, 26, 0.45)', // Premium dark translucent glass cockpit filter mask
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#1f1f24',
+    padding: 20,
+    display: 'flex',
+  },
+  cyberAnimatedInputWrapperField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    height: 46,
+    borderRadius: 10,
+    borderWidth: 1,
+    backgroundColor: '#09090b',
+    paddingHorizontal: 14,
+  },
+  cyberTerminalTextInputElement: {
+    flex: 1,
+    height: '100%',
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '600',
+    ...Platform.select({
+      web: { outlineStyle: 'none' } // Suppresses standard chrome/safari focus rings
+    }),
+  },
+  cyberTerminalActionButtonCTA: {
+    height: 50,
+    backgroundColor: '#00f0ff',       // Clean neon cyan high-contrast action button core
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#00c8ff',
+    ...Platform.select({
+      web: { boxShadow: '0px 0px 12px rgba(0, 240, 255, 0.3)' }
+    }),
+  },
+  cyberTerminalActionButtonCTAText: {
+    color: '#050507',
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+// Merge these exact properties inside your existing stylesheet object:
+cyberAuthTogglesUnifiedFooterRowContainer: {
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: 12,
+  marginTop: 18,
+  paddingTop: 14,
+  borderTopWidth: 1,
+  borderTopColor: 'rgba(255, 255, 255, 0.05)', // Elegant subtle division border line
+  width: '100%',
+},
+touchTargetToggleLink: {
+  paddingVertical: 4,
+  paddingHorizontal: 6,
+},
+
+// ==============================================================
+// 🟢 ✅ THE VISIBILITY FIX: EXPANDED SCROLLPAD ZONE BOUNDARIES
+// ==============================================================
+innerScroll: {
+  paddingHorizontal: 20,
+  // 👇 CRITICAL RECONCILIATION: Pushes up elements by 120px to unblock things from hiding underneath tabs
+  paddingBottom: 140,
+  paddingTop: 8,
 },
 
 

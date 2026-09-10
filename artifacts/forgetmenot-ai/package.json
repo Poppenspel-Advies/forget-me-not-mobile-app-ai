@@ -58,6 +58,7 @@
   "dependencies": {
     "@react-native-firebase/app": "^26.3.3",
     "@react-native-firebase/firestore": "^26.3.3",
+    "expo-av": "~16.0.8",
     "firebase": "^12.18.0"
   }
 }
