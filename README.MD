@@ -124,6 +124,72 @@ To avoid web-rendering lag or stuttering frame drops during authentication loops
 
 ---
 
+---
+
+## 📨 EmailJS Background Integration & Custom Template Configuration
+
+ForgetMeNot AI utilizes a background REST API relay architecture via EmailJS to dispatch secure user feedback notes directly to your support inbox without prompting native device mailing wrappers or hitting paid cloud extension barriers.
+
+### 1. Environment Variable Configuration
+Ensure your root `.env` environment configuration file has your unique developer account API keys loaded into the dynamic context layer:
+```env
+# --- EMAILJS BACKGROUND REST RELAY CREDS ---
+EXPO_PUBLIC_EMAILJS_SERVICE_ID=your_emailjs_service_id_here
+EXPO_PUBLIC_EMAILJS_TEMPLATE_ID=your_emailjs_template_id_here
+EXPO_PUBLIC_EMAILJS_PUBLIC_KEY=your_emailjs_public_key_here
+```
+*Note: Restart your local development environment bundle with `pnpm exec expo start -c` after making modifications to force cache initialization rules.*
+
+### 2. Live REST Endpoint Binding Specifications
+Background requests safely target the official EmailJS global JSON endpoint protocol rather than base domains to bypass client-side web CORS preflight constraints:
+*   **Target URI Route API :** `https://emailjs.com`
+*   **HTTP Method Payload:** `POST`
+*   **Encapsulation Content-Type:** `application/json`
+
+### 3. EmailJS Dashboard Custom Template Setup
+To display your beautiful high-fidelity customer notification design inside your inbox grid, build a template titled exactly **"Contact Us"** inside your [EmailJS Console](https://emailjs.com), toggle the editor into **`Source Code` (`<>`) mode**, and paste this custom HTML markup block:
+
+```html
+<div style="font-family: system-ui, sans-serif, Arial; font-size: 12px; max-width: 600px; margin: 0 auto; color: #2c3e50;">
+  <div style="font-size: 14px; margin-bottom: 10px;">
+    A message by <strong>{{name}}</strong> has been received. Kindly respond at your earliest convenience.
+  </div>
+  
+  <div style="margin-top: 20px; padding: 20px 0; border-width: 1px 0; border-style: dashed; border-color: lightgrey;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="vertical-align: top; width: 60px;">
+          <div style="padding: 10px; background-color: #f0f8ff; border-radius: 8px; font-size: 28px; text-align: center; line-height: 1;" role="img" aria-label="user-avatar">
+            👤
+          </div>
+        </td>
+        <td style="vertical-align: top; padding-left: 15px;">
+          <div style="color: #2c3e50; font-size: 16px; margin-bottom: 2px;">
+            <strong>{{name}}</strong>
+          </div>
+          <div style="color: #95a5a6; font-size: 12px; margin-bottom: 12px;">
+            {{time}}
+          </div>
+          <div style="font-size: 15px; color: #34495e; line-height: 1.6; white-space: pre-wrap; background-color: #fafbfc; padding: 12px; border-radius: 6px; border: 1px solid #f0f1f2;">
+            {{message}}
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+```
+
+### 4. Reactive Parameters Data Injection Map
+The frontend payload automatically extracts verified user session context details and binds them directly onto your double-curly braces handles (`{{}}`) on execution:
+*   **`{{name}}`**: The exact secure sender email address the user logged into the system with (`currentFirebaseUser.email`).
+*   **`{{time}}`**: The localized, real-time native device timestamp log frame.
+*   **`{{message}}`**: The text note string captured inside the feedback input container.
+*   **`{{to_email}}`**: Statically set to deliver directly to `poppenspeladvies@gmail.com`.
+*   **`{{reply_to}}`**: Auto-populated to ensure clicking "Reply" inside your inbox targets the user's logged-in account immediately.
+
+---
+
 ## 📊 API & Database Response Schema (`/analyses` Collection)
 
 The system records real-time cognitive timeline telemetry models inside Firestore documents using this specific nested JSON structure:

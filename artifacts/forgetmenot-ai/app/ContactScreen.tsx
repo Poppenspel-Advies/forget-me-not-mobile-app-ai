@@ -9,14 +9,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import * as Linking from 'expo-linking';
 import { getAuth } from 'firebase/auth';
 
-// Define the interface props matching your router switchboard contracts
 interface ContactScreenProps {
   onBack: () => void;
-  styles: any;    // Passes shared styling tokens from the master stylesheet safely
-  theme: any;     // Passes active design palette variables down dynamically
+  styles: any;
+  theme: any;
   tap: () => void;
   FGlobe: React.ComponentType<{ size?: number }>;
   ScreenHeader: React.ComponentType<{ title: string; subtitle?: string; onBack?: () => void }>;
@@ -37,36 +35,61 @@ export default function ContactScreen({ onBack, styles, theme, tap, FGlobe, Scre
     setIsSending(true);
 
     try {
+      const userLoggedInEmail = currentFirebaseUser?.email || 'anonymous-node@forgetmenot.ai';
       const recipientMailAddress = 'poppenspeladvies@gmail.com';
-      const mailSubjectLine = encodeURIComponent('ForgetMeNot AI // System Feedback & Signals Log');
 
-      const userMailAddressMetadata = currentFirebaseUser?.email || 'Anonymous Context Node';
-      const customMailBodyContent = encodeURIComponent(
-        `SYSTEM LOG SIGNAL SUBMISSION:\n` +
-        `----------------------------------------\n` +
-        `User Registry: ${userMailAddressMetadata}\n` +
-        `Timestamp Frame: ${new Date().toISOString()}\n\n` +
-        `FEEDBACK NOTE:\n` +
-        `"${message.trim()}"\n\n` +
-        `----------------------------------------\n` +
-        `Sent via ForgetMeNot Core Client Portal.`
-      );
+      console.log(`📡 Initializing secure backend REST API pipeline via 'Contact Us' template...`);
 
-      const secureMailtoStringUri = `mailto:${recipientMailAddress}?subject=${mailSubjectLine}&body=${customMailBodyContent}`;
+      // ==============================================================
+      // 🟢 ✅ FIXED: EXTRACTING VALUES SECURELY FROM ENVIRONMENT CONFIGS
+      // ==============================================================
+      const EMAILJS_SERVICE_ID = process.env.EXPO_PUBLIC_EMAILJS_SERVICE_ID;
+      const EMAILJS_TEMPLATE_ID = process.env.EXPO_PUBLIC_EMAILJS_TEMPLATE_ID;
+      const EMAILJS_PUBLIC_KEY = process.env.EXPO_PUBLIC_EMAILJS_PUBLIC_KEY;
 
-      console.log("📨 Launching device communications array module...");
-      const supportedChannelCheck = await Linking.canOpenURL(secureMailtoStringUri);
+      if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
+        throw new Error("Missing structural EmailJS environment credential parameters inside .env file context.");
+      }
 
-      if (supportedChannelCheck) {
-        await Linking.openURL(secureMailtoStringUri);
+      // Prepares variable bundles to map precisely into your custom HTML brackets
+      const emailParams = {
+        service_id: EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id: EMAILJS_PUBLIC_KEY,
+        template_params: {
+          name: userLoggedInEmail,
+          time: new Date().toLocaleString('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          }),
+          message: message.trim(),
+          to_email: recipientMailAddress,
+          reply_to: userLoggedInEmail
+        }
+      };
+
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(emailParams),
+      });
+
+      if (response.ok || response.status === 200) {
+        console.log("🚀 Custom 'Contact Us' payload transmitted seamlessly through background API web node.");
         setSent(true);
       } else {
-        alert(`Mailing modules unavailable. Please send your notes directly to: ${recipientMailAddress}`);
+        const errorText = await response.text();
+        throw new Error(errorText || `HTTP response status code: ${response.status}`);
       }
+
     } catch (error: any) {
-      console.error("💥 Outbound dispatch window crash:", error);
-      alert("Transmission channel timeout exception.");
+      console.error("💥 Outbound API email background pipeline exception:", error);
+      alert(`Transmission failed: ${error?.message || "Verify your network infrastructure endpoints."}`);
     } finally {
+      //setIsProcessing(false); // Fallback stability reset switch
       setIsSending(false);
     }
   };
@@ -122,7 +145,7 @@ export default function ContactScreen({ onBack, styles, theme, tap, FGlobe, Scre
           <View style={styles.sentCard}>
             <View style={styles.sentIcon}><Feather name="check" size={24} color={theme.background} /></View>
             <Text style={styles.sentTitle}>Signal received.</Text>
-            <Text style={styles.sentCopy}>Thanks for making the product a little more human. We’ll be in touch soon.</Text>
+            <Text style={styles.sentCopy}>Thanks for making the product a little more human. Your message was processed seamlessly using your active session context.</Text>
             <Pressable onPress={onBack} style={styles.secondaryButton}>
               <Text style={styles.secondaryButtonText}>Back to your space</Text>
             </Pressable>
@@ -130,9 +153,9 @@ export default function ContactScreen({ onBack, styles, theme, tap, FGlobe, Scre
         )}
 
         <View style={styles.contactDetails}>
-          <Text style={styles.contactDetailTitle}>Prefer manual email?</Text>
-          <Text style={styles.contactEmail}>poppenspeladvies@gmail.com</Text>
-          <Text style={styles.contactHours}>Usually replies within one quiet day.</Text>
+          <Text style={styles.contactDetailTitle}>Automated Matrix Logging</Text>
+          <Text style={styles.contactEmail}>Sending as: {currentFirebaseUser?.email || 'Anonymous Context Node'}</Text>
+          <Text style={styles.contactHours}>Directly targets poppenspeladvies@gmail.com automatically.</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
