@@ -34,6 +34,7 @@ import TransitWeatherWidget from './TransitWeatherWidget';
 import PredictiveLoopWidget from './PredictiveLoopWidget';
 // ✅ Add this line at the top asset import block section of app/index.tsx
 import PredictionScreen from './PredictionScreen'; // Update path if stored inside /components folder
+import ContactScreen from './ContactScreen'; //
 // ✅ Add this line at the top asset import block section of app/index.tsx
 import ChatScreen from './ChatScreen';
 import firestore from '@react-native-firebase/firestore';
@@ -1772,18 +1773,6 @@ function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void })
 
 
 
-function ContactScreen({ onBack }: { onBack: () => void }) {
-  const [sent, setSent] = useState(false);
-  const [message, setMessage] = useState('');
-  return <KeyboardAvoidingView behavior="padding" style={styles.screen}><ScreenHeader title="Talk to us" subtitle="We’re listening for better signals." onBack={onBack} />
-    <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
-      <View style={styles.contactHero}><FGlobe size={78} /><Text style={styles.contactHeroTitle}>A good assistant{"\n"}keeps learning.</Text><Text style={styles.contactHeroCopy}>Tell us what ForgetMeNot helped you notice — or what it should have.</Text></View>
-            {!sent ? <><View style={styles.contactInputWrap}><Text style={styles.contactInputLabel}>YOUR NOTE</Text><TextInput testID="contact-input" multiline value={message} onChangeText={setMessage} placeholder="I wish ForgetMeNot could…" placeholderTextColor={theme.mutedForeground} style={styles.contactInput} /></View><Pressable testID="send-contact" onPress={() => { if (message.trim()) { tap(); setSent(true); } }} style={[styles.primaryButton, !message.trim() && styles.disabledButton]}><Text style={styles.primaryButtonText}>Send to the team</Text><Feather name="send" size={16} color={theme.background} /></Pressable></> : <View style={styles.sentCard}><View style={styles.sentIcon}><Feather name="check" size={24} color={theme.background} /></View><Text style={styles.sentTitle}>Signal received.</Text><Text style={styles.sentCopy}>Thanks for making the product a little more human. We’ll be in touch soon.</Text><Pressable onPress={onBack} style={styles.secondaryButton}><Text style={styles.secondaryButtonText}>Back to your space</Text></Pressable></View>}
-            <View style={styles.contactDetails}><Text style={styles.contactDetailTitle}>Prefer email?</Text><Text style={styles.contactEmail}>hello@forgetmenot.ai</Text><Text style={styles.contactHours}>Usually replies within one quiet day.</Text></View>
-        </ScrollView>
-  </KeyboardAvoidingView>;
-}
-
 export default function Home() {
   const [screen, setScreen] = useState<Screen>('home');
   const [captured, setCaptured] = useState<CapturedItem[]>(capturedSeed);
@@ -1833,7 +1822,17 @@ export default function Home() {
       case 'prediction': return <PredictionScreen onBack={() => navigate('home')} onNavigate={navigate} />;
       case 'actions': return <ActionsScreen onBack={() => navigate('home')} />;
       case 'memory': return <MemoryScreen onBack={() => navigate('home')} captured={captured} />;
-      case 'contact': return <ContactScreen onBack={() => navigate('profile')} />;
+       case 'contact':
+              return (
+                <ContactScreen
+                  onBack={() => navigate('profile')}
+                  styles={styles}
+                  theme={theme}
+                  tap={tap}
+                  FGlobe={FGlobe}
+                  ScreenHeader={ScreenHeader}
+                />
+              );
       case 'repliesShield': return <RippleShieldWidget onBack={() => navigate('home')} />;
       default: return <HomeScreen onNavigate={navigate} captured={captured} />;
     }
