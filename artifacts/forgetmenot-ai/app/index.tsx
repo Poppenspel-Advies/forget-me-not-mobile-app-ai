@@ -39,6 +39,8 @@ import ContactScreen from './ContactScreen'; //
 import ChatScreen from './ChatScreen';
 import firestore from '@react-native-firebase/firestore';
 import { initializeApp, getApps } from 'firebase/app';
+// ✅ Add this line alongside your other screen/component imports at the top of app/index.tsx
+import { ProfileScreen } from './ProfileScreen'; // Adjust the relative path if you saved the file inside a subfolder
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
 // ✅ THE FIX: Pushes up one directory level (../) then enters the config subfolder
 import { db } from '../config/firebaseConfig';
@@ -1523,6 +1525,7 @@ function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) 
 
 
 
+/*
 // ==============================================================
 // 🌟 HYDRATED CORE PROFILE SCREEN WITH LIVE DB PREFERENCES & LOGOUT
 // ==============================================================
@@ -1645,7 +1648,9 @@ function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void })
       <ScreenHeader title="Your space" subtitle={currentFirebaseUser?.email || "The person behind the patterns"} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
 
-        {/* PROFILE PROFILE HERO CARD DOCK CONTAINER */}
+        { */
+/* PROFILE PROFILE HERO CARD DOCK CONTAINER *//*
+}
         <View style={styles.profileHero}>
           <View style={styles.profileAvatar}>
             <Text style={styles.profileAvatarText}>A</Text>
@@ -1655,7 +1660,9 @@ function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void })
           <Text style={styles.profileHandle}>THE SIGNAL SEEKER · ACTIVE PROFILE</Text>
         </View>
 
-        {/* METRICS DISCOVERY SECTION ROW */}
+        { */
+/* METRICS DISCOVERY SECTION ROW *//*
+}
         <View style={styles.profileStats}>
           <View>
             <Text style={styles.profileStatValue}>{dbStats.totalSignals}</Text>
@@ -1673,17 +1680,23 @@ function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void })
           </View>
         </View>
 
-        {/* CONNECTIONS SUMMARY CARD BOX MATRIX */}
+        { */
+/* CONNECTIONS SUMMARY CARD BOX MATRIX *//*
+}
         <SectionTitle eyebrow="CONNECTIONS" title="What I can see" />
         <View style={styles.settingCard}>
-          {/* Calendar Sync Toggle Row */}
+          { */
+/* Calendar Sync Toggle Row *//*
+}
           <View style={styles.settingRow}>
             <View style={styles.settingIcon}><Feather name="calendar" size={17} color={theme.cyan} /></View>
             <View style={styles.settingCopy}><Text style={styles.settingTitle}>Calendar</Text><Text style={styles.settingDetail}>Your events and movement logs</Text></View>
             <Pressable onPress={() => { setCalendarSync(!calendarSync); updatePreferenceInCloud('calendar', !calendarSync); }} style={[styles.toggle, calendarSync && styles.toggleOn]}><View style={[styles.toggleKnob, calendarSync && styles.toggleKnobOn]} /></Pressable>
           </View>
 
-          {/* Messages Sync Toggle Row (Displays Last 2 DB entries dynamically inside detail panel copy) */}
+          { */
+/* Messages Sync Toggle Row (Displays Last 2 DB entries dynamically inside detail panel copy) *//*
+}
           <View style={[styles.settingRow, { minHeight: 92, paddingVertical: 14, alignItems: 'flex-start' }]}>
             <View style={[styles.settingIcon, { marginTop: 2 }]}><Feather name="message-square" size={17} color={theme.pink} /></View>
             <View style={styles.settingCopy}>
@@ -1697,7 +1710,9 @@ function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void })
             <Pressable onPress={() => { setMessagesSync(!messagesSync); updatePreferenceInCloud('messages', !messagesSync); }} style={[styles.toggle, messagesSync && styles.toggleOn]}><View style={[styles.toggleKnob, messagesSync && styles.toggleKnobOn]} /></Pressable>
           </View>
 
-          {/* Places Sync Toggle Row */}
+          { */
+/* Places Sync Toggle Row *//*
+}
           <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
             <View style={styles.settingIcon}><Feather name="map-pin" size={17} color={theme.cyan} /></View>
             <View style={styles.settingCopy}><Text style={styles.settingTitle}>Places</Text><Text style={styles.settingDetail}>The localized contextual parameters around you</Text></View>
@@ -1705,17 +1720,23 @@ function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void })
           </View>
         </View>
 
-        {/* CUSTOM INTERACTIVE PREFERENCES SETTINGS BLOCK MATRIX */}
+        { */
+/* CUSTOM INTERACTIVE PREFERENCES SETTINGS BLOCK MATRIX *//*
+}
         <SectionTitle eyebrow="PREFERENCES" title="Shape the signal" />
         <View style={styles.settingCard}>
-          {/* Gentle Nudges Toggle */}
+          { */
+/* Gentle Nudges Toggle *//*
+}
           <View style={styles.settingRow}>
             <View style={[styles.settingIcon, { backgroundColor: `${theme.gold}12` }]}><Feather name="bell" size={17} color={theme.gold} /></View>
             <View style={styles.settingCopy}><Text style={styles.settingTitle}>Gentle nudges</Text><Text style={styles.settingDetail}>{gentleNudges ? "Only interrupt when it matters" : "Muted perimeter radar check variance alerts"}</Text></View>
             <Pressable onPress={() => { setGentleNudges(!gentleNudges); updatePreferenceInCloud('nudges', !gentleNudges); }} style={[styles.toggle, gentleNudges && styles.toggleOn]}><View style={[styles.toggleKnob, gentleNudges && styles.toggleKnobOn]} /></Pressable>
           </View>
 
-          {/* Signal Sensitivity Toggle */}
+          { */
+/* Signal Sensitivity Toggle *//*
+}
           <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
             <View style={[styles.settingIcon, { backgroundColor: `${theme.green}12` }]}><Feather name="sliders" size={17} color={theme.green} /></View>
             <View style={styles.settingCopy}><Text style={styles.settingTitle}>Signal sensitivity</Text><Text style={styles.settingDetail}>{signalSensitivity ? "Balanced · fewer, sharper predictions" : "Maximum tracking · hypersensitive velocity detection"}</Text></View>
@@ -1723,16 +1744,24 @@ function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void })
           </View>
         </View>
 
-        {/* HELPDESK CONTACT LINK ROW ACTION */}
+        { */
+/* HELPDESK CONTACT LINK ROW ACTION *//*
+}
         <Pressable onPress={() => { if (typeof tap === 'function') tap(); onNavigate('contact'); }} style={styles.contactLink}>
           <View style={styles.contactCircle}><Feather name="heart" size={17} color={theme.pink} /></View>
           <View style={{ flex: 1 }}><Text style={styles.contactTitle}>Talk to the ForgetMeNot team</Text><Text style={styles.contactDetail}>Questions, ideas, or a signal matrix split we missed?</Text></View>
           <Feather name="arrow-up-right" size={17} color={theme.cyan} />
         </Pressable>
 
-               {/* ============================================================== */}
-               {/* 🟢 ✅ FIXED: HIGH-FIDELITY CYBERNETIC LOGOUT BUTTON UPGRADE    */}
-               {/* ============================================================== */}
+               { */
+/* ============================================================== *//*
+}
+               { */
+/* 🟢 ✅ FIXED: HIGH-FIDELITY CYBERNETIC LOGOUT BUTTON UPGRADE    *//*
+}
+               { */
+/* ============================================================== *//*
+}
                <View style={{ width: '100%', marginTop: 32, marginBottom: 12 }}>
                  <Pressable
                    onPress={executeSessionSignOut}
@@ -1771,6 +1800,7 @@ function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void })
   );
 }
 
+ */
 
 
 export default function Home() {
@@ -1813,7 +1843,7 @@ export default function Home() {
                     if (targetScreen === 'home') {
                       setActiveSessionUserId(null);
                     }
-                    setScreen(targetScreen);
+                    setScreen(targetScreen as Screen);
                   }}
                 />
               );
