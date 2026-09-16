@@ -457,6 +457,55 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     const [analysisData, setAnalysisData] = useState<any>(null);
     const [anchorActive, setAnchorActive] = useState<boolean>(true); // Preserved component state control
 
+      // 🕒 1. Real-time Date & Time Formatting Engine
+      const currentLocalDate = new Date();
+      const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+      const monthsOfYear = ['AUG', 'SEP', 'OCT', 'NOV', 'DEC', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL'];
+
+      const formattedDayAndDate = `${daysOfWeek[currentLocalDate.getDay()]} · ${currentLocalDate.getDate()} ${monthsOfYear[currentLocalDate.getMonth()]} ${currentLocalDate.getFullYear()}`;
+
+      // 📝 2. Profile Telemetry Hooks Linked securely to Firestore
+      const auth = getAuth();
+      const currentFirebaseUser = auth.currentUser;
+      const currentUserId = currentFirebaseUser ? currentFirebaseUser.uid : "Admin_ForgetMeNotAI";
+
+      const [dynamicUsername, setDynamicUsername] = useState<string>("Alex");
+      const [dynamicAvatarString, setDynamicAvatarString] = useState<string>("A");
+      const [cloudProfilePicture, setCloudProfilePicture] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!currentFirebaseUser) return;
+
+        // Listen to user document updates persistently to handle quick changes instantly
+        const userDocRef = doc(db, "users", currentUserId);
+        const unsubscribeProfile = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+
+            // Pull email prefix out dynamically if a custom display name is missing
+            if (data.email) {
+              const splitParts = data.email.split('@')[0];
+              const capitalizedName = splitParts.charAt(0).toUpperCase() + splitParts.slice(1);
+              setDynamicUsername(capitalizedName);
+              setDynamicAvatarString(capitalizedName.charAt(0).toUpperCase());
+            }
+
+            // Cache your persistent Base64 avatar strings to avoid loading blank boxes
+            if (data.profile_picture) {
+              setCloudProfilePicture(data.profile_picture);
+            }
+          } else if (currentFirebaseUser.email) {
+            // Fallback calculation matrix if document entry initialization is pending
+            const splitParts = currentFirebaseUser.email.split('@')[0];
+            const capitalizedName = splitParts.charAt(0).toUpperCase() + splitParts.slice(1);
+            setDynamicUsername(capitalizedName);
+            setDynamicAvatarString(capitalizedName.charAt(0).toUpperCase());
+          }
+        });
+
+        return () => unsubscribeProfile();
+      }, [currentUserId, currentFirebaseUser]);
+
     useFocusEffect(
       useCallback(() => {
         if (!shieldActive) return;
@@ -627,15 +676,30 @@ useEffect(() => {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[styles.scrollContent, { paddingTop: Platform.OS === 'web' ? 67 : insets.top + 12, paddingBottom: 118 }]}
     >
-      <View style={styles.homeTop}>
-        <View>
-          <Text style={styles.miniLabel}>TUESDAY · 18 AUG 2026</Text>
-          <Text style={styles.greeting}>Good morning, Alex</Text>
-        </View>
-        <Pressable testID="home-profile" onPress={() => { tap(); onNavigate('profile'); }} style={styles.avatar}>
-          <Text style={styles.avatarText}>A</Text>
-        </Pressable>
-      </View>
+            <View style={styles.homeTop}>
+              <View>
+                {/* ✅ FIXED: Dynamically injects formatted day, date, month, and calendar year */}
+                <Text style={styles.miniLabel}>{formattedDayAndDate}</Text>
+                {/* ✅ FIXED: Injects the dynamic username compiled directly from the Database context row */}
+                <Text style={styles.greeting}>Good morning, {dynamicUsername}</Text>
+              </View>
+
+              <Pressable testID="home-profile" onPress={() => { tap(); onNavigate('profile'); }} style={styles.avatar}>
+                {/* ✅ FIXED: Render Base64 string source directly if uploaded; fallback cleanly to your dynamic initial text node if null */}
+                {cloudProfilePicture ? (
+                  <RNImage
+                    source={{
+                      uri: cloudProfilePicture.startsWith('data:') || cloudProfilePicture.startsWith('http')
+                        ? cloudProfilePicture
+                        : `data:image/jpeg;base64,${cloudProfilePicture}`
+                    }}
+                    style={{ width: '100%', height: '100%', borderRadius: 21 }}
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>{dynamicAvatarString}</Text>
+                )}
+              </Pressable>
+            </View>
 
 
       <ImageBackground source={require('@/assets/images/ai-globe.jpg')} imageStyle={styles.heroImage} style={styles.heroCard}>
@@ -1524,283 +1588,6 @@ function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) 
 }
 
 
-
-/*
-// ==============================================================
-// 🌟 HYDRATED CORE PROFILE SCREEN WITH LIVE DB PREFERENCES & LOGOUT
-// ==============================================================
-function ProfileScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
-  const auth = getAuth();
-  const currentFirebaseUser = auth.currentUser;
-
-  // Safe fallback to avoid tracking anomalies if profile is null during logout cycles
-  const userId = currentFirebaseUser ? currentFirebaseUser.uid : "Admin_ForgetMeNotAI";
-
-  // 📝 REACTIVE PROFILE AND STATS STATES
-  const [dbStats, setDbStats] = useState({ totalSignals: "00", omissionsAvoided: "00", clarityIndex: "92%" });
-  const [lastTwoSignals, setLastTwoSignals] = useState<string[]>(["Awaiting signal sync...", "No logged matrix tracks."]);
-
-  // 🎛️ PREFERENCE STATE TOGGLES DIRECTLY TIED TO FIRESTORE ENTRIES
-  const [calendarSync, setCalendarSync] = useState(true);
-  const [messagesSync, setMessagesSync] = useState(true);
-  const [placesSync, setPlacesSync] = useState(false);
-  const [gentleNudges, setGentleNudges] = useState(true);
-  const [signalSensitivity, setSignalSensitivity] = useState(true); // true = Balanced, false = High Sharpness
-
-  // ==============================================================
-  // 🧭 REAL-TIME SNAPSHOT LISTENERS FOR PROFILE AND SIGNALS
-  // ==============================================================
-  useEffect(() => {
-    if (!currentFirebaseUser) return;
-
-    // 1️⃣ Listen to user preferences document block
-    const userDocRef = doc(db, "users", userId);
-    const unsubsUser = onSnapshot(userDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.preferences) {
-          setCalendarSync(data.preferences.calendarSync ?? true);
-          setMessagesSync(data.preferences.messagesSync ?? true);
-          setPlacesSync(data.preferences.placesSync ?? false);
-          setGentleNudges(data.preferences.gentleNudges ?? true);
-          setSignalSensitivity(data.preferences.signalSensitivity ?? true);
-        }
-      }
-    });
-
-    // 2️⃣ Listen to analytics data logs to compute statistics and capture messages dynamically
-    const analysesQuery = query(
-      collection(db, "analyses"),
-      where("user_id", "==", "Admin_ForgetMeNotAI"), // Falls back safely to default project telemetry rows
-      orderBy("created_at", "desc")
-    );
-
-    const unsubsAnalyses = onSnapshot(analysesQuery, (snapshot) => {
-      if (!snapshot.empty) {
-        const totalCount = snapshot.docs.length;
-
-        // Dynamically parse out titles of the last 2 newest documents
-        const pulledTitles: string[] = [];
-        snapshot.docs.slice(0, 2).forEach(doc => {
-          pulledTitles.push(doc.data().title || doc.data().analysis?.signal || "Context frame event logged.");
-        });
-        setLastTwoSignals(pulledTitles);
-
-        // Count omissions automatically based on records matching high confidence thresholds
-        let avoidedCount = 0;
-        snapshot.docs.forEach(doc => {
-          if ((doc.data().analysis?.confidence || 85) > 88) avoidedCount++;
-        });
-
-        setDbStats({
-          totalSignals: totalCount < 10 ? `0${totalCount}` : `${totalCount}`,
-          omissionsAvoided: avoidedCount < 10 ? `0${avoidedCount}` : `${avoidedCount}`,
-          clarityIndex: totalCount > 0 ? "94%" : "92%"
-        });
-      }
-    });
-
-    return () => {
-      unsubsUser();
-      unsubsAnalyses();
-    };
-  }, [userId]);
-
-  // ==============================================================
-  // 💾 FIRESTORE UPDATE PIPELINES
-  // ==============================================================
-  const updatePreferenceInCloud = async (key: string, newValue: boolean) => {
-    if (typeof tap === 'function') tap();
-    if (!currentFirebaseUser) return;
-    try {
-      await setDoc(doc(db, "users", userId), {
-        preferences: {
-          calendarSync: key === 'calendar' ? newValue : calendarSync,
-          messagesSync: key === 'messages' ? newValue : messagesSync,
-          placesSync: key === 'places' ? newValue : placesSync,
-          gentleNudges: key === 'nudges' ? newValue : gentleNudges,
-          signalSensitivity: key === 'sensitivity' ? newValue : signalSensitivity
-        }
-      }, { merge: true });
-    } catch (e) {
-      console.error("💥 Error syncing preference updates to cloud dictionary:", e);
-    }
-  };
-
-  // ==============================================================
-  // 🔓 DISCONNECT RUNTIME SESSION LOGOUT METHOD
-  // ==============================================================
-  const executeSessionSignOut = async () => {
-    if (typeof tap === 'function') tap();
-    try {
-      console.log("🔒 Identity context terminating... Disconnecting auth matrices.");
-      await signOut(auth);
-
-      // ✅ CRITICAL DIRECT FIX: Triggers parent router state setter loop to clear out the canvas
-      // This immediately forces the app view tree back down to your LoginGate portal
-      onNavigate('home');
-    } catch (error) {
-      alert("Sign out sequence interrupted.");
-    }
-  };
-  return (
-    <View style={styles.screen}>
-      <ScreenHeader title="Your space" subtitle={currentFirebaseUser?.email || "The person behind the patterns"} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
-
-        { */
-/* PROFILE PROFILE HERO CARD DOCK CONTAINER *//*
-}
-        <View style={styles.profileHero}>
-          <View style={styles.profileAvatar}>
-            <Text style={styles.profileAvatarText}>A</Text>
-            <View style={styles.profileSpark}><Feather name="zap" size={11} color={theme.background} /></View>
-          </View>
-          <Text style={styles.profileName}>Alex Morgan</Text>
-          <Text style={styles.profileHandle}>THE SIGNAL SEEKER · ACTIVE PROFILE</Text>
-        </View>
-
-        { */
-/* METRICS DISCOVERY SECTION ROW *//*
-}
-        <View style={styles.profileStats}>
-          <View>
-            <Text style={styles.profileStatValue}>{dbStats.totalSignals}</Text>
-            <Text style={styles.profileStatLabel}>signals held</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View>
-            <Text style={styles.profileStatValue}>{dbStats.omissionsAvoided}</Text>
-            <Text style={styles.profileStatLabel}>omissions avoided</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View>
-            <Text style={styles.profileStatValue}>{dbStats.clarityIndex}</Text>
-            <Text style={styles.profileStatLabel}>signal clarity</Text>
-          </View>
-        </View>
-
-        { */
-/* CONNECTIONS SUMMARY CARD BOX MATRIX *//*
-}
-        <SectionTitle eyebrow="CONNECTIONS" title="What I can see" />
-        <View style={styles.settingCard}>
-          { */
-/* Calendar Sync Toggle Row *//*
-}
-          <View style={styles.settingRow}>
-            <View style={styles.settingIcon}><Feather name="calendar" size={17} color={theme.cyan} /></View>
-            <View style={styles.settingCopy}><Text style={styles.settingTitle}>Calendar</Text><Text style={styles.settingDetail}>Your events and movement logs</Text></View>
-            <Pressable onPress={() => { setCalendarSync(!calendarSync); updatePreferenceInCloud('calendar', !calendarSync); }} style={[styles.toggle, calendarSync && styles.toggleOn]}><View style={[styles.toggleKnob, calendarSync && styles.toggleKnobOn]} /></Pressable>
-          </View>
-
-          { */
-/* Messages Sync Toggle Row (Displays Last 2 DB entries dynamically inside detail panel copy) *//*
-}
-          <View style={[styles.settingRow, { minHeight: 92, paddingVertical: 14, alignItems: 'flex-start' }]}>
-            <View style={[styles.settingIcon, { marginTop: 2 }]}><Feather name="message-square" size={17} color={theme.pink} /></View>
-            <View style={styles.settingCopy}>
-              <Text style={styles.settingTitle}>Messages (Last 2 Live Signals)</Text>
-              {lastTwoSignals.map((signalText, index) => (
-                <Text key={index} style={[styles.settingDetail, { color: '#a1a1aa', fontSize: 11, fontStyle: 'italic', marginTop: 4, paddingRight: 6 }]} numberOfLines={1}>
-                  • {signalText}
-                </Text>
-              ))}
-            </View>
-            <Pressable onPress={() => { setMessagesSync(!messagesSync); updatePreferenceInCloud('messages', !messagesSync); }} style={[styles.toggle, messagesSync && styles.toggleOn]}><View style={[styles.toggleKnob, messagesSync && styles.toggleKnobOn]} /></Pressable>
-          </View>
-
-          { */
-/* Places Sync Toggle Row *//*
-}
-          <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
-            <View style={styles.settingIcon}><Feather name="map-pin" size={17} color={theme.cyan} /></View>
-            <View style={styles.settingCopy}><Text style={styles.settingTitle}>Places</Text><Text style={styles.settingDetail}>The localized contextual parameters around you</Text></View>
-            <Pressable onPress={() => { setPlacesSync(!placesSync); updatePreferenceInCloud('places', !placesSync); }} style={[styles.toggle, placesSync && styles.toggleOn]}><View style={[styles.toggleKnob, placesSync && styles.toggleKnobOn]} /></Pressable>
-          </View>
-        </View>
-
-        { */
-/* CUSTOM INTERACTIVE PREFERENCES SETTINGS BLOCK MATRIX *//*
-}
-        <SectionTitle eyebrow="PREFERENCES" title="Shape the signal" />
-        <View style={styles.settingCard}>
-          { */
-/* Gentle Nudges Toggle *//*
-}
-          <View style={styles.settingRow}>
-            <View style={[styles.settingIcon, { backgroundColor: `${theme.gold}12` }]}><Feather name="bell" size={17} color={theme.gold} /></View>
-            <View style={styles.settingCopy}><Text style={styles.settingTitle}>Gentle nudges</Text><Text style={styles.settingDetail}>{gentleNudges ? "Only interrupt when it matters" : "Muted perimeter radar check variance alerts"}</Text></View>
-            <Pressable onPress={() => { setGentleNudges(!gentleNudges); updatePreferenceInCloud('nudges', !gentleNudges); }} style={[styles.toggle, gentleNudges && styles.toggleOn]}><View style={[styles.toggleKnob, gentleNudges && styles.toggleKnobOn]} /></Pressable>
-          </View>
-
-          { */
-/* Signal Sensitivity Toggle *//*
-}
-          <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
-            <View style={[styles.settingIcon, { backgroundColor: `${theme.green}12` }]}><Feather name="sliders" size={17} color={theme.green} /></View>
-            <View style={styles.settingCopy}><Text style={styles.settingTitle}>Signal sensitivity</Text><Text style={styles.settingDetail}>{signalSensitivity ? "Balanced · fewer, sharper predictions" : "Maximum tracking · hypersensitive velocity detection"}</Text></View>
-            <Pressable onPress={() => { setSignalSensitivity(!signalSensitivity); updatePreferenceInCloud('sensitivity', !signalSensitivity); }} style={[styles.toggle, signalSensitivity && styles.toggleOn]}><View style={[styles.toggleKnob, signalSensitivity && styles.toggleKnobOn]} /></Pressable>
-          </View>
-        </View>
-
-        { */
-/* HELPDESK CONTACT LINK ROW ACTION *//*
-}
-        <Pressable onPress={() => { if (typeof tap === 'function') tap(); onNavigate('contact'); }} style={styles.contactLink}>
-          <View style={styles.contactCircle}><Feather name="heart" size={17} color={theme.pink} /></View>
-          <View style={{ flex: 1 }}><Text style={styles.contactTitle}>Talk to the ForgetMeNot team</Text><Text style={styles.contactDetail}>Questions, ideas, or a signal matrix split we missed?</Text></View>
-          <Feather name="arrow-up-right" size={17} color={theme.cyan} />
-        </Pressable>
-
-               { */
-/* ============================================================== *//*
-}
-               { */
-/* 🟢 ✅ FIXED: HIGH-FIDELITY CYBERNETIC LOGOUT BUTTON UPGRADE    *//*
-}
-               { */
-/* ============================================================== *//*
-}
-               <View style={{ width: '100%', marginTop: 32, marginBottom: 12 }}>
-                 <Pressable
-                   onPress={executeSessionSignOut}
-                   style={({ pressed }) => [
-                     {
-                       width: '100%',
-                       height: 48,
-                       backgroundColor: 'rgba(255, 0, 85, 0.06)', // Deep tech-crimson tinted glow
-                       borderRadius: 12,
-                       borderWidth: 1.2,
-                       borderColor: '#ff0055',                     // Vivid alert edge tracking line
-                       flexDirection: 'row',
-                       alignItems: 'center',
-                       justifyContent: 'center',
-                       gap: 8,
-                       ...Platform.select({
-                         web: {
-                           boxShadow: pressed ? 'none' : '0px 0px 14px rgba(255, 0, 85, 0.2)',
-                           transition: 'all 0.2s ease',
-                         }
-                       })
-                     },
-                     pressed && { backgroundColor: 'rgba(255, 0, 85, 0.18)' }
-                   ]}
-                 >
-                   <Feather name="log-out" size={14} color="#ff0055" />
-                   <Text style={{ color: '#ff0055', fontSize: 12, fontWeight: '900', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-                     TERMINATE SECURITY SESSION
-                   </Text>
-                 </Pressable>
-               </View>
-
-        <Text style={styles.version}>FORGETMENOT AI · CONTEXT HYDRATED · v0.1.0</Text>
-      </ScrollView>
-    </View>
-  );
-}
-
- */
 
 
 export default function Home() {
