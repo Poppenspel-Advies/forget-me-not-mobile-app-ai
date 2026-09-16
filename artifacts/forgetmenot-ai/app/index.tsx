@@ -457,12 +457,8 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     const [analysisData, setAnalysisData] = useState<any>(null);
     const [anchorActive, setAnchorActive] = useState<boolean>(true); // Preserved component state control
 
-      // 🕒 1. Real-time Date & Time Formatting Engine
-      const currentLocalDate = new Date();
-      const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-      const monthsOfYear = ['AUG', 'SEP', 'OCT', 'NOV', 'DEC', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL'];
-
-      const formattedDayAndDate = `${daysOfWeek[currentLocalDate.getDay()]} · ${currentLocalDate.getDate()} ${monthsOfYear[currentLocalDate.getMonth()]} ${currentLocalDate.getFullYear()}`;
+      // 🕒 1. Baseline Real-Time Interval Clock Sub-Routine Hooks
+      const [currentTime, setCurrentTime] = useState(new Date());
 
       // 📝 2. Profile Telemetry Hooks Linked securely to Firestore
       const auth = getAuth();
@@ -472,6 +468,14 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
       const [dynamicUsername, setDynamicUsername] = useState<string>("Alex");
       const [dynamicAvatarString, setDynamicAvatarString] = useState<string>("A");
       const [cloudProfilePicture, setCloudProfilePicture] = useState<string | null>(null);
+
+      useEffect(() => {
+        const timeInterval = setInterval(() => {
+          setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timeInterval);
+      }, []);
+
 
     useEffect(() => {
         if (!currentFirebaseUser) return;
@@ -505,6 +509,48 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
 
         return () => unsubscribeProfile();
       }, [currentUserId, currentFirebaseUser]);
+
+  // Compute local greeting window based on local browser time hour parameters
+    const currentHour = currentTime.getHours();
+    let timeOfDayGreeting = "Good morning";
+    if (currentHour >= 12 && currentHour < 17) timeOfDayGreeting = "Good afternoon";
+    else if (currentHour >= 17 || currentHour < 4) timeOfDayGreeting = "Good evening";
+
+
+   const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    const monthsOfYear = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const formattedDayAndDate = `${daysOfWeek[currentTime.getDay()]} · ${currentTime.getDate()} ${monthsOfYear[currentTime.getMonth()]} ${currentTime.getFullYear()}`;
+
+    // 📐 3. MULTI-TIMEZONE ANALOG GEOMETRY MATRICES GENERATOR FUNCTION
+    const getClockRotationDegrees = (timeZoneString: string) => {
+      // Force specific international location formats to isolate hours and minutes variables
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: timeZoneString,
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: false
+      });
+
+      const parts = formatter.formatToParts(currentTime);
+      const tzHour = parseInt(parts.find(p => p.type === 'hour')?.value || '0', 10);
+      const tzMin = parseInt(parts.find(p => p.type === 'minute')?.value || '0', 10);
+      const tzSec = parseInt(parts.find(p => p.type === 'second')?.value || '0', 10);
+
+      return {
+        secondHand: (tzSec / 60) * 360,
+        minuteHand: ((tzMin + tzSec / 60) / 60) * 360,
+        hourHand: (((tzHour % 12) + tzMin / 60) / 12) * 360,
+        digitalDisplay: `${tzHour < 10 ? '0' + tzHour : tzHour}:${tzMin < 10 ? '0' + tzMin : tzMin}`
+      };
+    };
+
+    // Compile active timezone data objects context maps
+    const usClock = getClockRotationDegrees('America/New_York');
+    const ukClock = getClockRotationDegrees('Europe/London');
+    const sydneyClock = getClockRotationDegrees('Australia/Sydney');
+    const worldClock = getClockRotationDegrees('UTC');
+
 
     useFocusEffect(
       useCallback(() => {
@@ -676,30 +722,87 @@ useEffect(() => {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[styles.scrollContent, { paddingTop: Platform.OS === 'web' ? 67 : insets.top + 12, paddingBottom: 118 }]}
     >
-            <View style={styles.homeTop}>
-              <View>
-                {/* ✅ FIXED: Dynamically injects formatted day, date, month, and calendar year */}
-                <Text style={styles.miniLabel}>{formattedDayAndDate}</Text>
-                {/* ✅ FIXED: Injects the dynamic username compiled directly from the Database context row */}
-                <Text style={styles.greeting}>Good morning, {dynamicUsername}</Text>
-              </View>
+                  {/* --- DYNAMIC HEADER AND USER GREETING SLOTS --- */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <View>
+                      <Text style={styles.miniLabel}>{formattedDayAndDate}</Text>
+                      <Text style={styles.greeting}>{timeOfDayGreeting}, {dynamicUsername}</Text>
+                    </View>
 
-              <Pressable testID="home-profile" onPress={() => { tap(); onNavigate('profile'); }} style={styles.avatar}>
-                {/* ✅ FIXED: Render Base64 string source directly if uploaded; fallback cleanly to your dynamic initial text node if null */}
-                {cloudProfilePicture ? (
-                  <RNImage
-                    source={{
-                      uri: cloudProfilePicture.startsWith('data:') || cloudProfilePicture.startsWith('http')
-                        ? cloudProfilePicture
-                        : `data:image/jpeg;base64,${cloudProfilePicture}`
-                    }}
-                    style={{ width: '100%', height: '100%', borderRadius: 21 }}
-                  />
-                ) : (
-                  <Text style={styles.avatarText}>{dynamicAvatarString}</Text>
-                )}
-              </Pressable>
-            </View>
+                    <Pressable
+                      testID="home-profile"
+                      onPress={() => onNavigate('profile')}
+                      style={[styles.avatar, { width: 42, height: 42, borderRadius: 21, overflow: 'hidden' }]}
+                    >
+                      {cloudProfilePicture ? (
+                        <RNImage
+                          source={{
+                            uri: cloudProfilePicture.startsWith('data:') || cloudProfilePicture.startsWith('http')
+                              ? cloudProfilePicture
+                              : `data:image/jpeg;base64,${cloudProfilePicture}`
+                          }}
+                          style={{ width: '100%', height: '100%' }}
+                        />
+                      ) : (
+                        <Text style={styles.avatarText}>{dynamicAvatarString}</Text>
+                      )}
+                    </Pressable>
+                  </View>
+
+                  {/* ============================================================== */}
+                  {/* 🧭 🛸 FOUR GEOGRAPHIC ANALOG HOROLOGE CLOCKS CONTAINER DOCK    */}
+                  {/* ============================================================== */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#131316', padding: 12, borderRadius: 16, borderWidth: 1, borderColor: '#222226', marginBottom: 24, gap: 6 }}>
+
+                    {/* 🇺🇸 CLOCK 1: UNITED STATES (NEW YORK) */}
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                      <Text style={{ color: '#737373', fontSize: 8, fontWeight: '900', letterSpacing: 0.5, marginBottom: 6 }}>USA (EST)</Text>
+                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#26262b', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                        <View style={{ position: 'absolute', width: 2, height: 11, backgroundColor: '#ffffff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${usClock.hourHand}deg)` }} />
+                        <View style={{ position: 'absolute', width: 1.5, height: 16, backgroundColor: '#00f0ff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${usClock.minuteHand}deg)` }} />
+                        <View style={{ position: 'absolute', width: 0.8, height: 18, backgroundColor: '#ff007f', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${usClock.secondHand}deg)` }} />
+                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#00f0ff' }} />
+                      </View>
+                      <Text style={{ color: '#ffffff', fontSize: 9, fontWeight: '700', marginTop: 5 }}>{usClock.digitalDisplay}</Text>
+                    </View>
+
+                    {/* 🇬🇧 CLOCK 2: UNITED KINGDOM (LONDON) */}
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                      <Text style={{ color: '#737373', fontSize: 8, fontWeight: '900', letterSpacing: 0.5, marginBottom: 6 }}>UK (BST)</Text>
+                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#26262b', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                        <View style={{ position: 'absolute', width: 2, height: 11, backgroundColor: '#ffffff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${ukClock.hourHand}deg)` }} />
+                        <View style={{ position: 'absolute', width: 1.5, height: 16, backgroundColor: '#00f0ff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${ukClock.minuteHand}deg)` }} />
+                        <View style={{ position: 'absolute', width: 0.8, height: 18, backgroundColor: '#ff007f', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${ukClock.secondHand}deg)` }} />
+                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#00f0ff' }} />
+                      </View>
+                      <Text style={{ color: '#ffffff', fontSize: 9, fontWeight: '700', marginTop: 5 }}>{ukClock.digitalDisplay}</Text>
+                    </View>
+
+                    {/* 🇦🇺 CLOCK 3: AUSTRALIA (SYDNEY) */}
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                      <Text style={{ color: '#737373', fontSize: 8, fontWeight: '900', letterSpacing: 0.5, marginBottom: 6 }}>SYDNEY</Text>
+                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#26262b', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                        <View style={{ position: 'absolute', width: 2, height: 11, backgroundColor: '#ffffff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${sydneyClock.hourHand}deg)` }} />
+                        <View style={{ position: 'absolute', width: 1.5, height: 16, backgroundColor: '#00f0ff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${sydneyClock.minuteHand}deg)` }} />
+                        <View style={{ position: 'absolute', width: 0.8, height: 18, backgroundColor: '#ff007f', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${sydneyClock.secondHand}deg)` }} />
+                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#00f0ff' }} />
+                      </View>
+                      <Text style={{ color: '#ffffff', fontSize: 9, fontWeight: '700', marginTop: 5 }}>{sydneyClock.digitalDisplay}</Text>
+                    </View>
+
+                    {/* 🌐 CLOCK 4: WORLD TIME BASELINE (UTC) */}
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                      <Text style={{ color: '#737373', fontSize: 8, fontWeight: '900', letterSpacing: 0.5, marginBottom: 6 }}>WORLD (UTC)</Text>
+                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#26262b', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                        <View style={{ position: 'absolute', width: 2, height: 11, backgroundColor: '#ffffff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${worldClock.hourHand}deg)` }} />
+                        <View style={{ position: 'absolute', width: 1.5, height: 16, backgroundColor: '#00f0ff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${worldClock.minuteHand}deg)` }} />
+                        <View style={{ position: 'absolute', width: 0.8, height: 18, backgroundColor: '#ff007f', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${worldClock.secondHand}deg)` }} />
+                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#00f0ff' }} />
+                      </View>
+                      <Text style={{ color: '#ffffff', fontSize: 9, fontWeight: '700', marginTop: 5 }}>{worldClock.digitalDisplay}</Text>
+                    </View>
+
+                  </View>
 
 
       <ImageBackground source={require('@/assets/images/ai-globe.jpg')} imageStyle={styles.heroImage} style={styles.heroCard}>
