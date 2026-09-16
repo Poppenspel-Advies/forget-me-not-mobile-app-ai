@@ -718,6 +718,20 @@ useEffect(() => {
 
 
   return (
+
+       <View style={{ flex: 1, backgroundColor: '#050507' }}>
+           {/* ✅ FIXED: Uses require() macro to compile local hardware path references directly */}
+           <RNImage
+             source={require('../assets/images/ai-globe-new.png')} // 👈 Swap this path to point exactly to your local file location name index
+             style={{
+               position: 'absolute',
+               width: '100%',
+               height: '100%',
+               opacity: 0.16, // Blends subtle texture into background shadows smoothly
+             }}
+             resizeMode="cover"
+           />
+
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[styles.scrollContent, { paddingTop: Platform.OS === 'web' ? 67 : insets.top + 12, paddingBottom: 118 }]}
@@ -749,60 +763,88 @@ useEffect(() => {
                     </Pressable>
                   </View>
 
-                  {/* ============================================================== */}
-                  {/* 🧭 🛸 FOUR GEOGRAPHIC ANALOG HOROLOGE CLOCKS CONTAINER DOCK    */}
-                  {/* ============================================================== */}
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#131316', padding: 12, borderRadius: 16, borderWidth: 1, borderColor: '#222226', marginBottom: 24, gap: 6 }}>
+                        {/* ============================================================== */}
+                        {/* 🧭 👑 THE ROYAL SHOWCASE: PREMIUM WATCH COLLECTOR MATRIX       */}
+                        {/* ============================================================== */}
+                              <View
+                                style={{
+                                  flexDirection: 'row',
+                                  justifyContent: 'space-between',
+                                  backgroundColor: '#0a0a0c',
+                                  paddingVertical: 20,
+                                  paddingHorizontal: 14,
+                                  borderRadius: 24,
+                                  borderWidth: 1.5,
+                                  borderColor: '#1c1710',
+                                  marginBottom: 26,
+                                  boxShadow: '0px 12px 30px rgba(0, 0, 0, 0.61)',
+                                }}
+                              >
+                                {/* 🇺🇸 HOROLOGE 1: NEW YORK */}
+                                <View style={{ flex: 1, alignItems: 'center' }}>
+                                  <Text style={styles.royalWatchHeading}>NEW YORK</Text>
+                                  <View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: '#111115', borderWidth: 2, borderColor: '#AA7C11', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                                    <View style={{ position: 'absolute', top: 3, width: 2, height: 5, backgroundColor: '#D4AF37' }} />
+                                    <View style={{ position: 'absolute', bottom: 3, width: 2, height: 5, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', left: 3, width: 5, height: 2, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', right: 3, width: 5, height: 2, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', width: 2.5, height: 15, backgroundColor: '#f3e5ab', borderRadius: 2, bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${usClock.hourHand}deg)` }} />
+                                    <View style={{ position: 'absolute', width: 1.5, height: 22, backgroundColor: '#ffffff', borderRadius: 1, bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${usClock.minuteHand}deg)` }} />
+                                    <View style={{ position: 'absolute', width: 0.8, height: 24, backgroundColor: '#ff0055', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${usClock.secondHand}deg)` }} />
+                                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#D4AF37', borderWidth: 1, borderColor: '#111115' }} />
+                                  </View>
+                                  <Text style={styles.royalWatchDigital}>{usClock.digitalDisplay}</Text>
+                                </View>
 
-                    {/* 🇺🇸 CLOCK 1: UNITED STATES (NEW YORK) */}
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                      <Text style={{ color: '#737373', fontSize: 8, fontWeight: '900', letterSpacing: 0.5, marginBottom: 6 }}>USA (EST)</Text>
-                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#26262b', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-                        <View style={{ position: 'absolute', width: 2, height: 11, backgroundColor: '#ffffff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${usClock.hourHand}deg)` }} />
-                        <View style={{ position: 'absolute', width: 1.5, height: 16, backgroundColor: '#00f0ff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${usClock.minuteHand}deg)` }} />
-                        <View style={{ position: 'absolute', width: 0.8, height: 18, backgroundColor: '#ff007f', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${usClock.secondHand}deg)` }} />
-                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#00f0ff' }} />
-                      </View>
-                      <Text style={{ color: '#ffffff', fontSize: 9, fontWeight: '700', marginTop: 5 }}>{usClock.digitalDisplay}</Text>
-                    </View>
+                                {/* 🇬🇧 HOROLOGE 2: LONDON */}
+                                <View style={{ flex: 1, alignItems: 'center' }}>
+                                  <Text style={styles.royalWatchHeading}>LONDON</Text>
+                                  <View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: '#111115', borderWidth: 2, borderColor: '#AA7C11', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                                    <View style={{ position: 'absolute', top: 3, width: 2, height: 5, backgroundColor: '#D4AF37' }} />
+                                    <View style={{ position: 'absolute', bottom: 3, width: 2, height: 5, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', left: 3, width: 5, height: 2, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', right: 3, width: 5, height: 2, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', width: 2.5, height: 15, backgroundColor: '#f3e5ab', borderRadius: 2, bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${ukClock.hourHand}deg)` }} />
+                                    <View style={{ position: 'absolute', width: 1.5, height: 22, backgroundColor: '#ffffff', borderRadius: 1, bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${ukClock.minuteHand}deg)` }} />
+                                    <View style={{ position: 'absolute', width: 0.8, height: 24, backgroundColor: '#ff0055', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${ukClock.secondHand}deg)` }} />
+                                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#D4AF37', borderWidth: 1, borderColor: '#111115' }} />
+                                  </View>
+                                  <Text style={styles.royalWatchDigital}>{ukClock.digitalDisplay}</Text>
+                                </View>
 
-                    {/* 🇬🇧 CLOCK 2: UNITED KINGDOM (LONDON) */}
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                      <Text style={{ color: '#737373', fontSize: 8, fontWeight: '900', letterSpacing: 0.5, marginBottom: 6 }}>UK (BST)</Text>
-                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#26262b', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-                        <View style={{ position: 'absolute', width: 2, height: 11, backgroundColor: '#ffffff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${ukClock.hourHand}deg)` }} />
-                        <View style={{ position: 'absolute', width: 1.5, height: 16, backgroundColor: '#00f0ff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${ukClock.minuteHand}deg)` }} />
-                        <View style={{ position: 'absolute', width: 0.8, height: 18, backgroundColor: '#ff007f', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${ukClock.secondHand}deg)` }} />
-                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#00f0ff' }} />
-                      </View>
-                      <Text style={{ color: '#ffffff', fontSize: 9, fontWeight: '700', marginTop: 5 }}>{ukClock.digitalDisplay}</Text>
-                    </View>
+                                {/* 🇦🇺 HOROLOGE 3: SYDNEY */}
+                                <View style={{ flex: 1, alignItems: 'center' }}>
+                                  <Text style={styles.royalWatchHeading}>SYDNEY</Text>
+                                  <View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: '#111115', borderWidth: 2, borderColor: '#AA7C11', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                                    <View style={{ position: 'absolute', top: 3, width: 2, height: 5, backgroundColor: '#D4AF37' }} />
+                                    <View style={{ position: 'absolute', bottom: 3, width: 2, height: 5, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', left: 3, width: 5, height: 2, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', right: 3, width: 5, height: 2, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', width: 2.5, height: 15, backgroundColor: '#f3e5ab', borderRadius: 2, bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${sydneyClock.hourHand}deg)` }} />
+                                    <View style={{ position: 'absolute', width: 1.5, height: 22, backgroundColor: '#ffffff', borderRadius: 1, bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${sydneyClock.minuteHand}deg)` }} />
+                                    <View style={{ position: 'absolute', width: 0.8, height: 24, backgroundColor: '#ff0055', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${sydneyClock.secondHand}deg)` }} />
+                                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#D4AF37', borderWidth: 1, borderColor: '#111115' }} />
+                                  </View>
+                                  <Text style={styles.royalWatchDigital}>{sydneyClock.digitalDisplay}</Text>
+                                </View>
 
-                    {/* 🇦🇺 CLOCK 3: AUSTRALIA (SYDNEY) */}
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                      <Text style={{ color: '#737373', fontSize: 8, fontWeight: '900', letterSpacing: 0.5, marginBottom: 6 }}>SYDNEY</Text>
-                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#26262b', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-                        <View style={{ position: 'absolute', width: 2, height: 11, backgroundColor: '#ffffff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${sydneyClock.hourHand}deg)` }} />
-                        <View style={{ position: 'absolute', width: 1.5, height: 16, backgroundColor: '#00f0ff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${sydneyClock.minuteHand}deg)` }} />
-                        <View style={{ position: 'absolute', width: 0.8, height: 18, backgroundColor: '#ff007f', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${sydneyClock.secondHand}deg)` }} />
-                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#00f0ff' }} />
-                      </View>
-                      <Text style={{ color: '#ffffff', fontSize: 9, fontWeight: '700', marginTop: 5 }}>{sydneyClock.digitalDisplay}</Text>
-                    </View>
+                                {/* 🌐 HOROLOGE 4: GMT */}
+                                <View style={{ flex: 1, alignItems: 'center' }}>
+                                  <Text style={styles.royalWatchHeading}>GMT (UTC)</Text>
+                                  <View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: '#111115', borderWidth: 2, borderColor: '#AA7C11', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                                    <View style={{ position: 'absolute', top: 3, width: 2, height: 5, backgroundColor: '#D4AF37' }} />
+                                    <View style={{ position: 'absolute', bottom: 3, width: 2, height: 5, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', left: 3, width: 5, height: 2, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', right: 3, width: 5, height: 2, backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                                    <View style={{ position: 'absolute', width: 2.5, height: 15, backgroundColor: '#f3e5ab', borderRadius: 2, bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${worldClock.hourHand}deg)` }} />
+                                    <View style={{ position: 'absolute', width: 1.5, height: 22, backgroundColor: '#ffffff', borderRadius: 1, bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${worldClock.minuteHand}deg)` }} />
+                                    <View style={{ position: 'absolute', width: 0.8, height: 24, backgroundColor: '#ff0055', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${worldClock.secondHand}deg)` }} />
+                                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#D4AF37', borderWidth: 1, borderColor: '#111115' }} />
+                                  </View>
+                                  <Text style={styles.royalWatchDigital}>{worldClock.digitalDisplay}</Text>
+                                </View>
+                              </View>
 
-                    {/* 🌐 CLOCK 4: WORLD TIME BASELINE (UTC) */}
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                      <Text style={{ color: '#737373', fontSize: 8, fontWeight: '900', letterSpacing: 0.5, marginBottom: 6 }}>WORLD (UTC)</Text>
-                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#26262b', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-                        <View style={{ position: 'absolute', width: 2, height: 11, backgroundColor: '#ffffff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${worldClock.hourHand}deg)` }} />
-                        <View style={{ position: 'absolute', width: 1.5, height: 16, backgroundColor: '#00f0ff', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${worldClock.minuteHand}deg)` }} />
-                        <View style={{ position: 'absolute', width: 0.8, height: 18, backgroundColor: '#ff007f', bottom: '50%', transformOrigin: 'bottom center', transform: `rotate(${worldClock.secondHand}deg)` }} />
-                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#09090b', borderWidth: 1, borderColor: '#00f0ff' }} />
-                      </View>
-                      <Text style={{ color: '#ffffff', fontSize: 9, fontWeight: '700', marginTop: 5 }}>{worldClock.digitalDisplay}</Text>
-                    </View>
-
-                  </View>
 
 
       <ImageBackground source={require('@/assets/images/ai-globe.jpg')} imageStyle={styles.heroImage} style={styles.heroCard}>
@@ -994,6 +1036,7 @@ useEffect(() => {
       </View>
       {captured.length > 2 ? <Text style={styles.captureCount}>{captured.length} pieces of context feeding your signal map</Text> : null}
     </ScrollView>
+    </View>
   );
 }
 
@@ -2569,6 +2612,31 @@ innerScroll: {
   paddingBottom: 140,
   paddingTop: 8,
 },
+  // ✅ ADD THESE LUXURY SELECTORS INTO YOUR StyleSheet.create ENGINE:
+  royalWatchHeading: {
+    color: '#D4AF37', // Polished 24k Royal Gold Baseline
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    // Layered metallic shading engine to simulate reflections
+    textShadowColor: 'rgba(212, 175, 55, 0.45)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  royalWatchDigital: {
+    color: '#F3E5AB', // Silk Cream Satin Sub-Text Accent
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginTop: 10,
+    fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1.5 },
+    textShadowRadius: 2,
+  }
 
 
 
