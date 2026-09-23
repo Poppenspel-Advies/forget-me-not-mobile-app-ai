@@ -37,7 +37,12 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
   const storage = getStorage(app);
   const currentFirebaseUser = auth.currentUser;
   const theme = colors.light;
-  const userId = currentFirebaseUser ? currentFirebaseUser.uid : "Admin_ForgetMeNotAI";
+
+  // ✅ THE CRITICAL AUTH FIX: Instantiates the real logged-in Firebase user token dynamically
+  const authInstance = getAuth();
+  const loggedInFirebaseUser = authInstance.currentUser;
+  const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
+
 
   const [username, setUsername] = useState<string>("Syncing Identifier...");
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -144,11 +149,12 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
            }
          });
 
-         const analysesQuery = query(
-           collection(db, "analyses"),
-           where("user_id", "==", "Admin_ForgetMeNotAI"),
-           orderBy("created_at", "desc")
-         );
+        // 2. ✅ FIXED FILTER: Uses the dynamic `userId` variable to isolate the active user's records!
+            const analysesQuery = query(
+              collection(db, "analyses"),
+              where("user_id", "==", userId), // 👈 Replaces the hardcoded "Admin_ForgetMeNotAI" string securely
+              orderBy("created_at", "desc")
+            );
 
          const unsubsAnalyses = onSnapshot(analysesQuery, async (snapshot) => {
            if (!snapshot.empty && snapshot.docs) {

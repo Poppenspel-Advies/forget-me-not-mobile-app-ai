@@ -6,6 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import { db } from '../config/firebaseConfig';
 import { collection, query, where, orderBy, onSnapshot, doc, deleteDoc, updateDoc, getDoc } from 'firebase/firestore';
 import { saveOrUpdateSignalAnalysis, deleteSignalAnalysis } from '../config/signalDataController';
+import { getAuth } from 'firebase/auth';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -75,7 +76,11 @@ function FGlobe({ size }: { size: number }) {
 // 🛡️ DYNAMIC MEMORY ENGINE CONTAINER - WITH FIREBASE REAL-TIME SYNC
 // =========================================================================
 export function MemoryScreen({ onBack, captured = [] }: MemoryScreenProps) {
-  const userId = "Admin_ForgetMeNotAI";
+   // ✅ THE CRITICAL AUTH FIX: Instantiates the real logged-in Firebase user token dynamically
+    const authInstance = getAuth();
+    const loggedInFirebaseUser = authInstance.currentUser;
+    const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
+
   const [dbSignals, setDbSignals] = useState<CapturedItem[]>([]);
   const [loading, setLoading] = useState(true);
 

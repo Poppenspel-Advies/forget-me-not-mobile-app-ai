@@ -41,6 +41,8 @@ import firestore from '@react-native-firebase/firestore';
 import { initializeApp, getApps } from 'firebase/app';
 // ✅ Add this line alongside your other screen/component imports at the top of app/index.tsx
 import { ProfileScreen } from './ProfileScreen'; // Adjust the relative path if you saved the file inside a subfolder
+// 💡 Import the named function from your component file path
+import { UserPreferenceTimeline } from './UserPreferenceTimeline';
 // 🌟 THE DATABASE FIX IMPORT: Links your live Firestore references securely
 // ✅ THE FIX: Pushes up one directory level (../) then enters the config subfolder
 import { db } from '../config/firebaseConfig';
@@ -170,6 +172,171 @@ const events = [
   { time: '06:00', am: 'PM', title: 'Pick up dry cleaning', type: 'ERRAND', color: theme.green },
 ];
 
+  const [contextLogs, setContextLogs] = useState([]);
+
+
+/*
+export function UserPreferenceTimeline() {
+  const [loading, setLoading] = useState(true);
+  const [contextLogs, setContextLogs] = useState([]);
+  // Tracker register hooks for the analysis signals feed pipeline
+  // Tracker register hooks for the analysis signals feed pipeline
+  const [recentSignalsFeed, setRecentSignalsFeed] = useState<any[]>([]);
+  const [isFeedLoading, setIsFeedLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // ✅ RESOLVED NAMESPACE: Setup clean authentication references safely
+    const authInstance = getAuth();
+    const activeFirebaseUser = authInstance.currentUser;
+    const currentActiveUserId = activeFirebaseUser ? activeFirebaseUser.uid : "Admin_ForgetMeNotAI";
+
+    console.log(`📡 Linking live Recent Context data streams to active channel: [${currentActiveUserId}]`);
+
+    const feedQuery = query(
+      collection(db, "analyses"),
+      where("user_id", "==", currentActiveUserId),
+      orderBy("created_at", "desc")
+    );
+
+    const unsubscribeFeed = onSnapshot(feedQuery, (snapshot) => {
+      const compiledSignals: any[] = [];
+      if (!snapshot.empty) {
+        snapshot.docs.forEach((doc) => {
+          const docData = doc.data();
+          compiledSignals.push({
+            id: doc.id,
+            title: docData.title || "Context frame logged.",
+            omission: docData.omission_item || "Evaluating perimeter logs...",
+            preventive: docData.mitigation || "No active warning logged.",
+            confidence: docData.metrics?.probability_index || docData.probability || 85,
+            tag: docData.tag || "GENERAL",
+            color: docData.color || "#00f0ff"
+          });
+        });
+      }
+      setRecentSignalsFeed(compiledSignals.slice(0, 3));
+      setIsFeedLoading(false);
+    }, (error) => {
+      console.error("💥 Feed snapshot collection tracking failure:", error);
+      setIsFeedLoading(false);
+    });
+
+    return () => unsubscribeFeed();
+  }, [authInstance.currentUser?.uid]); // ✅ FIXED: Directly check the unique user string ID path to clear the error reference block
+
+
+
+  if (loading) {
+    return (
+      <View style={{ width: '100%', paddingVertical: 20, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="small" color="#4CD964" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ width: '100%', paddingHorizontal: 4, marginVertical: 10, display: 'flex' }}>
+      <View style={{ flexDirection: 'row', backgroundColor: '#16171D', borderRadius: 16, paddingVertical: 18, paddingHorizontal: 20, borderWidth: 1, borderColor: '#242630', width: '100%' }}>
+
+              { */
+/* ============================================================== *//*
+}
+              { */
+/* 🔮 THE RECENT CONTEXT RADAR FEED CARD CONTAINER ENGINE          *//*
+}
+              { */
+/* ============================================================== *//*
+}
+              <View style={{ width: '100%', marginTop: 8, marginBottom: 24 }}>
+                {isFeedLoading ? (
+                  <View style={{ backgroundColor: 'rgba(23, 23, 27, 0.7)', borderRadius: 16, padding: 24, borderInter: 1, borderColor: '#222226', alignItems: 'center' }}>
+                    <ActivityIndicator size="small" color="#00f0ff" />
+                    <Text style={{ color: '#737373', fontSize: 11, marginTop: 8 }}>Hydrating matrix parameters...</Text>
+                  </View>
+                ) : recentSignalsFeed.length === 0 ? (
+                  <View style={{ backgroundColor: 'rgba(23, 23, 27, 0.7)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: '#222226' }}>
+                    <Text style={{ color: '#a1a1aa', fontSize: 12, textAlign: 'center', fontStyle: 'italic' }}>
+                      No active memory omission risks logged on this perimeter channel.
+                    </Text>
+                  </View>
+                ) : (
+                  recentSignalsFeed.map((item, index) => (
+                    <View
+                      key={item.id}
+                      style={{
+                        backgroundColor: 'rgba(23, 23, 27, 0.65)',
+                        borderRadius: 16,
+                        padding: 16,
+                        borderWidth: 1.2,
+                        borderColor: '#222226',
+                        marginBottom: index === recentSignalsFeed.length - 1 ? 0 : 12,
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.4)'
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <Text style={{ color: '#00f0ff', fontSize: 11, fontWeight: '900', letterSpacing: 0.5 }} numberOfLines={1}>
+                          ⚠️ RISK DETECTED: {item.title.toUpperCase()}
+                        </Text>
+                        <View style={{ backgroundColor: 'rgba(255, 0, 127, 0.12)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1, borderColor: 'rgba(255, 0, 127, 0.25)' }}>
+                          <Text style={{ color: '#ff007f', fontSize: 9, fontWeight: '800' }}>{item.confidence}% MATCH</Text>
+                        </View>
+                      </View>
+
+                      <Text style={{ color: '#ffffff', fontSize: 13, fontWeight: '700', marginBottom: 4 }}>
+                        {item.omission}
+                      </Text>
+
+                      <Text style={{ color: '#a1a1aa', fontSize: 11, lineHeight: 16 }}>
+                        💡 Action: {item.preventive}
+                      </Text>
+                    </View>
+                  ))
+                )}
+              </View>
+
+      </View>
+    </View>
+  );
+}
+ */
+
+// Global UI Layout Wrapper
+export function CategoryContextSelector({
+  selectedTag,
+  setSelectedTag,
+}: {
+  selectedTag: TagOption;
+  setSelectedTag: (tag: TagOption) => void;
+
+
+}) {
+  return (
+    <View style={styles.tagSelectorContainer}>
+      <Text style={styles.tagSelectorTitle}>Select Category Context</Text>
+      <View style={styles.tagSelectorRow}>
+        {(['People', 'Places', 'Things'] as TagOption[]).map((tag) => (
+          <AnimatedTagChip
+            key={tag}
+            tag={tag}
+            isActive={selectedTag === tag}
+            onPress={() => {
+              if (typeof tap === 'function') tap();
+              setSelectedTag(tag);
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+
+ // if (loading) {
+   // return <ActivityIndicator size="small" color={theme.green} style={styles.loader} />;
+ // }
+
+ // if (contextLogs.length === 0) return null;
+
 function tap() {
   // Optional chaining safely drops execution if the native module is absent (like on Web)
   Haptics?.selectionAsync?.().catch(() => {
@@ -238,6 +405,7 @@ function AnimatedTagChip({
   );
 }
 
+/*
 // Global UI Layout Wrapper
 export function CategoryContextSelector({
   selectedTag,
@@ -265,6 +433,7 @@ export function CategoryContextSelector({
     </View>
   );
 }
+ */
 
 
 function FGlobe({ size = 50, showWord = false }: { size?: number; showWord?: boolean }) {
@@ -445,7 +614,10 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     // 🌟 1. MOCK STATE HOOKS: Track card dismissals dynamically on layout
    // const [anchorActive, setAnchorActive] = useState(true);
     const [shieldActive, setShieldActive] = useState(true);
-    const userId = "Admin_ForgetMeNotAI";
+    // ✅ THE CRITICAL AUTH FIX: Instantiates the real logged-in Firebase user token dynamically
+    const authInstance = getAuth();
+    const loggedInFirebaseUser = authInstance.currentUser;
+    const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
 
     // 🌟 2. ANIMATED GLIDE WRAPPERS: Control entrance sliding offsets upon app startup
     const startUpFade = useRef(new Animated.Value(0)).current;
@@ -550,6 +722,27 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
     const ukClock = getClockRotationDegrees('Europe/London');
     const sydneyClock = getClockRotationDegrees('Australia/Sydney');
     const worldClock = getClockRotationDegrees('UTC');
+
+    const addLogAndKeepClean = async (userId, newLog) => {
+      const userRef = firestore().collection('users').doc(userId);
+
+      await firestore().runTransaction(async (transaction) => {
+        const userDoc = await transaction.get(userRef);
+        if (!userDoc.exists) return;
+
+        let logs = userDoc.data()?.preferences?.recentContext || [];
+
+        // Add the new item to the beginning of the list
+        logs.unshift(newLog);
+
+        // Keep only the 5 most recent records in history storage, even if UI displays 2
+        if (logs.length > 5) {
+          logs = logs.slice(0, 5);
+        }
+
+        transaction.update(userRef, { 'preferences.recentContext': logs });
+      });
+    };
 
 
     useFocusEffect(
@@ -845,8 +1038,6 @@ useEffect(() => {
                                 </View>
                               </View>
 
-
-
       <ImageBackground source={require('@/assets/images/ai-globe.jpg')} imageStyle={styles.heroImage} style={styles.heroCard}>
         <View style={styles.heroOverlay} />
         <View style={styles.heroCopy}>
@@ -913,18 +1104,44 @@ useEffect(() => {
          {/* ✅ THE VISUAL VERTICAL SPACER LAYOUT BAR */}
          <View style={{ height: 18 }} />
 
-      <SectionTitle eyebrow="YOUR SIGNALS" title="Recent context" action="Open memory" onAction={() => onNavigate('memory')} />
-      <View style={styles.contextCard}>
-        <View style={styles.contextTimeline}>
-          <View style={[styles.timelineDot, { backgroundColor: theme.green }]} />
-          <View style={styles.timelineLine} />
-          <View style={[styles.timelineDot, { backgroundColor: theme.pink }]} />
-        </View>
-        <View style={styles.contextItems}>
-          <View style={styles.contextItem}><Text style={styles.contextTime}>09:42</Text><Text style={styles.contextText}>Captured a photo of a blue folder</Text></View>
-          <View style={styles.contextItem}><Text style={styles.contextTime}>YESTERDAY</Text><Text style={styles.contextText}>Booked a train for tomorrow morning</Text></View>
-        </View>
-      </View>
+   <SectionTitle eyebrow="YOUR SIGNALS" title="Recent context" action="Open memory" onAction={() => onNavigate('memory')} />
+
+
+    <View style={styles.contextCard}>
+    {/* 👇 FIXED: Changed flexDirection from 'row' to 'column' so child views span full width */}
+    <View style={{ flexDirection: 'column', backgroundColor: '#16171D', borderRadius: 16, paddingVertical: 18, paddingHorizontal: 20, borderWidth: 1, borderColor: '#242630', width: '100%' }}>
+        {/* 🔮 THE RECENT CONTEXT RADAR FEED CARD CONTAINER ENGINE */}
+            <View style={{ width: '100%', marginTop: 8, marginBottom: 24 }}>
+               <UserPreferenceTimeline />
+                </View>
+             </View>
+             {/* Left Vertical Progress Line */}
+             <View style={styles.contextTimeline}>
+               {contextLogs.map((item, index) => (
+                 <React.Fragment key={`indicator-${item.id || index}`}>
+                   <View
+                     style={[
+                       styles.timelineDot,
+                       { backgroundColor: item.type === 'pink' ? theme.pink : theme.green }
+                     ]}
+                   />
+                   {/* Only render line segment if there's a subsequent item underneath */}
+                   {index < contextLogs.length - 1 && <View style={styles.timelineLine} />}
+                 </React.Fragment>
+               ))}
+             </View>
+
+             {/* Right Label and Action Log Text */}
+             <View style={styles.contextItems}>
+               {contextLogs.map((item, index) => (
+                 <View key={item.id || index} style={styles.contextItem}>
+                   <Text style={styles.contextTime}>{item.label}</Text>
+                   <Text style={styles.contextText}>{item.text}</Text>
+                 </View>
+               ))}
+             </View>
+           </View>
+
 
 
        {/* 🧭 INTENT ANCHOR CONTAINER WITH SLIDE ENTRANCE */}
@@ -1083,237 +1300,147 @@ function EventsScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) 
 }
 
 // --- MAIN CAPTURE SCREEN COMPONENT ---
+// --- MAIN CAPTURE SCREEN COMPONENT ---
 export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: string) => void; onCapture: (item: any) => void }) {
   const [mode, setMode] = useState<'note' | 'photo' | 'voice'>('note');
   const [text, setText] = useState('');
   const [saved, setSaved] = useState(false);
   const [selectedTag, setSelectedTag] = useState<TagOption>('Things');
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
 
-  // 🌟 THE DYNAMIC SHIFT: Initialized cleanly as null. No more hardcoded mock stubs!
-    const [analysis, setAnalysis] = useState<{
-      signal: string;
-      confidence: number;
-      likelyOmission: string;
-      explanation: string;
-      preventiveAction: string;
-      category?: string;
-    } | null>(null);
+  const [analysis, setAnalysis] = useState<{
+    signal: string;
+    confidence: number;
+    likelyOmission: string;
+    explanation: string;
+    preventiveAction: string;
+    category?: string;
+  } | null>(null);
 
   const analyzeMutation = useAnalyzeCapture();
 
-  let geminiResultJson: any = null;
+  // ✅ THE CRITICAL AUTH FIX: Instantiates the real logged-in Firebase user token dynamically
+  const authInstance = getAuth();
+  const loggedInFirebaseUser = authInstance.currentUser;
+  const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
 
-   const [analysisError, setAnalysisError] = useState<string | null>(null);
-
-   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
-
-  const userId = "Admin_ForgetMeNotAI"; // Dynamic user pipeline fallback parameter tracking
-
-
-  // Local style helper fallback object reference mapping
-  const theme = colors?.light || {
-    background: '#0A0A0A',
-    card: '#171717',
-    border: '#262626',
-    text: '#FFFFFF',
-    mutedForeground: '#737373',
-    cyan: '#00f0ff'
-  };
-
-  const captureContent = text.trim() || (mode === 'photo'
-      ? 'A visual context capture from the user that may contain an object, place, or note worth remembering.'
-      : 'A voice context capture from the user containing a thought they want ForgetMeNot to keep visible.');
-
-    // 🌟 THE EXACT SAVE CONTROLLER RE-FACTOR: Updated with an async execution pattern
-    const save = async () => {
-      if (!analysis) {
-        if (mode === 'note' && !text.trim()) return;
-        tap();
-        setAnalysisError('');
-
-        try {
-            // 1. Declare the variable outside the block so the entire function can see it
-
-                try {
-                    // 🌟 CLEAN CALL: Simply invoke the imported function with your form arguments
-                    const geminiResultJson = await fetchGeminiSignalAnalysis(text.trim(), selectedTag.toLowerCase());
-                    setAnalysis(geminiResultJson);
-                     } catch (parseError) {
-                          console.warn("🔥 JSON string structural truncation detected. Recovering using client-side fallback...");
-
-                          // Return a clean fallback object so your UI stays stable
-                          return {
-                            signal: "Analysis Routine Interrupted",
-                            confidence: 50,
-                            likelyOmission: "Travel Logistics Check",
-                            explanation: "The intelligence engine encountered a processing error while mapping this specific destination path.",
-                            preventiveAction: "Verify your travel route, site-access details, and hardware chargers manually.",
-                            category: selectedTag.toLowerCase()
-                          };
-                      setAnalysis(geminiResultJson);
-                        }
-                     // ✅ THE FIX: Stop execution immediately if data hasn't loaded yet
-                      if (!geminiResultJson) {
-                        console.warn("⚠️ Cannot save yet: Gemini analysis data is still loading or null.");
-                        return;
-                      }
-
-                // Map categories cleanly behind the scenes based on Gemini's JSON return payload
-                const modelCategory = geminiResultJson?.category?.toLowerCase();
-                if (modelCategory === 'people' || modelCategory === 'personal') setSelectedTag('People');
-                else if (modelCategory === 'places' || modelCategory === 'travel') setSelectedTag('Places');
-                else if (modelCategory === 'practical') setSelectedTag('Practical');
-                else setSelectedTag('Things');
-
-             } catch (err: any) {
-                     console.error("💥 Error fetching Gemini signal streams:", err);
-                     setAnalysisError(err?.message || 'I could not reach Gemini. Verify API parameters and try again.');
-                   } finally {
-                     setIsAiLoading(false); // Shuts off interface loader spinners
-                   }
-                   return;
-           }
-
+  const save = async () => {
+    // Phase 1: If Gemini analysis hasn't run yet, invoke the generator pipeline
+    if (!analysis) {
+      if (mode === 'note' && !text.trim()) return;
       tap();
-
-      // Assign color layouts based on selected categories
-      const activeColor = selectedTag === 'People'
-        ? customAccents.pink
-        : selectedTag === 'Places'
-          ? customAccents.gold
-          : customAccents.cyan;
-
-      // Initialize document allocation tracking parameters
-      let databaseDocumentId = Date.now().toString();
-      // 🌟 SYNC USER TARGET: Aligned cleanly with your active DB log user channel token string
-      const targetUserId = "Admin_ForgetMeNotAI";
+      setAnalysisError('');
+      setIsAiLoading(true);
 
       try {
-        console.log('🔮 Initalizing active Firestore telemetry stream thread...');
-         const isPeople = selectedTag === 'People';
-         const isPlaces = selectedTag === 'Places';
-         const isPractical = selectedTag === 'Practical' || selectedTag === 'Things';
+        const geminiResultJson = await fetchGeminiSignalAnalysis(text.trim(), selectedTag.toLowerCase());
 
-         const handleFetchAnalysis = async () => {
-           try {
-             await analyzeMutation.mutateAsync();
-           } catch (err) {
-             console.error("💥 Generation phase failure:", err);
-           }
-         };
+        if (!geminiResultJson) {
+          console.warn("⚠️ Cannot save yet: Gemini analysis data returned null.");
+          setIsAiLoading(false);
+          return;
+        }
 
-         const handleSaveToFirestore = async () => {
-           // ✅ Guard check: stop immediately if the unified state analysis is missing
-           if (!analysis) {
-             console.warn("⚠️ Aborting save: No active Gemini analysis found in state.");
-             return;
-           }
+        setAnalysis(geminiResultJson);
 
-           try {
-             // ✅ Consolidated Payload: Merging both of your object schemas into one clean payload
-             const docPayload = {
-               user_id: userId || "Admin_ForgetMeNotAI",
-               omission_item: analysis.likelyOmission || 'Context entry logged',
-               status: "active_obsession",
-               created_at: serverTimestamp(),
-               tag: selectedTag.toUpperCase(),
-               title: text.trim() || analysis.signal || `New ${selectedTag} Signal`,
-               detail: analysis.explanation || "System intelligence tracking sequence active.",
-               rawPrompt: text.trim(),
-               categoryTag: selectedTag.toLowerCase(),
+        // Auto-switch matching categorization chip indicators behind the scenes
+        const modelCategory = geminiResultJson?.category?.toLowerCase();
+        if (modelCategory === 'people' || modelCategory === 'personal') setSelectedTag('People');
+        else if (modelCategory === 'places' || modelCategory === 'travel') setSelectedTag('Places');
+        else setSelectedTag('Things');
 
-               // Legacy analysis child nesting mapping matching your old schema
-               analysis: {
-                 signal: analysis.signal,
-                 confidence: analysis.confidence,
-                 likelyOmission: analysis.likelyOmission,
-                 explanation: analysis.explanation,
-                 preventiveAction: analysis.preventiveAction,
-                 category: analysis.category,
-               },
+        setIsAiLoading(false);
+        return; // Stops here so the user can review the card on screen before saving
+      } catch (err: any) {
+        console.error("💥 Error fetching Gemini signal streams:", err);
+        setAnalysisError(err?.message || 'I could not reach Gemini. Verify API parameters and try again.');
+        setIsAiLoading(false);
+        return;
+      }
+    }
 
-               intent_anchor: {
-                 anchor_point: isPeople ? "Transit Sequence Initiation (Departure Window)" : "Routine Path Execution Window",
-                 user_unstated_goal: `Fulfill objective regarding ${selectedTag.toLowerCase()} with zero routine memory drops or friction loops.`,
-                 routine_deviation_probability: `${analysis.confidence - 12}% Deviation Risk Index`
-               },
+    // Phase 2: Save the fully reviewed model metadata down to your Firestore collection
+    tap();
 
-               replies_shield: {
-                 critical_contact: isPlaces ? "Primary Core Contact Identity" : "Maya (System Context Coordinator)",
-                 preemptive_auto_draft: `System alert notification trace: Processing task addressing active ${selectedTag.toLowerCase()} parameters loop.`,
-                 trigger_condition: "Fires automatically upon localized telemetry perimeter radar check variance."
-               },
+    const activeColor = selectedTag === 'People'
+      ? '#ff007f'
+      : selectedTag === 'Places'
+        ? '#ffbf00'
+        : '#00f0ff';
 
-               radar_scopes: {
-                 is_today: true,
-                 is_personal: isPeople || isPlaces,
-                 is_practical: isPractical
-               },
+    let databaseDocumentId = Date.now().toString();
+    const isPeople = selectedTag === 'People';
+    const isPlaces = selectedTag === 'Places';
+    const isPractical = selectedTag === 'Things';
 
-               gemini_signal_read: {
-                 signal_signature: analysis.signal,
-                 confidence_rating: Number(analysis.confidence) || 95,
-                 structural_explanation: analysis.explanation,
-                 preventive_action_blueprint: analysis.preventiveAction,
-                 cascading_dominoes: [
-                   `Delayed ${(text.trim() || 'preparation').toLowerCase()} sequence (1.42x Velocity Friction engagement)`,
-                   "Shortened response window capacity threshold decay",
-                   `Downstream tracking failure risk vector for structural ${selectedTag.toLowerCase()} loops`
-                 ],
-                 holographic_network_nodes: [selectedTag.toUpperCase(), "DELAYED_PREP", "VELOCITY_FRICTION", "OMISSION_RISK"]
-               },
+    try {
+      console.log('🔮 Compiling consolidated payload for authenticated user channel:', userId);
 
-               metrics: {
-                 probability_index: Number(analysis.confidence) || 95,
-                 loop_friction: (analysis.confidence || 95) > 80 ? "1.42x Velocity Friction" : "1.18x Routine Friction",
-                 time_gravity: "T-Minus 14 Hours",
-                 severity: (analysis.confidence || 95) > 85 ? "Catastrophic Impact" : "High Impact"
-               },
+      const docPayload = {
+        // ✅ FIXED USER_ID: Points securely to the dynamic logged-in user state instead of a hardcoded string
+        user_id: userId,
+        omission_item: analysis.likelyOmission || 'Context entry logged',
+        status: "active_obsession",
+        created_at: serverTimestamp(),
+        tag: selectedTag.toUpperCase(),
+        title: text.trim() || analysis.signal || `New ${selectedTag} Signal`,
+        detail: analysis.explanation || "System intelligence tracking sequence active.",
+        rawPrompt: text.trim(),
+        categoryTag: selectedTag.toLowerCase(),
+        color: activeColor,
 
-               dominoes: [
-                 `Delayed ${(analysis.signal || 'preparation').toLowerCase()}`,
-                 "Shortened response window",
-                 `Potential downstream ${(analysis.likelyOmission || 'omission').toLowerCase()} failure risk`
-               ],
+        analysis: {
+          signal: analysis.signal,
+          confidence: analysis.confidence,
+          likelyOmission: analysis.likelyOmission,
+          explanation: analysis.explanation,
+          preventiveAction: analysis.preventiveAction,
+          category: analysis.category || selectedTag.toLowerCase(),
+        },
 
-               nodes: [
-                 (analysis.likelyOmission || 'OMISSION').toUpperCase(),
-                 "DELAYED PREP",
-                 "TIMELINE DECAY",
-                 "MISSED CORE"
-               ],
+        intent_anchor: {
+          anchor_point: isPeople ? "Transit Sequence Initiation (Departure Window)" : "Routine Path Execution Window",
+          user_unstated_goal: `Fulfill objective regarding ${selectedTag.toLowerCase()} with zero routine memory drops.`,
+          routine_deviation_probability: `${analysis.confidence - 12}% Deviation Risk Index`
+        },
 
-               probability: `${analysis.confidence || 95}%`,
-               multiplier: (analysis.confidence || 95) > 80 ? "1.42x Velocity Friction" : "1.18x Routine Friction",
-               timeGravity: "T-Minus 14 Hours",
-               severity: (analysis.confidence || 95) > 85 ? "Catastrophic Impact" : "High Impact",
-               dependencyNodesCount: "04 Downstream Nodes",
-               flowVelocity: `${(analysis.confidence || 95) - 5}% Flow Velocity`,
-               mitigation: analysis.preventiveAction || 'Place items beside your active layout bag'
-             };
+        metrics: {
+          probability_index: Number(analysis.confidence) || 95,
+          loop_friction: (analysis.confidence || 95) > 80 ? "1.42x Velocity Friction" : "1.18x Routine Friction",
+          time_gravity: "T-Minus 14 Hours",
+          severity: (analysis.confidence || 95) > 85 ? "Catastrophic Impact" : "High Impact"
+        },
 
-             // ✅ Single Fire Write: Sends the full payload in one clean operational push
-             const docRef = await addDoc(collection(db, "analyses"), docPayload);
-             console.log('🛡️ Document logged cleanly inside Firestore. Cloud Reference Key ID:', docRef.id);
+        dominoes: [
+          `Delayed ${(analysis.signal || 'preparation').toLowerCase()}`,
+          "Shortened response window",
+          `Potential downstream ${(analysis.likelyOmission || 'omission').toLowerCase()} failure risk`
+        ],
 
-             // Assign to your global scope variable track if declared outside
-             databaseDocumentId = docRef.id;
-             console.log('🔮  Stored in Firestore telemetry stream thread...');
+        nodes: [
+          (analysis.likelyOmission || 'OMISSION').toUpperCase(),
+          "DELAYED PREP",
+          "TIMELINE DECAY",
+          "MISSED CORE"
+        ],
 
-           } catch (dbError) {
-             console.error('💥 Crash writing telemetry data down to your Firestore collection:', dbError);
-           }
-         };
+        probability: `${analysis.confidence || 95}%`,
+        multiplier: (analysis.confidence || 95) > 80 ? "1.42x Velocity Friction" : "1.18x Routine Friction",
+        timeGravity: "T-Minus 14 Hours",
+        severity: (analysis.confidence || 95) > 85 ? "Catastrophic Impact" : "High Impact",
+        dependencyNodesCount: "04 Downstream Nodes",
+        flowVelocity: `${(analysis.confidence || 95) - 5}% Flow Velocity`,
+        mitigation: analysis.preventiveAction || 'Place items beside your active layout bag'
+      };
 
-     } catch (dbError) {
-             console.error('💥 Crash writing telemetry data down to your Firestore collection:', dbError);
-             // Fallback tracking parameters execute to prevent local app blockages if network times out
-           }
+      // Push document parameters up to the collection matrix safely
+      const docRef = await addDoc(collection(db, "analyses"), docPayload);
+      databaseDocumentId = docRef.id;
+      console.log('🛡️ Document logged inside Firestore under current user. Reference Key ID:', databaseDocumentId);
 
-
-      // Passes dynamic data down through your layout state hooks pipeline
       onCapture({
-        id: databaseDocumentId, // ✅ Uses live Firestore record pointer string mapping safely
+        id: databaseDocumentId,
         title: analysis.signal || text.trim() || `New ${selectedTag} Context`,
         detail: `${analysis.likelyOmission || 'Context entry logged'} · ${analysis.confidence || 95}% likely`,
         tag: selectedTag.toUpperCase(),
@@ -1325,13 +1452,11 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
       setSaved(true);
       setText('');
       setAnalysis(null);
-      setIsAiLoading(false);
-      onNavigate('Home');
-         console.log('🔮 Stored in Firestore DB');
-
-    };
-
-
+      onNavigate('home');
+    } catch (dbError) {
+      console.error('💥 Crash writing telemetry data down to your Firestore collection:', dbError);
+    }
+  };
 
     return (
 
@@ -1761,6 +1886,8 @@ export default function Home() {
                   />
                 );
               }
+
+
 
     switch (screen) {
       case 'events': return <EventsScreen onNavigate={navigate} />;
@@ -2627,7 +2754,8 @@ innerScroll: {
     textShadowRadius: 3,
   },
   royalWatchDigital: {
-    color: '#F3E5AB', // Silk Cream Satin Sub-Text Accent
+    color: '#F3E5AB', // Silk Cream Satin Sub-T
+    ext: 'Accent',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.8,
@@ -2636,8 +2764,17 @@ innerScroll: {
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1.5 },
     textShadowRadius: 2,
-  }
+  },
 
-
+  container: { flex: 1, backgroundColor: theme.background, justifyContent: 'center', padding: 16 },
+  contextCard: { flexDirection: 'row', backgroundColor: theme.cardBg, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 20 },
+  contextTimeline: { alignItems: 'center', marginRight: 16, paddingVertical: 4 },
+  timelineDot: { width: 8, height: 8, borderRadius: 4 },
+  timelineLine: { width: 1, flex: 1, backgroundColor: theme.lineColor, marginVertical: 4 },
+  contextItems: { flex: 1, gap: 20 },
+  contextItem: { flexDirection: 'column' },
+  contextTime: { fontSize: 10, fontWeight: '700', color: theme.textMuted, marginBottom: 2, letterSpacing: 0.5 },
+  contextText: { fontSize: 14, color: theme.textMain, fontWeight: '400', lineHeight: 20 },
+  loader: { flex: 1, backgroundColor: theme.background, justifyContent: 'center' },
 
 });

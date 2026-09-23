@@ -2,6 +2,7 @@ import { db } from './firebaseConfig'; // Ensure this points to your actual Fire
 import { collection, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { fetchGeminiSignalAnalysis } from './geminiService'; // Update path based on your file structure
 import { Alert } from 'react-native';
+import { getAuth } from 'firebase/auth';
 
 // Define types for our payload parameters
 interface SaveSignalParams {
@@ -28,7 +29,10 @@ interface SaveSignalParams {
  */
 export const saveOrUpdateSignalAnalysis = async (params: SaveSignalParams): Promise<any> => {
   const { text, selectedTag, userId, editingRecordId, customAccents } = params;
-  const targetUserId = userId || "Admin_ForgetMeNotAI";
+  // ✅ THE CRITICAL AUTH FIX: Instantiates the real logged-in Firebase user token dynamically
+  const authInstance = getAuth();
+  const loggedInFirebaseUser = authInstance.currentUser;
+  const targetUserId = userId || loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
 
   let geminiResultJson: any = null;
 

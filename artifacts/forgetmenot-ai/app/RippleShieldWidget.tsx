@@ -4,13 +4,18 @@ import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestor
 import { db } from '../config/firebaseConfig';
 import { Feather } from '@expo/vector-icons';
 import { rippleStyles } from './RippleShieldWidget.styles';
+import { getAuth } from 'firebase/auth';
 
 interface RippleShieldProps {
   onPreventRipple: () => void;
 }
 
 export function RippleShieldWidget({ onPreventRipple }: RippleShieldProps) {
-  const userId = "Admin_ForgetMeNotAI";
+  // ✅ THE CRITICAL AUTH FIX: Instantiates the real logged-in Firebase user token dynamically
+  const authInstance = getAuth();
+  const loggedInFirebaseUser = authInstance.currentUser;
+  const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
+
 
   const [loading, setLoading] = useState(true);
   const [matrixSheetVisible, setMatrixSheetVisible] = useState(false);

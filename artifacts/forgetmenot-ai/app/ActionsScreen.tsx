@@ -5,6 +5,7 @@ import { View, ScrollView, Text, Pressable, StyleSheet, ActivityIndicator, Image
 import { Feather } from '@expo/vector-icons'; // Ensure your icon packs are imported cleanly
 import { db } from '../config/firebaseConfig'; // Ensure path aligns with your directory mappings
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 
 
@@ -45,7 +46,11 @@ function ScreenHeader({
 
 
 function ActionsScreen({ onBack }: { onBack: () => void }) {
-  const userId = "Admin_ForgetMeNotAI";
+
+      // ✅ THE CRITICAL AUTH FIX: Instantiates the real logged-in Firebase user token dynamically
+      const authInstance = getAuth();
+      const loggedInFirebaseUser = authInstance.currentUser;
+      const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
 
   // 🌟 STATE HOKS MANAGEMENT
   const [actions, setActions] = useState<any[]>([]);

@@ -4,6 +4,7 @@ import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestor
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { db } from '../config/firebaseConfig'; // Ensure this matches your file structures
 import { Feather } from '@expo/vector-icons';
+import { getAuth } from 'firebase/auth';
 
 // Standard fallback palette to keep consistency across view files
 const customAccents = {
@@ -91,7 +92,11 @@ function PredictionCard({ item, onPress }: { item: any; onPress: () => void }) {
 
 
 export default function PredictionScreen({ onBack, onNavigate }: { onBack: () => void; onNavigate: (screen: string) => void }) {
-  const userId = "Admin_ForgetMeNotAI";
+        // ✅ THE CRITICAL AUTH FIX: Instantiates the real logged-in Firebase user token dynamically
+        const authInstance = getAuth();
+        const loggedInFirebaseUser = authInstance.currentUser;
+        const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
+
 
   // 🌟 REACTIVE STATE HOOKS
   const [dbSignals, setDbSignals] = useState<any[]>([]);

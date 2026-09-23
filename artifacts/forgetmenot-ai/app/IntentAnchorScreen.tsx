@@ -2,27 +2,38 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { IntentAnchorWidget, DBIntentAnchor } from './IntentAnchorWidget';
+import { getAuth } from 'firebase/auth';
 
 export function IntentAnchorScreen() {
   const [loading, setLoading] = useState(true);
   const [analysisData, setAnalysisData] = useState<DBIntentAnchor | null>(null);
 
   useEffect(() => {
-    // 💡 Replace 'analyses_collection' and 'current_session' with your real path references
+    // ✅ Verification Injection: Grab active session references safely
+    const authInstance = getAuth();
+    const loggedInFirebaseUser = authInstance.currentUser;
+    const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
+
+    console.log(`📡 Stream targeting isolated profile space: [${userId}]`);
+
+    // 📡 Updated Query path logic passing your dynamic user verification parameter
     const unsubscribe = firestore()
       .collection('analyses_collection')
-      .doc('current_session')
+      .doc(userId) // 🔑 Appended as explicit document query parameter
       .onSnapshot(
         (documentSnapshot) => {
-          if (documentSnapshot.exists) {
+          if (documentSnapshot && documentSnapshot.exists) {
             const data = documentSnapshot.data();
 
             if (data) {
               setAnalysisData({
                 intent_anchor: data.intent_anchor,
-                metrics: data.metrics, // Attaches matching telemetry metrics saved for this document snapshot
+                metrics: data.metrics,
               });
             }
+          } else {
+            // Safe fallback if user specific documentation frame is absent
+            setAnalysisData(null);
           }
           setLoading(false);
         },
@@ -33,7 +44,7 @@ export function IntentAnchorScreen() {
       );
 
     return () => unsubscribe();
-  }, []);
+  }, []); // Runs safely on screen initialization layer
 
   if (loading) {
     return (
@@ -58,6 +69,7 @@ export function IntentAnchorScreen() {
     />
   );
 }
+
 
 const styles = StyleSheet.create({
   centerContainer: {

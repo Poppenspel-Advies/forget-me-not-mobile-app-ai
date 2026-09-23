@@ -5,6 +5,9 @@ const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b-it:generateContent';
 
+  const GEMINI_ENDPOINT_PROFILE_PAGE =
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent";
+
 /**
  * 🌟 CORE AI CORE SERVICE PIPELINE: Calls Google AI Studio API and extracts structured JSON
  * @param userPrompt Captured text notes, photo details description, or voice over transcript text string.
@@ -150,15 +153,12 @@ export const fetchGeminiProfileRadarInsights = async (targetLocation: string): P
   try {
     console.log(`📡 Dispatched specialized 30-mile radius radar telemetry to Gemini for: [${targetLocation}]`);
 
-    // ✅ FIXED ENDPOINT: Uses production-stable gemini-2.5-flash to completely stop repetition loops
-    const targetEndpoint = `https://googleapis.com`;
-
-    const apiPayloadResponse = await fetch(targetEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY,
-      },
+    const apiPayloadResponse = await fetch(GEMINI_ENDPOINT_PROFILE_PAGE , {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': GEMINI_API_KEY,
+        },
       body: JSON.stringify({
         contents: [
           {
@@ -173,7 +173,6 @@ export const fetchGeminiProfileRadarInsights = async (targetLocation: string): P
         },
         generationConfig: {
           responseMimeType: "application/json",
-          temperature: 0.5, // ✅ FIXED: Increased to 0.5 to keep generation creative and natural
           maxOutputTokens: 2500, // ✅ FIXED: Increased to 2500 tokens so text never cuts off
           responseSchema: {
             type: "object",
