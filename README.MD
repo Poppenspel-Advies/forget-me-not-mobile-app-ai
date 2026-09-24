@@ -24,6 +24,56 @@ ForgetMeNot AI is a high-fidelity, cross-platform mobile and web application bui
 
 ---
 
+## 🛠️ Technology Stack
+
+ForgetMeNot AI is architected as a highly modular, cross-platform mobile ecosystem powered by edge intelligence, flexible backend cloud routing, and dynamic LLM orchestration.
+
+### 📱 Frontend & Mobile Client
+*   **React Native & Expo:** Cross-platform native application container targeting iOS and Android platforms from a single codebase.
+*   **TypeScript:** Type-safe scripting language driving state management, UI orchestration, and strict component definition.
+
+### 🤖 Artificial Intelligence & Cognitive Layer
+*   **Google Gemini API:** Native large language model integration managing structural prompt execution, cognitive synthesis, and contextual intent understanding.
+*   **Python:** Engine for supplementary data processing pipelines, algorithmic automation tasks, and underlying developer tooling.
+
+### 🛡️ Cloud Infrastructure & BaaS (Backend-as-a-Service)
+*   **Google Firebase Suite:** Complete infrastructure backbone facilitating:
+    *   *Firebase Authentication:* Secure identity provision and active session verification.
+    *   *Cloud Firestore / Realtime DB:* Structured object state storage and immediate data synchronization.
+    *   *Firebase Storage:* Repository routing for file objects, binaries, and user media logs.
+    *   *Cloud Messaging (FCM):* Native client push alert distribution system.
+*   **Node.js Runtime:** Underlying engine powering cross-dependency management and ecosystem operational scripts.
+
+### 🌐 Integrated Core Service APIs
+*   **Google Maps API:** Native geospatial routing, point-of-interest calculation, and visual map rendering.
+*   **OpenWeather API:** Real-time atmospheric condition retrieval, historical metrics, and telemetry scraping.
+*   **EmailJS API:** Serverless client-side secure SMTP payload dispatching for immediate transaction and alert notification delivery.
+
+---
+
+## 🔄 System Data Architecture Flow
+
+```text
+┌────────────────────────────────────────────────────────┐
+│             Expo Mobile Client (React Native)          │
+└───────────┬────────────────────┬───────────────────▲───┘
+            │                    │                   │
+   Fetch Geo/Weather     Read/Write State      Push Alerts /
+            │                    │             Email Dispatches
+            ▼                    ▼                   │
+┌──────────────────────┐ ┌───────────────┐ ┌─────────┴──────────┐
+│ Google Maps &        │ │  Google       │ │ Firebase Messaging │
+│ OpenWeather Services │ │  Firebase     │ │ & EmailJS Pipelines│
+└───────────┬──────────┘ └───────┬───────┘ └─────────▲──────────┘
+            │                    │                   │
+            │  Compile Context   │                   │
+            ▼                    ▼                   │
+┌────────────────────────────────────────────────────┴──┐
+│             Google Gemini API (LLM Engine)            │
+└───────────────────────────────────────────────────────┘
+```
+
+
 ## 📋 Comprehensive Component Props Matrix Table
 
 | Component Name | File Path Source Target | Prop Key | Prop Type | Required? | Functional Description |
@@ -46,6 +96,28 @@ ForgetMeNot AI is a high-fidelity, cross-platform mobile and web application bui
 ---
 
 ## ⚡ Deployment & Quick-Start Execution
+
+## 🚀 Getting Started
+
+Follow these instructions to configure dependencies and spin up the local development environment.
+
+### 📦 1. Installation
+
+Clone the repository and install the standard dependencies:
+
+```bash
+# Clone the repository
+git clone https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai.git
+cd artifacts/forgetmenot-ai
+# Install core packages
+npm install
+```
+
+To enable the text-to-speech engine for dynamic voiceovers, ensure you install the native `expo-speech` plugin module:
+
+```bash
+# Install native speech module via Expo CLI
+npx expo install expo-speech
 
 ### 1. Prerequisites Setup
 Ensure your local environment runs Node.js (v18+) and your package architecture runs **pnpm** or **npm**.
@@ -123,6 +195,10 @@ To avoid web-rendering lag or stuttering frame drops during authentication loops
     ```
 
 ---
+
+## 📹 Expo Text to Speech
+
+npx expo install expo-speech
 
 ---
 

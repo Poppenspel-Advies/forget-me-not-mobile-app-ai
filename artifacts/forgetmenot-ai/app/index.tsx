@@ -8,6 +8,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  SafeAreaView,
   StyleSheet,
   Text,
   Dimensions,
@@ -28,6 +29,7 @@ import { captureScreenStyles, customAccents } from './CaptureScreen.styles';
 import { IntentAnchorWidget, DBIntentAnchor } from './IntentAnchorWidget';
 import { RippleShieldWidget } from './RippleShieldWidget'; // Adjust the relative path if you saved the widget file in a separate components folder
 import { MemoryScreen } from './MemoryScreen';
+import { MediaCaptureEngine } from './MediaCaptureEngine';
 import { fetchGeminiSignalAnalysis } from '../config/geminiService';
 import ActionsScreen from './ActionsScreen';
 import TransitWeatherWidget from './TransitWeatherWidget';
@@ -122,6 +124,13 @@ const [analysisData, setAnalysisData] = useState<any>(null);
 
 export const authInstance = getAuth();
 
+const [currentMode, setCurrentMode] = useState<'photo' | 'audio'>('photo');
+const [capturedPayload, setCapturedPayload] = useState<{ base64: string; uri: string } | null>(null);
+
+//const customAccents = { cyan: '#00f0ff', gold: '#FFD700' };
+
+
+
 const capturedSeed: CapturedItem[] = [
   {
     id: '1',
@@ -206,12 +215,6 @@ export function CategoryContextSelector({
 }
 
 
- // if (loading) {
-   // return <ActivityIndicator size="small" color={theme.green} style={styles.loader} />;
- // }
-
- // if (contextLogs.length === 0) return null;
-
 function tap() {
   // Optional chaining safely drops execution if the native module is absent (like on Web)
   Haptics?.selectionAsync?.().catch(() => {
@@ -279,36 +282,6 @@ function AnimatedTagChip({
     </Animated.View>
   );
 }
-
-/*
-// Global UI Layout Wrapper
-export function CategoryContextSelector({
-  selectedTag,
-  setSelectedTag,
-}: {
-  selectedTag: TagOption;
-  setSelectedTag: (tag: TagOption) => void;
-}) {
-  return (
-    <View style={styles.tagSelectorContainer}>
-      <Text style={styles.tagSelectorTitle}>Select Category Context</Text>
-      <View style={styles.tagSelectorRow}>
-        {(['People', 'Places', 'Things'] as TagOption[]).map((tag) => (
-          <AnimatedTagChip
-            key={tag}
-            tag={tag}
-            isActive={selectedTag === tag}
-            onPress={() => {
-              if (typeof tap === 'function') tap();
-              setSelectedTag(tag);
-            }}
-          />
-        ))}
-      </View>
-    </View>
-  );
-}
- */
 
 
 function FGlobe({ size = 50, showWord = false }: { size?: number; showWord?: boolean }) {
@@ -1396,26 +1369,68 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
                   <Text style={styles.inputHint}>ForgetMeNot will connect this to your calendar, places, people, and patterns.</Text>
                 </View>
               ) : (
-                <Pressable onPress={() => { tap(); }} style={styles.mediaCapture}>
-                  <View style={styles.mediaIcon}>
-                    <Feather
-                      name={mode === 'photo' ? 'camera' : 'mic'}
-                      size={26}
-                      color={mode === 'photo' ? customAccents.cyan : customAccents.gold}
-                    />
+                mode === 'photo' ? (
+                  // 📊 PHOTO MODE: Displays the instructional context card and two separate action buttons
+                  <View style={{ width: '100%' }}>
+
+                    {/* Main Instruction Card Context */}
+                    <View style={styles.mediaCapture}>
+                      <View style={styles.mediaIcon}>
+                        <Feather name="camera" size={26} color={customAccents.cyan} />
+                      </View>
+                      <Text style={styles.mediaTitle}>Scan or Upload Context</Text>
+                      <Text style={styles.mediaCopy}>
+                        Use your camera to capture an object, note, or scene, or upload an image frame from your photo gallery.
+                      </Text>
+                    </View>
+
+                    {/* Split Action Buttons Row Container */}
+                    <View style={{ flexDirection: 'row', gap: 12, width: '100%', marginTop: 12 }}>
+
+                      {/* 📸 Option 1: Launch Device Camera Hardware */}
+                      <Pressable
+                        onPress={async () => {
+                          // 💡 Call your camera picker implementation function here
+                          console.log("Triggering camera hardware...");
+                        }}
+                        style={({ pressed }) => [
+                          styles.actionBtn,
+                          { borderColor: customAccents.cyan, opacity: pressed ? 0.7 : 1 }
+                        ]}
+                      >
+                        <Feather name="aperture" size={16} color={customAccents.cyan} />
+                        <Text style={[styles.actionBtnText, { color: customAccents.cyan }]}>OPEN CAMERA</Text>
+                      </Pressable>
+
+                      {/* 🖼️ Option 2: Browse Local File Device Gallery */}
+                      <Pressable
+                        onPress={async () => {
+                          // 💡 Call your library photo picker implementation function here
+                          console.log("Opening device photo library...");
+                        }}
+                        style={({ pressed }) => [
+                          styles.actionBtn,
+                          { borderColor: '#ffffff', opacity: pressed ? 0.7 : 1 }
+                        ]}
+                      >
+                        <Feather name="upload" size={16} color="#ffffff" />
+                        <Text style={[styles.actionBtnText, { color: '#ffffff' }]}>UPLOAD PHOTO</Text>
+                      </Pressable>
+
+                    </View>
                   </View>
-                  <Text style={styles.mediaTitle}>
-                    {mode === 'photo' ? 'Point at the context' : 'Speak the context'}
-                  </Text>
-                  <Text style={styles.mediaCopy}>
-                    {mode === 'photo'
-                      ? 'Use your camera to capture an object, note, or scene.'
-                      : 'Hold to record a thought before it disappears.'}
-                  </Text>
-                  <Text style={[styles.mediaAction, { color: mode === 'photo' ? customAccents.cyan : customAccents.gold }]}>
-                    {mode === 'photo' ? 'OPEN CAMERA' : 'START RECORDING'}
-                  </Text>
-                </Pressable>
+                ) : (
+                  // 🎙️ AUDIO MODE: Keeps your original operational recording execution layout 100% untouched
+                  <Pressable onPress={() => { tap(); }} style={styles.mediaCapture}>
+                    <View style={styles.mediaIcon}>
+                      <Feather name="mic" size={26} color={customAccents.gold} />
+                    </View>
+                    <Text style={styles.mediaTitle}>Speak the context</Text>
+                    <Text style={styles.mediaCopy}>Hold to record a thought before it disappears.</Text>
+                    <Text style={[styles.mediaAction, { color: customAccents.gold }]}>START RECORDING</Text>
+                  </Pressable>
+                )
+
               )}
 
               {/* --- DYNAMIC GEMINI DIAGNOSTIC ANALYSIS CARD VIEW --- */}
@@ -1744,7 +1759,7 @@ export default function Home() {
   // ✅ FIXED: Instantiated with the exact matching variable names expected by your content loop checks!
   const [activeSessionUserId, setActiveSessionUserId] = useState<string | null>(null);
   const currentNav = useMemo(() => ['home', 'events', 'capture', 'chat', 'profile'].includes(screen) ? screen : 'home', [screen]) as Screen;
-  const secondary = screen === 'prediction' || screen === 'actions' || screen === 'memory' || screen === 'contact';
+  const secondary = screen === 'chat' || screen === 'prediction' || screen === 'actions' || screen === 'memory' || screen === 'contact';
 
   const content = (() => {
 
@@ -2651,5 +2666,23 @@ innerScroll: {
   contextTime: { fontSize: 10, fontWeight: '700', color: theme.textMuted, marginBottom: 2, letterSpacing: 0.5 },
   contextText: { fontSize: 14, color: theme.textMain, fontWeight: '400', lineHeight: 20 },
   loader: { flex: 1, backgroundColor: theme.background, justifyContent: 'center' },
+
+    actionBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      borderRadius: 12,
+      borderWidth: 1.2,
+      backgroundColor: '#16171D', // Matches your template layout color profiles
+      gap: 8,
+    },
+    actionBtnText: {
+      fontSize: 11,
+      fontWeight: '800',
+      letterSpacing: 0.8,
+    },
+
 
 });

@@ -9,21 +9,24 @@ export function IntentAnchorScreen() {
   const [analysisData, setAnalysisData] = useState<DBIntentAnchor | null>(null);
 
   useEffect(() => {
-    // ✅ Verification Injection: Grab active session references safely
+    // Verification Injection: Grab active session references safely
     const authInstance = getAuth();
     const loggedInFirebaseUser = authInstance.currentUser;
     const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
 
-    console.log(`📡 Stream targeting isolated profile space: [${userId}]`);
+    console.log(`📡 Collection stream filtering by user field: [${userId}]`);
 
-    // 📡 Updated Query path logic passing your dynamic user verification parameter
+    // 📡 Updated to use an explicit collection query selector (.where)
     const unsubscribe = firestore()
       .collection('analyses_collection')
-      .doc(userId) // 🔑 Appended as explicit document query parameter
+      .where('user_id', '==', userId) // 🔑 Explicitly match user fields inside documents
       .onSnapshot(
-        (documentSnapshot) => {
-          if (documentSnapshot && documentSnapshot.exists) {
-            const data = documentSnapshot.data();
+        (querySnapshot) => {
+          // Check if any matching records were found in the database array snapshot
+          if (querySnapshot && !querySnapshot.empty) {
+            // Target the first document in the matched array list
+            const matchedDoc = querySnapshot.docs[0];
+            const data = matchedDoc.data();
 
             if (data) {
               setAnalysisData({
@@ -32,13 +35,13 @@ export function IntentAnchorScreen() {
               });
             }
           } else {
-            // Safe fallback if user specific documentation frame is absent
+            // Clear layout metrics cleanly if no matching user records exist
             setAnalysisData(null);
           }
           setLoading(false);
         },
         (error) => {
-          console.error('Firestore analysis payload pipeline stream error:', error);
+          console.error('Firestore analysis query filtering pipeline failure:', error);
           setLoading(false);
         }
       );
@@ -69,7 +72,6 @@ export function IntentAnchorScreen() {
     />
   );
 }
-
 
 const styles = StyleSheet.create({
   centerContainer: {
