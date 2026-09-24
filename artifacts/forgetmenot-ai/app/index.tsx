@@ -39,6 +39,7 @@ import PredictionScreen from './PredictionScreen'; // Update path if stored insi
 import ContactScreen from './ContactScreen'; //
 // ✅ Add this line at the top asset import block section of app/index.tsx
 import ChatScreen from './ChatScreen';
+import EventsScreen from './EventsScreen';
 import firestore from '@react-native-firebase/firestore';
 import { initializeApp, getApps } from 'firebase/app';
 // ✅ Add this line alongside your other screen/component imports at the top of app/index.tsx
@@ -1105,49 +1106,7 @@ useEffect(() => {
   );
 }
 
-function EventsScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
-  const [selectedDay, setSelectedDay] = useState(18);
-  const days = [16, 17, 18, 19, 20, 21, 22];
-  return (
-    <View style={styles.screen}>
-      <ScreenHeader title="Your events" subtitle="The shape of your next few days" right={<Pressable onPress={() => { tap(); onNavigate('capture'); }} style={styles.iconButton}><Feather name="plus" size={21} color={theme.cyan} /></Pressable>} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.innerScroll}>
-        <View style={styles.weekRow}>
-          {days.map((day, i) => {
-            const active = day === selectedDay;
-            return (
-              <Pressable key={day} onPress={() => { tap(); setSelectedDay(day); }} style={[styles.dayCell, active && styles.dayCellActive]}>
-                <Text style={[styles.dayName, active && styles.dayNameActive]}>{['S', 'M', 'T', 'W', 'T', 'F', 'S'][i]}</Text>
-                <Text style={[styles.dayNumber, active && styles.dayNumberActive]}>{day}</Text>
-                {day === 18 ? <View style={[styles.dayDot, { backgroundColor: active ? theme.background : theme.pink }]} /> : null}
-              </Pressable>
-            );
-          })}
-        </View>
-        <View style={styles.eventIntro}>
-          <Text style={styles.dateBig}>TUESDAY, 18 AUG</Text>
-          <Pill label="3 EVENTS" color={theme.green} />
-        </View>
-        {events.map((event) => (
-          <View key={event.title} style={styles.eventRow}>
-            <View style={styles.eventTime}><Text style={styles.eventTimeText}>{event.time}</Text><Text style={styles.eventAm}>{event.am}</Text></View>
-            <View style={[styles.eventBar, { backgroundColor: event.color }]} />
-            <View style={styles.eventInfo}><Text style={styles.eventTitle}>{event.title}</Text><Text style={styles.eventType}>{event.type} · SYNCED</Text></View>
-            <Feather name="chevron-right" size={17} color={theme.mutedForeground} />
-          </View>
-        ))}
-        <View style={styles.eventInsight}>
-          <View style={styles.insightIcon}><Feather name="eye" size={18} color={theme.gold} /></View>
-          <View style={styles.insightCopy}><Text style={styles.insightLabel}>OMISSION RADAR</Text><Text style={styles.insightText}>Your 6 PM errand is close to the supermarket. Want me to remind you about the dry cleaning when you leave work?</Text></View>
-          <Pressable onPress={() => { tap(); onNavigate('actions'); }}><Feather name="arrow-up-right" size={18} color={theme.gold} /></Pressable>
-        </View>
-        <Text style={styles.eventsNote}>Events are a signal, not a checklist. ForgetMeNot looks between them.</Text>
-      </ScrollView>
-    </View>
-  );
-}
 
-// --- MAIN CAPTURE SCREEN COMPONENT ---
 // --- MAIN CAPTURE SCREEN COMPONENT ---
 export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: string) => void; onCapture: (item: any) => void }) {
   const [mode, setMode] = useState<'note' | 'photo' | 'voice'>('note');
