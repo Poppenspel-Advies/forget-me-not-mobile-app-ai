@@ -17,9 +17,18 @@
       "android": {
         "buildType": "app-bundle"
       }
+    },
+    "ForgetMeNot AI": {
+      "ios": {
+        "simulator": false
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {},
+    "ForgetMeNot AI": {}
   }
 }
