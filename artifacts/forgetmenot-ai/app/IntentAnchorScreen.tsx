@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { IntentAnchorWidget, DBIntentAnchor } from './IntentAnchorWidget';
 import { getAuth } from 'firebase/auth';
 

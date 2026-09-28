@@ -98,6 +98,11 @@ export default function ChatScreen({ onBack }: { onBack: () => void }) {
 
   const scrollViewRef = useRef<ScrollView>(null);
 
+    // 🟢 PLACE THIS RIGHT ABOVE YOUR `useEffect` IN THE COMPONENT BODY
+    const safeInsets = useSafeAreaInsets();
+    const insets = safeInsets || { top: 0, bottom: 0, left: 0, right: 0 };
+
+
   useEffect(() => {
     console.log("🖥️ [DIAGNOSTIC] ChatScreen rendered successfully.");
     console.log(`📱 Platform Target Detected: ${Platform.OS}`);
@@ -378,7 +383,15 @@ export default function ChatScreen({ onBack }: { onBack: () => void }) {
         </ScrollView>
 
         {/* Composer is a normal flex child and cannot be hidden by ScrollView. */}
-        <View style={styles.chatComposer}>
+        <View
+                  style={[
+                    styles.chatComposer,
+                    {
+                      paddingBottom: Math.max(insets.bottom, 12),
+                      minHeight: 68 + Math.max(insets.bottom, 0)
+                    }
+                  ]}
+                >
           <TextInput
             testID="chat-input"
             value={text}
@@ -632,21 +645,31 @@ const styles = StyleSheet.create({
     fontSize: 13
   },
 
-  chatComposer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#0c0c0e',
-    borderTopWidth: 1,
-    borderColor: '#141417',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-    minHeight: 68,
-    width: '100%',
-    flexShrink: 0,
-    zIndex: 100,
-    elevation: 100
-  },
+    // =========================================================================
+    // 🟢 FIX 2: REPLACED CHATCOMPOSER CLASS WITH EXPLICIT WEB & MOBILE CLEARENCES
+    // =========================================================================
+    chatComposer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#0c0c0e',
+      borderTopWidth: 1,
+      borderColor: '#141417',
+      paddingHorizontal: 16,
+      paddingTop: 12, // Decoupled bottom padding to let the dynamic safe insets scale it perfectly
+      gap: 12,
+      width: '100%',
+      flexShrink: 0,
+      zIndex: 100,
+      elevation: 100,
+
+      // 🧠 SAFETY OVERLAY: Adds an explicit layout margin clearance block if running inside web-browsers
+      ...Platform.select({
+        web: {
+          marginBottom: 64, // Pushes composer box directly over absolute web bottom tab navigation menus
+          paddingBottom: 12,
+        }
+      })
+    },
 
   chatInput: {
     flex: 1,

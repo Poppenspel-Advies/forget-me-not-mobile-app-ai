@@ -20,10 +20,10 @@ export default function TransitWeatherWidget({ onNavigate }: TransitWeatherWidge
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  console.log("🔑 API KEY CHECK:", {
+  /* console.log("🔑Clean Database Data Arrived:", {
             google: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ? "LOADED" : "MISSING",
             weather: process.env.EXPO_PUBLIC_OPENWEATHER_API_KEY ? "LOADED" : "MISSING"
-          });
+          }); */
 
   // Dynamic Live State Tracker Matrix
   const [commuteStatus, setCommuteStatus] = useState({

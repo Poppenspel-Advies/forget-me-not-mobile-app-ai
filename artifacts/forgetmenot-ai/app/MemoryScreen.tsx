@@ -836,8 +836,10 @@ const styles = StyleSheet.create({
       borderColor: '#26262B', // Crisp border boundary line
       paddingHorizontal: 20,
       paddingTop: 12,
-      paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-      zIndex: 130,
+       // 🧠 SAFETY ANCHOR GAP: Lifts control buttons above mobile soft navigators
+          paddingBottom: Platform.OS === 'ios' ? 44 : 28,
+          marginBottom: Platform.OS === 'web' ? 64 : 0, // Extra buffer specifically for absolute web bottom tab bars
+          zIndex: 130,
     },
 
     dragHandleBar: {
@@ -1035,6 +1037,20 @@ deleteButtonText: {
   fontWeight: '900',
   fontSize: 15,
 },
+  // =========================================================================
+  // 🟢 FIXED: INCREASED SPACING MATRIX GAP BETWEEN EDIT & TRASH BUTTONS
+  // =========================================================================
+  rowActionContainer: {
+    flexDirection: 'row',     // Arranges icons side-by-side instead of stacked
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    // 🧠 THE CHOSEN FIX: Enforces a wide 20-pixel horizontal separation gap
+    gap: 20,
+    marginHorizontal: 16,     // Shifts the button row safely inward from the outer capsule edge
+    minWidth: 70,             // Locks down an explicit layout box width area
+  },
+
 
 
 });

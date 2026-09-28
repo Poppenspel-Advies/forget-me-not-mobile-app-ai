@@ -24,6 +24,7 @@ import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useAnalyzeCapture, type CaptureAnalysis } from '@workspace/api-client-react';
 import colors from '@/constants/colors';
+import * as ImagePicker from 'expo-image-picker';
 // Import your newly split layout targets explicitly
 import { captureScreenStyles, customAccents } from './CaptureScreen.styles';
 import { IntentAnchorWidget, DBIntentAnchor } from './IntentAnchorWidget';
@@ -40,7 +41,6 @@ import ContactScreen from './ContactScreen'; //
 // ✅ Add this line at the top asset import block section of app/index.tsx
 import ChatScreen from './ChatScreen';
 import EventsScreen from './EventsScreen';
-import firestore from '@react-native-firebase/firestore';
 import { initializeApp, getApps } from 'firebase/app';
 // ✅ Add this line alongside your other screen/component imports at the top of app/index.tsx
 import { ProfileScreen } from './ProfileScreen'; // Adjust the relative path if you saved the file inside a subfolder
@@ -742,10 +742,10 @@ useEffect(() => {
         ]).start();
       }, []);
 
-        console.log("🔑 API KEY CHECK:", {
+       /*  console.log("🔑 API KEY CHECK:", {
           google: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ? "LOADED" : "MISSING",
           weather: process.env.EXPO_PUBLIC_OPENWEATHER_API_KEY ? "LOADED" : "MISSING"
-        });
+        }); */
 
 
   React.useEffect(() => {
@@ -1115,6 +1115,48 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
   const [selectedTag, setSelectedTag] = useState<TagOption>('Things');
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
+  // =========================================================================
+  // 🟢 FIXED: ADDED CONTROLLER VARIABLE STATE FOR ACTIVE IMAGE PREVIEWS
+  // =========================================================================
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  // =========================================================================
+  // 🟢 FIXED: DEFINED EXPLICIT DYNAMIC INPUT CONTRACT INTERFACE PARAMETERS
+  // =========================================================================
+  interface GeminiAnalysisInput {
+    userPrompt?: string;         // Optional text notes/phrases
+    selectedCategory?: string;   // Optional context categories
+    imagePayload?: {             // Optional camera/gallery snapshot capture data
+      base64: string;
+      mimeType: string;
+    };
+  }
+
+// =========================================================================
+// 🟢 FIXED: UNIVERSAL WEB-SAFE BASE64 CONVERTER FILE SUB-ROUTINE UTILITY
+// =========================================================================
+const convertUriToBase64 = async (uri: string): Promise<string> => {
+  try {
+    const localFileBlob = await fetch(uri);
+    const rawBlobBytes = await localFileBlob.blob();
+
+    return await new Promise<string>((resolve, reject) => {
+      const readerInstance = new FileReader();
+      readerInstance.onloadend = () => {
+        const completeResultStr = readerInstance.result as string;
+        // Extracts the clean base64 data string after the comma split boundary
+        const base64Data = completeResultStr.split(',')[1] || "";
+        resolve(base64Data);
+      };
+      readerInstance.onerror = reject;
+      readerInstance.readAsDataURL(rawBlobBytes);
+    });
+  } catch (error) {
+    console.error("💥 Failed running inline filesystem converter block:", error);
+    throw new Error("Unable to parse file binary stream into Base64 format.");
+  }
+};
+
 
   const [analysis, setAnalysis] = useState<{
     signal: string;
@@ -1132,40 +1174,75 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
   const loggedInFirebaseUser = authInstance.currentUser;
   const userId = loggedInFirebaseUser ? loggedInFirebaseUser.uid : "Admin_ForgetMeNotAI";
 
-  const save = async () => {
-    // Phase 1: If Gemini analysis hasn't run yet, invoke the generator pipeline
-    if (!analysis) {
-      if (mode === 'note' && !text.trim()) return;
-      tap();
-      setAnalysisError('');
-      setIsAiLoading(true);
+  // =========================================================================
+    // 🟢 FIXED: RE-ALIGNED TRY-CATCH BRACES AND RESTORED STRING PARSING SYNTAX
+    // =========================================================================
+    const save = async () => {
+      if (!analysis) {
+        if (mode === 'note' && !text.trim()) return;
+        if (mode === 'photo' && !imageUri) return;
 
-      try {
-        const geminiResultJson = await fetchGeminiSignalAnalysis(text.trim(), selectedTag.toLowerCase());
+        tap();
+        setAnalysisError('');
+        setIsAiLoading(true);
 
-        if (!geminiResultJson) {
-          console.warn("⚠️ Cannot save yet: Gemini analysis data returned null.");
+        try {
+          const apiPayload: GeminiAnalysisInput = {
+            userPrompt: text.trim() || undefined,
+            selectedCategory: selectedTag.toLowerCase(),
+          };
+
+          if (imageUri) {
+            console.log("📸 [COMPILING] Converting localized URI token path safely...");
+            let cleanBase64Content = "";
+            let inferredMimeType = "image/jpeg";
+
+            if (imageUri.startsWith('data:')) {
+              // Web / Base64 Data String Splitter Handling
+              const urlMetadataParts = imageUri.split(',');
+              cleanBase64Content = urlMetadataParts[1] || "";
+
+              // 🧠 FIXED: Corrected index matching syntax string array splits
+              const mimeMatch = urlMetadataParts[0].match(/data:(.*?);/);
+              if (mimeMatch) {
+                inferredMimeType = mimeMatch[1];
+              }
+            } else {
+              // Calls the isolated external async helper utility cleanly
+              cleanBase64Content = await convertUriToBase64(imageUri);
+            }
+
+            apiPayload.imagePayload = {
+              base64: cleanBase64Content,
+              mimeType: inferredMimeType
+            };
+          }
+
+          console.log("📡 Forwarding fully assembled input contract payload directly to service gateway...");
+          const geminiResultJson = await fetchGeminiSignalAnalysis(apiPayload);
+
+          if (!geminiResultJson) {
+            console.warn("⚠️ Gemini analysis data returned null.");
+            setIsAiLoading(false);
+            return;
+          }
+
+          setAnalysis(geminiResultJson);
+
+          const modelCategory = geminiResultJson?.category?.toLowerCase();
+          if (modelCategory === 'people' || modelCategory === 'personal') setSelectedTag('People');
+          else if (modelCategory === 'places' || modelCategory === 'travel') setSelectedTag('Places');
+          else setSelectedTag('Things');
+
+          setIsAiLoading(false);
+          return; // Stops here so the user can review the card on screen before saving
+        } catch (err: any) {
+          console.error("💥 Error fetching Gemini signal streams:", err);
+          setAnalysisError(err?.message || 'I could not reach Gemini. Verify API parameters and try again.');
           setIsAiLoading(false);
           return;
         }
-
-        setAnalysis(geminiResultJson);
-
-        // Auto-switch matching categorization chip indicators behind the scenes
-        const modelCategory = geminiResultJson?.category?.toLowerCase();
-        if (modelCategory === 'people' || modelCategory === 'personal') setSelectedTag('People');
-        else if (modelCategory === 'places' || modelCategory === 'travel') setSelectedTag('Places');
-        else setSelectedTag('Things');
-
-        setIsAiLoading(false);
-        return; // Stops here so the user can review the card on screen before saving
-      } catch (err: any) {
-        console.error("💥 Error fetching Gemini signal streams:", err);
-        setAnalysisError(err?.message || 'I could not reach Gemini. Verify API parameters and try again.');
-        setIsAiLoading(false);
-        return;
       }
-    }
 
     // Phase 2: Save the fully reviewed model metadata down to your Firestore collection
     tap();
@@ -1331,52 +1408,138 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
                 mode === 'photo' ? (
                   // 📊 PHOTO MODE: Displays the instructional context card and two separate action buttons
                   <View style={{ width: '100%' }}>
+{/* =========================================================================
+    🟢 FIXED: BLACK CONTEXT AREA PANEL (STRICT BOUNDS - PREVENTING CONTENT SHIFT)
+    ========================================================================= */}
+                    <View style={styles.centerContextBlackPanel}>
 
-                    {/* Main Instruction Card Context */}
-                    <View style={styles.mediaCapture}>
-                      <View style={styles.mediaIcon}>
-                        <Feather name="camera" size={26} color={customAccents.cyan} />
-                      </View>
-                      <Text style={styles.mediaTitle}>Scan or Upload Context</Text>
-                      <Text style={styles.mediaCopy}>
-                        Use your camera to capture an object, note, or scene, or upload an image frame from your photo gallery.
-                      </Text>
+                      {!imageUri ? (
+                        // 🔍 FIX A: Restored original standalone styling frame for the initial view state
+                        <View style={styles.initialContextWrapper}>
+                          <View style={styles.scanIconContainer}>
+                            <Feather name="camera" size={24} color="#00ffcc" />
+                          </View>
+                          <Text style={styles.scanTitleText}>Scan or Upload Context</Text>
+                          <Text style={styles.scanDescriptionText}>
+                            Use your camera to capture an object, note, or scene, or upload an image frame from your photo gallery.
+                          </Text>
+                        </View>
+                      ) : (
+                        // 🖼️ FIX B: Dynamic thumbnail framework layout
+                        <View style={styles.thumbnailPreviewContainer}>
+                          <Image
+                            source={{ uri: imageUri }}
+                            style={styles.thumbnailImageFrame}
+                            resizeMode="contain"
+                          />
+
+                          {/* Remove Image Floating Badge Button Accent */}
+                          <Pressable
+                            onPress={() => {
+                              console.log("🧹 Clearing active preview frame metadata.");
+                              setImageUri(null);
+                            }}
+                            style={styles.clearImageFloatingBadgeButton}
+                            hitSlop={10}
+                          >
+                            <Feather name="x" size={12} color="#ffffff" />
+                            <Text style={styles.clearImageFloatingBadgeText}>Remove</Text>
+                          </Pressable>
+                        </View>
+                      )}
+
                     </View>
 
-                    {/* Split Action Buttons Row Container */}
-                    <View style={{ flexDirection: 'row', gap: 12, width: '100%', marginTop: 12 }}>
+                    {/* =========================================================================
+                        🟢 FIXED: SIDE-BY-SIDE BUTTON ROW GRID CONTAINER (RESTORED ORIGINAL LAYOUT STYLE)
+                        ========================================================================= */}
+                    <View style={styles.buttonActionGridRow}>
+                              {/* 📷 Option 1: Open Camera (Strict Camera-Only Interface Subsystem) */}
+                              <Pressable
+                                style={({ pressed }) => [
+                                  styles.actionBtnCamera,
+                                  { opacity: pressed ? 0.7 : 1 }
+                                ]}
+                                onPress={async () => {
+                                  console.log("🔒 Initializing strict camera-only hardware access...");
+                                  try {
+                                    // 1. Explicitly request camera hardware permissions only
+                                    const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
 
-                      {/* 📸 Option 1: Launch Device Camera Hardware */}
-                      <Pressable
-                        onPress={async () => {
-                          // 💡 Call your camera picker implementation function here
-                          console.log("Triggering camera hardware...");
-                        }}
-                        style={({ pressed }) => [
-                          styles.actionBtn,
-                          { borderColor: customAccents.cyan, opacity: pressed ? 0.7 : 1 }
-                        ]}
-                      >
-                        <Feather name="aperture" size={16} color={customAccents.cyan} />
-                        <Text style={[styles.actionBtnText, { color: customAccents.cyan }]}>OPEN CAMERA</Text>
-                      </Pressable>
+                                    if (cameraPermission.granted === false) {
+                                      if (Platform.OS === 'web') {
+                                        alert("Permission Denied: ForgetMeNot needs camera access to take a live photo.");
+                                      } else {
+                                        Alert.alert("Permission Denied", "ForgetMeNot needs camera access to take a live photo.");
+                                      }
+                                      return;
+                                    }
+
+                                    // 2. Launch the camera directly (Bypasses photo library completely)
+                                    const cameraResult = await ImagePicker.launchCameraAsync({
+                                      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Restricts hardware to photo capture only
+                                      allowsEditing: true, // Displays crop boundaries before saving
+                                      quality: 0.8, // Optimizes compression size for background processing
+                                    });
+
+                                    console.log("📸 Raw camera hardware response payload:", cameraResult);
+
+                                    // 3. Populate the exact same imageUri state slot to render in the center panel
+                                    if (!cameraResult.canceled && cameraResult.assets && cameraResult.assets.length > 0) {
+                                      const freshPhotoUri = cameraResult.assets[0].uri;
+                                      console.log("✅ Live photo captured successfully. Storing URI:", freshPhotoUri);
+                                      setImageUri(freshPhotoUri); // Unified state updates the exact same thumbnail preview panel
+                                    } else {
+                                      console.log("⚠️ Camera view dismissed without taking a photo.");
+                                    }
+
+                                  } catch (error) {
+                                    console.error("💥 Critical exception caught on camera engine pipeline:", error);
+                                  }
+                                }}
+                              >
+                                <Feather name="aperture" size={16} color="#00ffcc" />
+                                <Text style={styles.actionBtnCameraText}>OPEN CAMERA</Text>
+                              </Pressable>
+
+
 
                       {/* 🖼️ Option 2: Browse Local File Device Gallery */}
                       <Pressable
                         onPress={async () => {
-                          // 💡 Call your library photo picker implementation function here
                           console.log("Opening device photo library...");
+                          try {
+                            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+                            if (permissionResult.granted === false) {
+                              alert("Permission Denied: ForgetMeNot needs gallery access to upload context images.");
+                              return;
+                            }
+
+                            const pickerResult = await ImagePicker.launchImageLibraryAsync({
+                              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                              allowsEditing: true,
+                              quality: 0.8,
+                            });
+
+                            if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
+                              setImageUri(pickerResult.assets[0].uri); // Added direct 0 index array reference fix
+                            }
+                          } catch (error) {
+                            console.error("💥 Platform media subsystem exception:", error);
+                          }
                         }}
                         style={({ pressed }) => [
-                          styles.actionBtn,
-                          { borderColor: '#ffffff', opacity: pressed ? 0.7 : 1 }
+                          styles.actionBtnUpload,
+                          { opacity: pressed ? 0.7 : 1 }
                         ]}
                       >
                         <Feather name="upload" size={16} color="#ffffff" />
-                        <Text style={[styles.actionBtnText, { color: '#ffffff' }]}>UPLOAD PHOTO</Text>
+                        <Text style={styles.actionBtnUploadText}>UPLOAD PHOTO</Text>
                       </Pressable>
 
                     </View>
+
                   </View>
                 ) : (
                   // 🎙️ AUDIO MODE: Keeps your original operational recording execution layout 100% untouched
@@ -1386,7 +1549,7 @@ export function CaptureScreen({ onNavigate, onCapture }: { onNavigate: (screen: 
                     </View>
                     <Text style={styles.mediaTitle}>Speak the context</Text>
                     <Text style={styles.mediaCopy}>Hold to record a thought before it disappears.</Text>
-                    <Text style={[styles.mediaAction, { color: customAccents.gold }]}>START RECORDING</Text>
+                    <Text style={[styles.mediaAction, { color: customAccents.gold }]}>COMING SOON</Text>
                   </Pressable>
                 )
 
@@ -1595,16 +1758,22 @@ function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) 
 
       <ScrollView contentContainerStyle={styles.authCoreScrollContentEnforcer}>
 
-        {/* ROTATING LOGO ENTRY DOCK HEADER */}
-        <View style={{ alignItems: 'center', marginBottom: 24 }}>
-          <Animated.View style={{ transform: [{ rotate: logoSpinAngle }] }}>
-            <FGlobe size={64} />
-          </Animated.View>
-          <Text style={[styles.brandName, { marginTop: 16, fontSize: 16, letterSpacing: 4, color: '#ffffff', fontWeight: '900' }]}>FORGETMENOT</Text>
-          <Text style={{ color: '#00f0ff', fontSize: 9, letterSpacing: 1.5, marginTop: 4, fontWeight: '800' }}>
-            PREDICTIVE IDENTITY MATRIX // ACTIVE MONITOR
-          </Text>
-        </View>
+                {/* ROTATING LOGO ENTRY DOCK HEADER */}
+                {/* 🟢 FIXED: INJECTED PLATFORM-AWARE TOP PADDING TO LOWER THE ROTATING LOGO DOWN THE CANVAS */}
+                <View style={{
+                  alignItems: 'center',
+                  marginBottom: 24,
+                  paddingTop: Platform.OS === 'ios' ? 90 : 70 // Pushes the container down beneath system status bars
+                }}>
+                  <Animated.View style={{ transform: [{ rotate: logoSpinAngle }] }}>
+                    <FGlobe size={64} />
+                  </Animated.View>
+                  <Text style={[styles.brandName, { marginTop: 16, fontSize: 16, letterSpacing: 4, color: '#ffffff', fontWeight: '900' }]}>FORGETMENOT</Text>
+                  <Text style={{ color: '#00f0ff', fontSize: 9, letterSpacing: 1.5, marginTop: 4, fontWeight: '800' }}>
+                    PREDICTIVE IDENTITY MATRIX // ACTIVE MONITOR
+                  </Text>
+                </View>
+
 
         {/* EMAIL & PASSWORD INPUT FORMS CONTAINER DOCKS */}
         {(authMode === 'LOGIN' || authMode === 'SIGNUP' || authMode === 'FORGOT') && (
@@ -1710,83 +1879,85 @@ function LoginGateScreen({ onAuthComplete }: { onAuthComplete: (userId: string) 
 
 
 
+// =========================================================================
+// 🟢 FIXED: FORCED EXPLICIT DEFAULT EXPORT HOOK FOR EXPO-ROUTER TO BOOT ON MOBILE
+// =========================================================================
 export default function Home() {
   const [screen, setScreen] = useState<Screen>('home');
   const [captured, setCaptured] = useState<CapturedItem[]>(capturedSeed);
   const navigate = (next: Screen) => setScreen(next);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  // ✅ FIXED: Instantiated with the exact matching variable names expected by your content loop checks!
   const [activeSessionUserId, setActiveSessionUserId] = useState<string | null>(null);
+
   const currentNav = useMemo(() => ['home', 'events', 'capture', 'chat', 'profile'].includes(screen) ? screen : 'home', [screen]) as Screen;
   const secondary = screen === 'chat' || screen === 'prediction' || screen === 'actions' || screen === 'memory' || screen === 'contact';
 
+  // 🟢 CORRECTION A: EXPLICIT ROOT-LEVEL IDENTITY GATEWAY INTERCEPTION
+  if (!activeSessionUserId) {
+    console.log("🔒 [SECURITY HANDSHAKE] No active session user id token detected. Intercepting viewport layer...");
+    return (
+      <View style={{ flex: 1, backgroundColor: '#050506' }}>
+        <LoginGateScreen
+          onAuthComplete={(verifiedUid) => {
+            console.log("🚀 Identity Handshake: Syncing UID token state into active app context.");
+            setActiveSessionUserId(verifiedUid);
+          }}
+        />
+      </View>
+    );
+  }
+
+  // Content evaluation block executes cleanly only AFTER authentication token is verified
   const content = (() => {
-
-          // ==============================================================
-          // 🔐 FIXED: GUARANTEES PROP INTERPOLATION BINDING AT THE ROOT LEVEL
-          // ==============================================================
-          if (!activeSessionUserId) {
-                return (
-                  <LoginGateScreen
-                    onAuthComplete={(verifiedUid) => {
-                      console.log("🚀 Identity Handshake: Syncing UID token state into active app context.");
-                      setActiveSessionUserId(verifiedUid);
-                    }}
-                  />
-                );
-              }
-
-
-
     switch (screen) {
       case 'events': return <EventsScreen onNavigate={navigate} />;
       case 'capture': return <CaptureScreen onNavigate={navigate} onCapture={(item) => { setCaptured((items) => [item, ...items]); setScreen('memory'); }} />;
-      case 'chat':
-        // ✅ Instructs the framework to change view context to 'home' when clicking back
-      return <ChatScreen onBack={() => navigate('home')} />;
+      case 'chat': return <ChatScreen onBack={() => navigate('home')} />;
       case 'profile':
-              return (
-                <ProfileScreen
-                  onNavigate={(targetScreen) => {
-                    // If the profile screen redirects to 'home' during logout, wipe the user token state completely!
-                    if (targetScreen === 'home') {
-                      setActiveSessionUserId(null);
-                    }
-                    setScreen(targetScreen as Screen);
-                  }}
-                />
-              );
-
+        return (
+          <ProfileScreen
+            onNavigate={(targetScreen) => {
+              if (targetScreen === 'home') {
+                setActiveSessionUserId(null);
+              }
+              setScreen(targetScreen as Screen);
+            }}
+          />
+        );
       case 'radar':
       case 'prediction': return <PredictionScreen onBack={() => navigate('home')} onNavigate={navigate} />;
       case 'actions': return <ActionsScreen onBack={() => navigate('home')} />;
       case 'memory': return <MemoryScreen onBack={() => navigate('home')} captured={captured} />;
-       case 'contact':
-              return (
-                <ContactScreen
-                  onBack={() => navigate('profile')}
-                  styles={styles}
-                  theme={theme}
-                  tap={tap}
-                  FGlobe={FGlobe}
-                  ScreenHeader={ScreenHeader}
-                />
-              );
+      case 'contact':
+        return (
+          <ContactScreen
+            onBack={() => navigate('profile')}
+            styles={styles}
+            theme={theme}
+            tap={tap}
+            FGlobe={FGlobe}
+            ScreenHeader={ScreenHeader}
+          />
+        );
       case 'repliesShield': return <RippleShieldWidget onBack={() => navigate('home')} />;
       default: return <HomeScreen onNavigate={navigate} captured={captured} />;
     }
   })();
+
+  // 🟢 CORRECTION B: CORE RENDERING PIPELINE FOR LOGGED-IN WORKSPACES
   return (
      <View style={styles.app}>
        {content}
 
-       {/* Only display the primary navigation panel bar if authenticated and active */}
-       {activeSessionUserId  && !secondary ? (
+       {/* Display navigation panels exclusively for authorized system views */}
+       {!secondary ? (
          <BottomNav screen={currentNav} onNavigate={navigate} />
        ) : null}
      </View>
    );
 }
+
+
 
 const styles = StyleSheet.create({
   app: { flex: 1, backgroundColor: theme.background },
@@ -2642,6 +2813,162 @@ innerScroll: {
       fontWeight: '800',
       letterSpacing: 0.8,
     },
+  // Styles for the thumbnail box wrapper layout bounds
+  thumbnailPreviewContainer: {
+    width: '100%',
+    height: 220, // Sets a fixed boundary height for image content areas
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#0c0c0e',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  thumbnailImageFrame: {
+    width: '100%',
+    height: '100%',
+  },
+  clearImageFloatingBadgeButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 62, 165, 0.85)', // Distinct transparent pink floating indicator accent
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  clearImageFloatingBadgeText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  // Core Panel Bounds
+  centerContextBlackPanel: {
+    backgroundColor: '#111115', // Matches your deep dark panel tint color scheme
+    borderRadius: 14,
+    padding: 24,
+    minHeight: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#1c1c1f',
+  },
+  initialContextWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  scanIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0, 255, 204, 0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 255, 204, 0.15)',
+  },
+  scanTitleText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  scanDescriptionText: {
+    color: '#62626a',
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 18,
+    maxWidth: '85%',
+  },
+
+  // Thumbnail Container Layout Styles
+  thumbnailPreviewContainer: {
+    width: '100%',
+    height: 200,
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thumbnailImageFrame: {
+    width: '100%',
+    height: '100%',
+  },
+  clearImageFloatingBadgeButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FF3EA5', // Matches your custom notification badge signature pink shade
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
+  },
+  clearImageFloatingBadgeText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  // Button Action Grid Matrix Layout (Restored Horizontal Alignment)
+  buttonActionGridRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 14,
+    gap: 12,
+  },
+  actionBtnCamera: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: '#00ffcc',
+    borderRadius: 10,
+    height: 48,
+    gap: 8,
+  },
+  actionBtnCameraText: {
+    color: '#00ffcc',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  actionBtnUpload: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#121214',
+    borderWidth: 1.5,
+    borderColor: '#323236',
+    borderRadius: 10,
+    height: 48,
+    gap: 8,
+  },
+  actionBtnUploadText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+
 
 
 });

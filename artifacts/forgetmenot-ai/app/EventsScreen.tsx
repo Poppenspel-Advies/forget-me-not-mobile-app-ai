@@ -949,11 +949,15 @@ export default function EventsScreen({ onNavigate = (screen: string) => console.
               </ScrollView>
             </View>
 
-            {/* DYNAMIC SCROLLABLE REFRESH EVENT LIST */}
+            {/* =========================================================================
+                🟢 FIXED: CORRECTED EVENT LIST SCROLLVIEW TREE (REMOVED UNWRAPPED STRINGS)
+                ========================================================================= */}
             <ScrollView
               style={styles.eventScroll}
               contentContainerStyle={styles.eventContent}
-              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshEvents} tintColor="#00F5FF" />}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={refreshEvents} tintColor="#00F5FF" />
+              }
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.dateHeading}>
@@ -962,22 +966,42 @@ export default function EventsScreen({ onNavigate = (screen: string) => console.
               </View>
 
               {loadingEvents && isGoogleConnected ? (
-                <View style={styles.loadingBox}><ActivityIndicator size="large" color="#00F5FF" /><Text style={styles.loadingText}>Loading Google Calendar...</Text></View>
+                <View style={styles.loadingBox}>
+                  <ActivityIndicator size="large" color="#00F5FF" />
+                  <Text style={styles.loadingText}>Loading Google Calendar...</Text>
+                </View>
               ) : selectedDayEvents.length === 0 ? (
-                <View style={styles.emptyBox}><View style={styles.emptyIcon}><Feather name="calendar" size={26} color="#555" /></View><Text style={styles.emptyTitle}>No events</Text><Text style={styles.emptyText}>There are no calendar events scheduled for this day.</Text></View>
+                <View style={styles.emptyBox}>
+                  <View style={styles.emptyIcon}><Feather name="calendar" size={26} color="#555" /></View>
+                  <Text style={styles.emptyTitle}>No events</Text>
+                  <Text style={styles.emptyText}>There are no calendar events scheduled for this day.</Text>
+                </View>
               ) : (
                 selectedDayEvents.map((event) => (
                   <View key={event.id} style={styles.eventCard}>
                     <View style={[styles.eventAccent, { backgroundColor: event.color }]} />
+
                     <View style={styles.eventTime}>
                       <Text style={styles.eventTimeText}>{event.time}</Text>
                       {event.am ? <Text style={styles.eventAm}>{event.am}</Text> : null}
                     </View>
+
                     <View style={styles.eventInfo}>
                       <Text style={styles.eventTitle} numberOfLines={2}>{event.title}</Text>
-                      <Text style={[styles.eventType, { color: event.color }]}>{event.allDay ? 'ALL DAY' : event.type}</Text>
+                      <Text style={[styles.eventType, { color: event.color }]}>
+                        {event.allDay ? 'ALL DAY' : event.type}
+                      </Text>
+                      {event.location ? (
+                        <View style={styles.metaRow}>
+                          <Feather name="map-pin" size={12} color="#777" />
+                          <Text style={styles.metaText} numberOfLines={1}>{event.location}</Text>
+                        </View>
+                      ) : null}
                     </View>
-                    <View style={styles.eventChevron}><Feather name="chevron-right" size={18} color="#444" /></View>
+
+                    <View style={styles.eventChevron}>
+                      <Feather name="chevron-right" size={18} color="#444" />
+                    </View>
                   </View>
                 ))
               )}

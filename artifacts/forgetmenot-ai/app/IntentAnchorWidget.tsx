@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, Pressable, Modal, Animated, ScrollView, Platform, Easing } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import firestore from '@react-native-firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { artStyles } from './IntentAnchorWidget.styles';
 
 // Matches the exact nested map structure from your Firestore analysis document
