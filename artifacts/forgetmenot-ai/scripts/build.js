@@ -35,7 +35,7 @@ function exitWithError(message) {
 function setupSignalHandlers() {
   const cleanup = () => {
     if (metroProcess) {
-      console.log('Cleaning up Metro process...');
+      //console.log('Cleaning up Metro process...');
       metroProcess.kill();
     }
     process.exit(0);
@@ -76,7 +76,7 @@ function getDeploymentDomain() {
 }
 
 function prepareDirectories(timestamp) {
-  console.log('Preparing build directories...');
+  //console.log('Preparing build directories...');
 
   const staticBuild = path.join(projectRoot, 'static-build');
   if (fs.existsSync(staticBuild)) {
@@ -94,11 +94,11 @@ function prepareDirectories(timestamp) {
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  console.log('Build:', timestamp);
+  //console.log('Build:', timestamp);
 }
 
 function clearMetroCache() {
-  console.log('Clearing Metro cache...');
+  //console.log('Clearing Metro cache...');
 
   const cacheDirs = [
     path.join(projectRoot, '.metro-cache'),
@@ -111,7 +111,7 @@ function clearMetroCache() {
     }
   }
 
-  console.log('Cache cleared');
+  //console.log('Cache cleared');
 }
 
 async function checkMetroHealth() {
@@ -132,12 +132,12 @@ function getExpoPublicReplId() {
 async function startMetro(expoPublicDomain, expoPublicReplId) {
   const isRunning = await checkMetroHealth();
   if (isRunning) {
-    console.log('Metro already running');
+    //console.log('Metro already running');
     return;
   }
 
-  console.log('Starting Metro...');
-  console.log(`Setting EXPO_PUBLIC_DOMAIN=${expoPublicDomain}`);
+  //console.log('Starting Metro...');
+  //console.log(`Setting EXPO_PUBLIC_DOMAIN=${expoPublicDomain}`);
   const env = {
     ...process.env,
     EXPO_PUBLIC_DOMAIN: expoPublicDomain,
@@ -145,7 +145,7 @@ async function startMetro(expoPublicDomain, expoPublicReplId) {
   };
 
   if (expoPublicReplId) {
-    console.log(`Setting EXPO_PUBLIC_REPL_ID=${expoPublicReplId}`);
+    //console.log(`Setting EXPO_PUBLIC_REPL_ID=${expoPublicReplId}`);
   }
 
   metroProcess = spawn(
@@ -192,7 +192,7 @@ async function downloadFile(url, outputPath) {
   const timeoutId = setTimeout(() => controller.abort(), fiveMinMS);
 
   try {
-    console.log(`Downloading: ${url}`);
+    //console.log(`Downloading: ${url}`);
     const response = await fetch(url, { signal: controller.signal });
 
     if (!response.ok) {
@@ -247,9 +247,9 @@ async function downloadBundle(platform, timestamp) {
     'bundle.js',
   );
 
-  console.log(`Fetching ${platform} bundle...`);
+  //console.log(`Fetching ${platform} bundle...`);
   await downloadFile(url.toString(), output);
-  console.log(`${platform} bundle ready`);
+  //console.log(`${platform} bundle ready`);
 }
 
 async function downloadManifest(platform) {
@@ -257,7 +257,7 @@ async function downloadManifest(platform) {
   const timeoutId = setTimeout(() => controller.abort(), 300_000);
 
   try {
-    console.log(`Fetching ${platform} manifest...`);
+    //console.log(`Fetching ${platform} manifest...`);
     const response = await fetch('http://localhost:8081/manifest', {
       headers: { 'expo-platform': platform },
       signal: controller.signal,
@@ -268,7 +268,7 @@ async function downloadManifest(platform) {
     }
 
     const manifest = await response.json();
-    console.log(`${platform} manifest ready`);
+    //console.log(`${platform} manifest ready`);
     return manifest;
   } catch (error) {
     if (error.name === 'AbortError') {
@@ -283,8 +283,8 @@ async function downloadManifest(platform) {
 }
 
 async function downloadBundlesAndManifests(timestamp) {
-  console.log('Downloading bundles and manifests...');
-  console.log('This may take several minutes for production builds...');
+  //console.log('Downloading bundles and manifests...');
+  //console.log('This may take several minutes for production builds...');
 
   try {
     // Bundles are sequential — Metro can't handle both platforms simultaneously
@@ -297,7 +297,7 @@ async function downloadBundlesAndManifests(timestamp) {
       downloadManifest('android'),
     ]);
 
-    console.log('All downloads completed successfully');
+    //console.log('All downloads completed successfully');
     return { ios: iosManifest, android: androidManifest };
   } catch (error) {
     exitWithError(`Download failed: ${error.message}`);
@@ -379,7 +379,7 @@ async function downloadAssets(assets, timestamp) {
     return 0;
   }
 
-  console.log('Copying assets...');
+  //console.log('Copying assets...');
   let successCount = 0;
   const failures = [];
 
@@ -436,7 +436,7 @@ async function downloadAssets(assets, timestamp) {
     exitWithError(errorMsg);
   }
 
-  console.log(`Copied ${successCount} assets`);
+  //console.log(`Copied ${successCount} assets`);
   return successCount;
 }
 
@@ -476,7 +476,7 @@ function updateBundleUrls(timestamp, baseUrl) {
 
   updateForPlatform('ios');
   updateForPlatform('android');
-  console.log('Updated bundle URLs');
+  //console.log('Updated bundle URLs');
 }
 
 function updateManifests(manifests, timestamp, baseUrl, assetsByHash) {
@@ -518,11 +518,11 @@ function updateManifests(manifests, timestamp, baseUrl, assetsByHash) {
 
   updateForPlatform('ios', manifests.ios);
   updateForPlatform('android', manifests.android);
-  console.log('Manifests updated');
+  //console.log('Manifests updated');
 }
 
 async function main() {
-  console.log('Building static Expo Go deployment...');
+  //console.log('Building static Expo Go deployment...');
 
   setupSignalHandlers();
 
@@ -551,9 +551,9 @@ async function main() {
 
   const manifests = await Promise.race([downloadPromise, timeoutPromise]);
 
-  console.log('Processing assets...');
+  //console.log('Processing assets...');
   const assets = extractAssets(timestamp);
-  console.log('Found', assets.length, 'unique asset(s)');
+  //console.log('Found', assets.length, 'unique asset(s)');
 
   const assetsByHash = new Map();
   for (const asset of assets) {
@@ -569,10 +569,10 @@ async function main() {
     updateBundleUrls(timestamp, baseUrl);
   }
 
-  console.log('Updating manifests and creating landing page...');
+  //console.log('Updating manifests and creating landing page...');
   updateManifests(manifests, timestamp, baseUrl, assetsByHash);
 
-  console.log('Build complete! Deploy to:', baseUrl);
+  //console.log('Build complete! Deploy to:', baseUrl);
 
   if (metroProcess) {
     metroProcess.kill();

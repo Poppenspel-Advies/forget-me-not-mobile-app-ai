@@ -634,10 +634,10 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
         // ✅ 1. Check if we are actually getting documents from Firestore
-        console.log("➡️ SNAPSHOT TRIGGERED. TOTAL RECEIVED DOCUMENTS:", snapshot.docs.length);
+        ("➡️ SNAPSHOT TRIGGERED. TOTAL RECEIVED DOCUMENTS:", snapshot.docs.length);
 
         if (snapshot.docs.length === 0) {
-          console.log("❌ ZERO RECORDS: No matching documents found for user:", userId);
+          //console.log("❌ ZERO RECORDS: No matching documents found for user:", userId);
           setDbSignals([]);
           return;
         }
@@ -649,7 +649,7 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
           if (idx === 0) {
             console.log("----------------------------------------");
             console.log("🔍 INSPECTING FIRST DOCUMENT ID:", doc.id);
-            console.log("📦 RAW FIRESTORE DATA PAYLOAD:", JSON.stringify(rawData, null, 2));
+            //console.log("📦 RAW FIRESTORE DATA PAYLOAD:", JSON.stringify(rawData, null, 2));
           }
 
           // 2. Resolve tag parameters
@@ -662,7 +662,7 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
           if (inferredTag === 'PEOPLE') computedColor = '#ff007f';
           else if (inferredTag === 'PLACES') computedColor = '#ffd700';
 
-            console.log("🔍 INSPECTING inferredTag:", inferredTag);
+            //console.log("🔍 INSPECTING inferredTag:", inferredTag);
 
           const rawConfidence = rawData.analysis?.confidence || rawData.metrics?.probability_index || 95;
 
@@ -677,7 +677,7 @@ function HomeScreen({ onNavigate, captured }: { onNavigate: (screen: Screen) => 
           };
 
           if (idx === 0) {
-            console.log("✨ HYDRATED COMPONENT OUTPUT ITEM:", JSON.stringify(formattedObj, null, 2));
+            //console.log("✨ HYDRATED COMPONENT OUTPUT ITEM:", JSON.stringify(formattedObj, null, 2));
             console.log("----------------------------------------");
           }
 
@@ -704,7 +704,7 @@ useEffect(() => {
     useEffect(() => {
       // Triggers the subscription cleanly across web, ios, or android seamlessly
       const unsubscribe = subscribeToLatestAnalysis((rawDbPayload) => {
-        console.log("🔥 Clean Database Data Arrived:", rawDbPayload);
+        //console.log("🔥 Clean Database Data Arrived:", rawDbPayload);
 
         if (rawDbPayload && rawDbPayload.analysis) {
           const item = rawDbPayload.analysis;
@@ -728,10 +728,10 @@ useEffect(() => {
       return () => unsubscribe();
     }, []);
 
-    console.log('Intent Anchor Visibility Debug:', {
+  /* console.log('Intent Anchor Visibility Debug:', {
             anchorActive,
             hasAnalysisData: !!analysisData
-      });
+      }); */
 
      useEffect(() => {
         // Sequentially cascade widgets upwards into focal layout ranges smoothly
@@ -999,7 +999,7 @@ useEffect(() => {
            <IntentAnchorWidget
              analysisData={analysisData}
              onSelectStrategy={(strategyId) => {
-               console.log('Dynamic Strategy Action triggered:', strategyId);
+               //console.log('Dynamic Strategy Action triggered:', strategyId);
                // Dismisses the active intention widget layout slide instantly on choice confirm
                setAnchorActive(false);
              }}
@@ -1193,7 +1193,7 @@ const convertUriToBase64 = async (uri: string): Promise<string> => {
           };
 
           if (imageUri) {
-            console.log("📸 [COMPILING] Converting localized URI token path safely...");
+            //console.log("📸 [COMPILING] Converting localized URI token path safely...");
             let cleanBase64Content = "";
             let inferredMimeType = "image/jpeg";
 
@@ -1218,7 +1218,7 @@ const convertUriToBase64 = async (uri: string): Promise<string> => {
             };
           }
 
-          console.log("📡 Forwarding fully assembled input contract payload directly to service gateway...");
+          //console.log("📡 Forwarding fully assembled input contract payload directly to service gateway...");
           const geminiResultJson = await fetchGeminiSignalAnalysis(apiPayload);
 
           if (!geminiResultJson) {
@@ -1259,7 +1259,7 @@ const convertUriToBase64 = async (uri: string): Promise<string> => {
     const isPractical = selectedTag === 'Things';
 
     try {
-      console.log('🔮 Compiling consolidated payload for authenticated user channel:', userId);
+      //console.log('🔮 Compiling consolidated payload for authenticated user channel:', userId);
 
       const docPayload = {
         // ✅ FIXED USER_ID: Points securely to the dynamic logged-in user state instead of a hardcoded string
@@ -1321,7 +1321,7 @@ const convertUriToBase64 = async (uri: string): Promise<string> => {
       // Push document parameters up to the collection matrix safely
       const docRef = await addDoc(collection(db, "analyses"), docPayload);
       databaseDocumentId = docRef.id;
-      console.log('🛡️ Document logged inside Firestore under current user. Reference Key ID:', databaseDocumentId);
+      //console.log('🛡️ Document logged inside Firestore under current user. Reference Key ID:', databaseDocumentId);
 
       onCapture({
         id: databaseDocumentId,
@@ -1436,7 +1436,7 @@ const convertUriToBase64 = async (uri: string): Promise<string> => {
                           {/* Remove Image Floating Badge Button Accent */}
                           <Pressable
                             onPress={() => {
-                              console.log("🧹 Clearing active preview frame metadata.");
+                              //console.log("🧹 Clearing active preview frame metadata.");
                               setImageUri(null);
                             }}
                             style={styles.clearImageFloatingBadgeButton}
@@ -1461,7 +1461,7 @@ const convertUriToBase64 = async (uri: string): Promise<string> => {
                                   { opacity: pressed ? 0.7 : 1 }
                                 ]}
                                 onPress={async () => {
-                                  console.log("🔒 Initializing strict camera-only hardware access...");
+                                  //console.log("🔒 Initializing strict camera-only hardware access...");
                                   try {
                                     // 1. Explicitly request camera hardware permissions only
                                     const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
@@ -1482,15 +1482,15 @@ const convertUriToBase64 = async (uri: string): Promise<string> => {
                                       quality: 0.8, // Optimizes compression size for background processing
                                     });
 
-                                    console.log("📸 Raw camera hardware response payload:", cameraResult);
+                                    //console.log("📸 Raw camera hardware response payload:", cameraResult);
 
                                     // 3. Populate the exact same imageUri state slot to render in the center panel
                                     if (!cameraResult.canceled && cameraResult.assets && cameraResult.assets.length > 0) {
                                       const freshPhotoUri = cameraResult.assets[0].uri;
-                                      console.log("✅ Live photo captured successfully. Storing URI:", freshPhotoUri);
+                                      //console.log("✅ Live photo captured successfully. Storing URI:", freshPhotoUri);
                                       setImageUri(freshPhotoUri); // Unified state updates the exact same thumbnail preview panel
                                     } else {
-                                      console.log("⚠️ Camera view dismissed without taking a photo.");
+                                      //console.log("⚠️ Camera view dismissed without taking a photo.");
                                     }
 
                                   } catch (error) {
@@ -1507,7 +1507,7 @@ const convertUriToBase64 = async (uri: string): Promise<string> => {
                       {/* 🖼️ Option 2: Browse Local File Device Gallery */}
                       <Pressable
                         onPress={async () => {
-                          console.log("Opening device photo library...");
+                          //console.log("Opening device photo library...");
                           try {
                             const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -1894,12 +1894,12 @@ export default function Home() {
 
   // 🟢 CORRECTION A: EXPLICIT ROOT-LEVEL IDENTITY GATEWAY INTERCEPTION
   if (!activeSessionUserId) {
-    console.log("🔒 [SECURITY HANDSHAKE] No active session user id token detected. Intercepting viewport layer...");
+    //console.log("🔒 [SECURITY HANDSHAKE] No active session user id token detected. Intercepting viewport layer...");
     return (
       <View style={{ flex: 1, backgroundColor: '#050506' }}>
         <LoginGateScreen
           onAuthComplete={(verifiedUid) => {
-            console.log("🚀 Identity Handshake: Syncing UID token state into active app context.");
+            //console.log("🚀 Identity Handshake: Syncing UID token state into active app context.");
             setActiveSessionUserId(verifiedUid);
           }}
         />
