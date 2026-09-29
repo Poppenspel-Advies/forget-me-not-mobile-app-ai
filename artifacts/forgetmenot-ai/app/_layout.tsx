@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Platform, LogBox } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
@@ -64,3 +64,9 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
+
+// Suppress Expo Router missing default export warnings
+LogBox.ignoreLogs([
+  'Route',
+  'missing the required default export'
+]);

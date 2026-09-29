@@ -57,9 +57,6 @@ const dbStreamInstance = () => {
     // 1. Pull modules dynamically from the web SDK bundle configuration setup
     const { getFirestore } = require('firebase/firestore');
     return getFirestore();
-  } else {
-    // 2. Fallback cleanly to the native mobile operational layer
-    return require('@react-native-firebase/firestore').default();
   }
 };
 

@@ -24,6 +24,8 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 
+import ContactScreen from './ContactScreen';
+
 
 interface ProfileScreenProps {
   onNavigate: (screen: string) => void;
@@ -118,6 +120,7 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
       }
     };
 
+      const [showContactPage, setShowContactPage] = useState<boolean>(false);
 
        useEffect(() => {
          if (!currentFirebaseUser) return;
@@ -394,6 +397,71 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
        }
      };
 
+        // ✅ SAFELY TRIGGER COMPONENT RENDERING LOWER IN EXECUTION LOOP
+        if (showContactPage) {
+          const customizedAppHeader = ({ title, subtitle, onBack }: any) => (
+            <View style={{
+              paddingHorizontal: 24,
+              paddingBottom: 16,
+              backgroundColor: '#050506',
+              paddingTop: Platform.OS === 'web' ? 30 : 50,
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                <Pressable
+                  onPress={onBack}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 12,
+                    backgroundColor: '#171717',
+                    borderWidth: 1,
+                    borderColor: '#262626'
+                  }}
+                >
+                  <Feather name="arrow-left" size={18} color="#FFFFFF" />
+                </Pressable>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#ffffff', fontSize: 20, fontWeight: '700', letterSpacing: -0.5 }}>{title}</Text>
+                  <Text style={{ color: '#737373', fontSize: 12, marginTop: 2 }}>{subtitle}</Text>
+                </View>
+              </View>
+            </View>
+          );
+
+          const contactDarkThemeOverride = {
+            mutedForeground: '#52525b',
+            background: '#ffffff' // Used as text contrast inside primary actions
+          };
+
+          return (
+            <ContactScreen
+              onBack={() => setShowContactPage(false)}
+              styles={localStyles}
+              theme={contactDarkThemeOverride}
+              tap={() => {}}
+              FGlobe={() => (
+                <View style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: 20,
+                  backgroundColor: 'rgba(0, 240, 255, 0.05)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(0, 240, 255, 0.15)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 20,
+                  alignSelf: 'center'
+                }}>
+                  <Feather name="message-square" size={32} color="#00f0ff" />
+                </View>
+              )}
+              ScreenHeader={customizedAppHeader}
+            />
+          );
+        }
+
    return (
      <View style={localStyles.screen}>
        <View style={localStyles.header}>
@@ -475,7 +543,6 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
            </View>
          </View>
 
-// Section 2 of 3: Local Scope Radar Telemetry Lists, Maps, and Trip Planner Render Arrays
                <View style={localStyles.sectionHeaderRow}>
                  <Text style={localStyles.eyebrow}>LOCAL DATA SCOPES</Text>
                  <Text style={localStyles.sectionTitle}>Contextual Radar Parameters</Text>
@@ -582,7 +649,6 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
                  </View>
                )}
 
-// Section 3 of 3: User Preferences Config Toggles, Session Closures, and File Closing Declarations
                 <View style={localStyles.sectionHeaderRow}>
                   <Text style={localStyles.eyebrow}>PREFERENCES</Text>
                   <Text style={localStyles.sectionTitle}>Shape the signal</Text>
@@ -601,6 +667,34 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
                     <Pressable onPress={() => { setSignalSensitivity(!signalSensitivity); updatePreferenceInCloud('sensitivity', !signalSensitivity); }} style={[localStyles.toggle, signalSensitivity && localStyles.toggleOn]}><View style={[localStyles.toggleKnob, signalSensitivity && localStyles.toggleKnobOn]} /></Pressable>
                   </View>
                 </View>
+        {/* SUPPORT CHANNEL LINK ENTRY */}
+        <View style={localStyles.sectionHeaderRow}>
+          <Text style={localStyles.eyebrow}>SUPPORT CHANNEL</Text>
+          <Text style={localStyles.sectionTitle}>Help us build better paths</Text>
+        </View>
+
+        <Pressable
+          onPress={() => {
+            console.log("Navigation link clicked. Mounting inline ContactScreen component view...");
+            setShowContactPage(true);
+          }}
+          style={({ pressed }) => [
+            localStyles.contactTriggerLinkWidget,
+            pressed && { borderColor: '#00f0ff', backgroundColor: '#1e1e24' }
+          ]}
+        >
+          <View style={localStyles.widgetIconWrapper}>
+            <Feather name="message-circle" size={18} color="#00f0ff" />
+          </View>
+          <View style={{ flex: 1, paddingLeft: 4 }}>
+            <Text style={localStyles.widgetMainText}>Talk to the Dev Team</Text>
+            <Text style={localStyles.widgetSubtext}>Share ideas or request missing feature signals.</Text>
+          </View>
+          <View style={{ justifyContent: 'center', alignItems: 'center', width: 24 }}>
+            <Feather name="chevron-right" size={16} color="#737373" />
+          </View>
+        </Pressable>
+
 
                 <View style={{ width: '100%', marginTop: 12, marginBottom: 12 }}>
                   <Pressable
@@ -765,5 +859,86 @@ const localStyles = StyleSheet.create({
   placeIndicatorDotCyan: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#00f0ff' },
   placeMainName: { color: '#ffffff', fontSize: 13, fontWeight: '700' },
   placeSecondaryDetail: { color: '#8a8f98', fontSize: 11, marginTop: 2 },
-  placePriceRatingInfo: { color: '#ffd700', fontSize: 11, fontWeight: '600' }
+  placePriceRatingInfo: { color: '#ffd700', fontSize: 11, fontWeight: '600' },
+   // 🔥 CRITICAL FIXED LINK INTERFACE CONTAINER PARAMETERS
+    contactTriggerLinkWidget: {
+      width: '100%',
+      backgroundColor: '#171717',
+      borderWidth: 1,
+      borderColor: '#262626',
+      borderRadius: 14,
+      padding: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      marginVertical: 8,
+      minHeight: 72
+    },
+    widgetIconWrapper: {
+      width: 40,
+      height: 40,
+      borderRadius: 10,
+      backgroundColor: 'rgba(0, 240, 255, 0.08)',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    widgetMainText: {
+      color: '#ffffff',
+      fontSize: 15,
+      fontWeight: '600',
+      lineHeight: 20
+    },
+    widgetSubtext: {
+      color: '#a3a3a3',
+      fontSize: 12,
+      marginTop: 2,
+      lineHeight: 16
+    },
+
+// ✉️ PREMIUM OVERHAUL STYLING SCHEME FOR THE IMPORTED CONTACTUS VIEWS
+  contactHero: { alignItems: 'center', marginTop: 16, marginBottom: 28 },
+  contactHeroTitle: { color: '#ffffff', fontSize: 24, fontWeight: '700', textAlign: 'center', letterSpacing: -0.5 },
+  contactHeroCopy: { color: '#737373', fontSize: 14, textAlign: 'center', marginTop: 8, paddingHorizontal: 20, lineHeight: 20 },
+  contactInputWrap: { backgroundColor: '#171717', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#262626', marginBottom: 20 },
+  contactInputLabel: { color: '#00f0ff', fontSize: 10, fontWeight: '800', marginBottom: 10, letterSpacing: 1 },
+  contactInput: { color: '#ffffff', minHeight: 140, textAlignVertical: 'top', fontSize: 14, lineHeight: 20 },
+  primaryButton: { height: 50, backgroundColor: '#00f0ff', borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, shadowColor: '#00f0ff', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12 },
+  disabledButton: { backgroundColor: '#1c2426', opacity: 0.4 },
+  primaryButtonText: { color: '#050506', fontWeight: '700', fontSize: 15 },
+  sentCard: { backgroundColor: '#171717', borderRadius: 16, padding: 24, alignItems: 'center', borderWidth: 1, borderColor: '#262626', marginVertical: 10 },
+  sentIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: 'rgba(57, 255, 20, 0.1)', borderWidth: 1, borderColor: '#39FF14', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  sentTitle: { color: '#ffffff', fontSize: 20, fontWeight: '700', letterSpacing: -0.4 },
+  sentCopy: { color: '#a3a3a3', fontSize: 14, textAlign: 'center', marginTop: 8, marginBottom: 20, lineHeight: 20 },
+  secondaryButton: { height: 42, paddingHorizontal: 20, backgroundColor: '#222226', borderRadius: 12, justifyContent: 'center', borderWidth: 1, borderColor: '#262626' },
+  secondaryButtonText: { color: '#ffffff', fontSize: 13, fontWeight: '600' },
+  contactDetails: { marginTop: 40, alignItems: 'center', borderTopWidth: 1, borderTopColor: '#1c1c1f', paddingTop: 24, paddingBottom: 20 },
+  contactDetailTitle: { color: '#44444a', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
+  contactEmail: { color: '#737373', fontSize: 13, marginTop: 4, fontWeight: '500' },
+  contactHours: { color: '#44444a', fontSize: 11, marginTop: 2 }
+
 });
+
+const contactInterfaceStyles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: '#050506', paddingHorizontal: 20 },
+  innerScroll: { paddingTop: 20, paddingBottom: 60 },
+  contactHero: { alignItems: 'center', marginVertical: 20 },
+  contactHeroTitle: { color: '#ffffff', fontSize: 24, fontWeight: '800', textAlign: 'center', marginTop: 10 },
+  contactHeroCopy: { color: '#737373', fontSize: 13, textAlign: 'center', marginTop: 8, paddingHorizontal: 10 },
+  contactInputWrap: { backgroundColor: '#171717', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: '#262626', marginBottom: 20 },
+  contactInputLabel: { color: '#737373', fontSize: 9, fontWeight: '900', marginBottom: 6 },
+  contactInput: { color: '#ffffff', minHeight: 100, textAlignVertical: 'top', fontSize: 14 },
+  primaryButton: { height: 46, backgroundColor: '#00f0ff', borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  disabledButton: { backgroundColor: '#262626', opacity: 0.5 },
+  primaryButtonText: { color: '#050506', fontWeight: '800', fontSize: 14 },
+  sentCard: { backgroundColor: '#171717', borderRadius: 15, padding: 20, alignItems: 'center', borderWidth: 1, borderColor: '#262626' },
+  sentIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#39FF14', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  sentTitle: { color: '#ffffff', fontSize: 18, fontWeight: '700' },
+  sentCopy: { color: '#737373', fontSize: 12, textAlign: 'center', marginTop: 6, marginBottom: 16 },
+  secondaryButton: { height: 36, paddingHorizontal: 16, backgroundColor: '#222', borderRadius: 8, justifyContent: 'center' },
+  secondaryButtonText: { color: '#ffffff', fontSize: 12, fontWeight: '600' },
+  contactDetails: { marginTop: 30, alignItems: 'center' },
+  contactDetailTitle: { color: '#444', fontSize: 10, fontWeight: '700' },
+  contactEmail: { color: '#737373', fontSize: 11, marginTop: 4 },
+  contactHours: { color: '#555', fontSize: 10, marginTop: 2 }
+});
+
