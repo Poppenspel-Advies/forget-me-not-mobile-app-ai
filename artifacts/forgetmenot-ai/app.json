@@ -24,7 +24,7 @@
       [
         "expo-router",
         {
-          "origin": "https://replit.com/"
+          "origin": "https://replit.com"
         }
       ],
       "expo-font",
@@ -33,6 +33,11 @@
     "experiments": {
       "typedRoutes": false,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "046a9792-9fce-4c5e-9f23-d39c39fb388e"
+      }
     }
   }
 }
