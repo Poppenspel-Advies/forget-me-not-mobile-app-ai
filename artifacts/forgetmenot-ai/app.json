@@ -14,9 +14,12 @@
       "backgroundColor": "#08080B"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.forgetmenot.ai"
     },
-    "android": {},
+    "android": {
+      "package": "com.forgetmenot.ai"
+    },
     "web": {
       "favicon": "./assets/images/favicon.png"
     },
