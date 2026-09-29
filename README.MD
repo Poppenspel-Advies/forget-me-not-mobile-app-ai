@@ -198,11 +198,36 @@ The final Profile action block clears active local authentication state, closes 
 Add your actual application screenshots to the repository and update the paths below.
 
 🏠 Home Dashboard
-<p align="center"> <img src="./assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-HomeScreen-web.png" width="900" alt="ForgetMeNot AI Home Dashboard"> </p>
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-HomeScreen-web.png" width="900" alt="ForgetMeNot AI Home Dashboard"> </p>
 
 The central workspace brings together the application's predictive widgets and contextual signals.
 
 ---------------------------------------------
+🛰️ Omission Radar
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-OmissionRadar_Screen.png" width="900" alt="ForgetMeNot AI Omission Radar"> </p>
+
+The Omission Radar maps geographical points of interest and environmental context against recent signals.
+
+------------------------------------------------
+
+🛡️ Omission Prevention
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-PreventOmissionScreen-%20web.png" width="900" alt="ForgetMeNot AI Omission Prevention"> </p>
+
+The prevention workspace analyzes signal variance and presents proactive guidance.
+
+------------------------------------------------
+
+☕ Coffee Chat AI
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-CoffeeAI-ChatScreen-web.png" width="900" alt="ForgetMeNot AI Chat"> </p>
+
+The conversational AI interface provides a natural-language gateway into the user's contextual data layer.
+
+------------------------------------------------
+
+📸 Capture
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeMot-CaptureScreenImageGeminiAnalysis-web.png" width="900" alt="ForgetMeNot AI Capture"> </p>
+
+Capture allows users to record notes, images, and contextual information for downstream AI analysis.
 
 ## 🧩 System Architecture
 
