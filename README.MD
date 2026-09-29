@@ -234,7 +234,7 @@ Capture allows users to record notes, images, and contextual information for dow
 
 ### 🧠 Memory Screen
 
-<p align="center"> <img src="./assets/screenshots/memory.png" width="900" alt="ForgetMeNot AI Memory Screen"> </p>
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-MemoryScreen-web.png" width="900" alt="ForgetMeNot AI Memory Screen"> </p>
 
 The Memory Screen provides access to historical omission and contextual records associated with the active user.
 
@@ -286,7 +286,7 @@ Event Context
 Calendar information provides an important contextual layer for the application.
 --------------------------------------------------
 
-👤 Profile Screen
+### 👤 Profile Screen
 
 <p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-ProfilePage1-web.png" width="900" alt="ForgetMeNot AI Profile Screen"> </p>
 
@@ -356,59 +356,10 @@ The Predictive Loop is the intelligence layer of ForgetMeNot AI that continuousl
 
 </div>
 
-flowchart TD
-A["📱 Expo / React Native Client"] --> B["🌍 Maps + Weather"]
-A --> C["🔥 Firebase"]
-A --> D["📨 Firebase Messaging + EmailJS"]
+### flowchart TD
 
-    B --> E["🧠 Context Compilation"]
-    C --> E
-    D --> E
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-FlowChart.png" width="900" alt="ForgetMeNot FlowChart"> </p>
 
-    E --> F["✨ Google Gemini API"]
-    F --> G["🔎 Intent & Signal Analysis"]
-    G --> H["🛡️ Omission Prevention"]
-    G --> I["🛰️ Omission Radar"]
-    G --> J["☕ Coffee Chat"]
-    G --> K["🧠 Firestore Timeline"]
-
-Core Data Flow
-
-flowchart TD
-``````
-    A[👤 User] --> B[📱 Expo / React Native Client]
-
-    B --> C[📸 Capture]
-    B --> D[📅 Calendar]
-    B --> E[📍 Location]
-    B --> F[🌦️ Weather]
-    B --> G[📝 Notes]
-
-    C --> H[🧠 Context Collection]
-    D --> H
-    E --> H
-    F --> H
-    G --> H
-
-    H --> I[🤖 Google Gemini]
-
-    I --> J[Context Analysis]
-    I --> K[Pattern Detection]
-    I --> L[Omission Prediction]
-
-    J --> M[🔥 Firebase / Firestore]
-    K --> M
-    L --> M
-
-    M --> N[🛰️ Omission Radar]
-    M --> O[🛡️ Prevention Engine]
-    M --> P[☕ Coffee Chat AI]
-
-    N --> Q[👤 User Guidance]
-    O --> Q
-    P --> Q
-    
-``````    
 
 ``````
 ┌───────────────────────────────────────────────────────────────┐
