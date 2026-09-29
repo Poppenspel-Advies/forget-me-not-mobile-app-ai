@@ -263,6 +263,8 @@ flowchart TD
     N --> Q[👤 User Guidance]
     O --> Q
     P --> Q
+    
+``````    
 
 ``````
 ┌───────────────────────────────────────────────────────────────┐
@@ -290,7 +292,9 @@ Geo / Weather              State / Context
 Prediction    Memory      Chat
 / Prevention  / Timeline  / Intent
 
-````
+``````
+
+
 
 
 ## 🛠️ Technology Stack
@@ -783,7 +787,7 @@ Keep local development secrets in .env and maintain a sanitized .env.example for
 
 ForgetMeNot AI Core System is distributed under the terms of the MIT License.
 
-Created by Arpit & The ForgetMeNot Developer Team.
+Created by Arpita & The ForgetMeNot Developer Team.
 
 <div align="center">
 
