@@ -26,7 +26,7 @@ Predict the omission. Prepare before the ripple.
 
 </div>
 
-✨ Visual Identity
+## ✨ Visual Identity
 
 <div align="center">
 
@@ -40,10 +40,10 @@ Cosmic Void Black · Neon Magenta · Fluorescent Cyan
 
 The interface combines predictive cards, signal traces, maps, timelines, context capture, and conversational AI into one operational workspace.
 
-📸 Add real product screenshots here when available
+### 📸 Add real product screenshots here when available
 
 Recommended repository structure:
-
+````
 assets/
 ├── forgetmenot-home.png
 ├── forgetmenot-radar.png
@@ -51,11 +51,11 @@ assets/
 ├── forgetmenot-chat.png
 └── forgetmenot-capture.png
 
+````
 
+![ForgetMeNot AI Home](assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-HomeScreen-web.png)
 
-![ForgetMeNot AI Home](assets/forgetmenot-home.png)
-
-✨ Product Vision
+### ✨ Product Vision
 
 From Multimodal Perception to Predictive Preparedness.
 
@@ -77,51 +77,51 @@ ForgetMeNot AI explores how contextual AI can move beyond simply responding to u
 
 The objective is to convert these signals into meaningful context and potential omission-prevention guidance.
 
-🧭 Application at a Glance
+## 🧭 Application at a Glance
 
 Module
 
 Purpose
 
-🔑 Login & Authentication
+### 🔑 Login & Authentication
 
 Account registration, login, password recovery and 4-digit quick-access PIN
 
-🏠 Home Workspace
+### 🏠 Home Workspace
 
 Ambient context hub with predictive widgets and navigation
 
-🛰️ Omission Radar
+### 🛰️ Omission Radar
 
 Maps potential physical oversights against recent context
 
-🛡️ Omission Prevention
+### 🛡️ Omission Prevention
 
 Analyzes signal variance, confidence and proactive actions
 
-📅 Calendar Sync
+### 📅 Calendar Sync
 
 Tracks schedules, travel timelines and event windows
 
-📸 Capture
+### 📸 Capture
 
 Captures notes, images and media for AI interpretation
 
-👤 Profile
+### 👤 Profile
 
 Profile telemetry, recent signals, nearby dining and itinerary intelligence
 
-📨 Contact Us
+### 📨 Contact Us
 
 EmailJS-powered feedback channel
 
-🔒 Logout
+### 🔒 Logout
 
 Secure session termination and return to the authentication gate
 
-🎯 Complete Application Feature Index
+## 🎯 Complete Application Feature Index
 
-1. 🔑 Login Screen & Hardened Authentication Gate
+### 1. 🔑 Login Screen & Hardened Authentication Gate
 
 Identity Provisioning: Secure email/password login.
 
@@ -129,7 +129,7 @@ Account Lifecycle Functions: New-user registration and forgot-password recovery.
 
 Multi-Tier Passcode Protection: Local 4-digit quick-access PIN linked to the user account with remote validation and reset configuration.
 
-2. 🏠 Core Workspace Hub — Home
+### 2. 🏠 Core Workspace Hub — Home
 
 The primary ambient context stream combines 7 integrated predictive widgets:
 
@@ -147,11 +147,11 @@ The primary ambient context stream combines 7 integrated predictive widgets:
 
 ☕ Coffee Chat Agent AI — Conversational interface for querying the cognitive data layer.
 
-3. 🛰️ Omission Radar Screen
+### 3. 🛰️ Omission Radar Screen
 
 Maps geographical points of interest and environmental hazards against recent context data to identify potential physical oversights within a 30-mile perimeter layout grid.
 
-4. 🛡️ Omission Prevention Screen
+### 4. 🛡️ Omission Prevention Screen
 
 A dedicated analytical workspace for:
 
@@ -163,15 +163,15 @@ Proactive human-step instructions
 
 Active omission-prevention workflows
 
-5. 📅 Google Calendar Event Sync Engine
+### 5. 📅 Google Calendar Event Sync Engine
 
 A dedicated integration view / bottom-navigation component for schedules, travel timelines and event windows.
 
-6. 📸 Media & Note Capture Engine
+### 6. 📸 Media & Note Capture Engine
 
 The Capture screen enables immediate note composition and camera/media-library uploads. Captured material can be dispatched to the Google Gemini API for structural intent parsing and persistence into Firestore.
 
-7. 👤 User Workspace Profile
+### 7. 👤 User Workspace Profile
 
 The Profile screen provides:
 
@@ -183,28 +183,28 @@ Italian, Spanish and US high-end restaurant discovery
 
 Gemini-generated day-trip itinerary planning
 
-8. 📨 Integrated Contact Us Module
+### 8. 📨 Integrated Contact Us Module
 
 The Contact Us module is located in the lower Profile card area and uses an EmailJS background relay to send feedback to the configured development endpoint.
 
-9. 🔒 Secure Session Termination
+### 9. 🔒 Secure Session Termination
 
 The final Profile action block clears active local authentication state, closes active data streams and returns the client to the root verification gate.
 
 ------------------------------------------------------
 
-🖼️ Application Showcase
+## 🖼️ Application Showcase
 
 Add your actual application screenshots to the repository and update the paths below.
 
 🏠 Home Dashboard
-<p align="center"> <img src="./assets/screenshots/home.png" width="900" alt="ForgetMeNot AI Home Dashboard"> </p>
+<p align="center"> <img src="./assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-HomeScreen-web.png" width="900" alt="ForgetMeNot AI Home Dashboard"> </p>
 
 The central workspace brings together the application's predictive widgets and contextual signals.
 
 ---------------------------------------------
 
-🧩 System Architecture
+## 🧩 System Architecture
 
 <div align="center">
 
@@ -230,6 +230,41 @@ A --> D["📨 Firebase Messaging + EmailJS"]
 
 Core Data Flow
 
+flowchart TD
+``````
+    A[👤 User] --> B[📱 Expo / React Native Client]
+
+    B --> C[📸 Capture]
+    B --> D[📅 Calendar]
+    B --> E[📍 Location]
+    B --> F[🌦️ Weather]
+    B --> G[📝 Notes]
+
+    C --> H[🧠 Context Collection]
+    D --> H
+    E --> H
+    F --> H
+    G --> H
+
+    H --> I[🤖 Google Gemini]
+
+    I --> J[Context Analysis]
+    I --> K[Pattern Detection]
+    I --> L[Omission Prediction]
+
+    J --> M[🔥 Firebase / Firestore]
+    K --> M
+    L --> M
+
+    M --> N[🛰️ Omission Radar]
+    M --> O[🛡️ Prevention Engine]
+    M --> P[☕ Coffee Chat AI]
+
+    N --> Q[👤 User Guidance]
+    O --> Q
+    P --> Q
+
+``````
 ┌───────────────────────────────────────────────────────────────┐
 │                  Expo Mobile Client                           │
 │                 React Native / TypeScript                     │
@@ -255,9 +290,12 @@ Geo / Weather              State / Context
 Prediction    Memory      Chat
 / Prevention  / Timeline  / Intent
 
-🛠️ Technology Stack
+````
 
-📱 Frontend & Mobile Client
+
+## 🛠️ Technology Stack
+
+### 📱 Frontend & Mobile Client
 
 React Native + Expo — Cross-platform native application container targeting iOS and Android.
 
@@ -269,7 +307,7 @@ Expo AV — Audio/video and media handling.
 
 Expo Speech — Text-to-speech voice output.
 
-🤖 Artificial Intelligence & Cognitive Layer
+### 🤖 Artificial Intelligence & Cognitive Layer
 
 Google Gemini API — Large-language-model integration for structural prompt execution, cognitive synthesis and contextual intent understanding.
 
@@ -297,7 +335,7 @@ OpenWeather API — Real-time atmospheric conditions and telemetry.
 
 EmailJS API — Client-side feedback and notification delivery.
 
-📋 Comprehensive Component Props Matrix
+### 📋 Comprehensive Component Props Matrix
 
 Component
 
@@ -449,7 +487,7 @@ onPress
 
 Opens selected signal
 
-🚀 Getting Started
+### 🚀 Getting Started
 
 Prerequisites
 
@@ -469,12 +507,12 @@ Google Maps API access
 
 OpenWeather API access
 
-1. Clone the Repository
+### 1. Clone the Repository
 
 git clone https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai.git
 cd artifacts/forgetmenot-ai
 
-2. Install Dependencies
+### 2. Install Dependencies
 
 npm install
 
@@ -486,7 +524,7 @@ On Windows, if required:
 
 pnpm install --ignore-scripts
 
-3. Configure Environment Variables
+### 3. Configure Environment Variables
 
 Create .env at the project root:
 
@@ -508,9 +546,9 @@ EXPO_PUBLIC_EMAILJS_SERVICE_ID=your_emailjs_service_id
 EXPO_PUBLIC_EMAILJS_TEMPLATE_ID=your_emailjs_template_id
 EXPO_PUBLIC_EMAILJS_PUBLIC_KEY=your_emailjs_public_key
 
-🔐 Security: Never commit real API keys or production secrets to GitHub.
+## 🔐 Security: Never commit real API keys or production secrets to GitHub.
 
-4. Start Expo
+### 4. Start Expo
 
 npx expo start --clear
 
@@ -520,7 +558,7 @@ Press w for web.
 
 Press r to refresh the development session.
 
-🖥️ Firebase Emulator Suite
+### 🖥️ Firebase Emulator Suite
 
 Use the local Firebase Emulator Suite for testing without modifying production data.
 
@@ -550,7 +588,7 @@ The Firebase emulator UI is available at:
 
 http://localhost:4000
 
-📹 Video Background Requirements
+### 📹 Video Background Requirements
 
 For reliable web rendering:
 
@@ -566,13 +604,13 @@ Add MP4 assets to Metro:
 
 config.resolver.assetExts.push('mp4');
 
-🔊 Expo Text to Speech
+### 🔊 Expo Text to Speech
 
 Install:
 
 npx expo install expo-speech
 
-📨 EmailJS Integration
+### 📨 EmailJS Integration
 
 ForgetMeNot AI uses EmailJS as a background REST relay for user feedback.
 
@@ -590,6 +628,7 @@ Template
 
 Create a template named Contact Us in the EmailJS console and map the following fields:
 
+``````
 Parameter
 
 Source
@@ -614,10 +653,14 @@ Configured support inbox
 
 Logged-in user's email
 
-📊 Firestore Response Schema
+``````
+
+
+### 📊 Firestore Response Schema
 
 The /analyses collection records cognitive timeline telemetry.
 
+````
 {
 "document_id": "an29Fj831kLdM0429sXz",
 "user_id": "Admin_ForgetMeNotAI",
@@ -633,8 +676,9 @@ The /analyses collection records cognitive timeline telemetry.
 "dependencyNodesCount": "5"
 }
 }
+````
 
-🔐 Cloud Firestore Security Rules
+### 🔐 Cloud Firestore Security Rules
 
 Use authenticated user-scoped access for user documents:
 
@@ -658,8 +702,9 @@ match /databases/{database}/documents {
 
 ⚠️ Review and harden production Firestore rules before deployment. The /analyses rule above permits any authenticated user to read/write that collection.
 
-🗂️ Recommended Repository Structure
+### 🗂️ Recommended Repository Structure
 
+````
 forget-me-not-mobile-app-ai/
 │
 ├── app/
@@ -682,7 +727,9 @@ forget-me-not-mobile-app-ai/
 ├── package.json
 └── README.md
 
-🧠 Product Concept
+````
+
+## 🧠 Product Concept
 
 <div align="center">
 
@@ -690,6 +737,7 @@ forget-me-not-mobile-app-ai/
 
 </div>
 
+````
 Event + Context + User Pattern
 │
 ▼
@@ -706,10 +754,12 @@ Preventive Signal
 │
 ▼
 Human Action / Plan
+````
+
 
 The application architecture connects capture, context, AI analysis, geographic information, schedules and memory into a predictive workflow.
 
-🧪 Development Notes
+### 🧪 Development Notes
 
 The project contains several integrations that require environment-specific configuration:
 
@@ -729,7 +779,7 @@ Web video playback / Metro asset handling
 
 Keep local development secrets in .env and maintain a sanitized .env.example for repository setup.
 
-📜 License & Legal Registry
+### 📜 License & Legal Registry
 
 ForgetMeNot AI Core System is distributed under the terms of the MIT License.
 
@@ -737,7 +787,7 @@ Created by Arpit & The ForgetMeNot Developer Team.
 
 <div align="center">
 
-🌌 ForgetMeNot AI
+### 🌌 ForgetMeNot AI
 
 Predictive Context Intelligence Engine
 
