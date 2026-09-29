@@ -1,313 +1,754 @@
-# 🌌 ForgetMeNot AI — Predictive Context Intelligence Engine
+<div align="center">
 
-ForgetMeNot AI is a high-fidelity, cross-platform mobile and web application built with **React Native (Expo)** and powered by **Firebase** and **Google Gemini Pro**. The application functions as an immersive, context-aware secondary memory brain that tracks anomalies, bridges predictive informational gaps, and converts ambient predictive metadata into actionable human blueprints.
+<a name="top"></a>
 
----
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:050509,45:15102B,75:7A0F67,100:00F5D4&height=230&section=header&text=ForgetMeNot%20AI&fontSize=58&fontColor=FFFFFF&animation=fadeIn&fontAlignY=38&desc=Predictive%20Context%20Intelligence%20Engine&descAlignY=62&descSize=20" width="100%"/>
 
-## 🎯 Complete Application Feature Index
+🧠 From ambient signals to predictive preparedness
 
-*   **Predictive Context Loop Analyzer:** Hooks directly into Google Gemini Pro to parse captured notes, files, and thoughts into structured metadata anomaly records, mapping situational risks automatically.
-*   **Immersive Audio-Visual Login Gate:** A high-fidelity, web-hardened authentication screen displaying a live continuous streaming space background video (`Planet_Galaxy.mp4`) backed by deep ambient acoustic soundscapes (`cosmic-ambient-void.mp3`).
-*   **Multi-Tier Identity Security Guard:** Integrates full dual-stage verification workflows. Supports Email/Password user creation, account login, automated remote password resets, and locks structural access behind a 4-digit database-synced quick-entry PIN card.
-*   **Real-Time Firestore Matrix Telemetry:** Utilizes reactive onSnapshot sockets to calculate signal logs, update user profile parameters, and bind interface toggles cleanly across client sessions without layout freeze bugs.
-*   **Responsive Glassmorphic UI/UX Engine:** Hand-tailored CSS grid styles and flex bounds optimized for native screens and Expo Web viewports, featuring spinning logo controllers, focus glow input inputs, and anti-clipping padding offsets.
+ForgetMeNot AI is a high-fidelity, cross-platform mobile and web application built with React Native (Expo) and powered by Firebase and Google Gemini Pro. It is designed as a context-aware secondary memory layer that tracks anomalies, bridges predictive informational gaps, and converts ambient predictive metadata into actionable human blueprints.
 
----
+<p>
+  <img src="https://img.shields.io/badge/React%20Native-Expo-000000?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native Expo"/>
+  <img src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/Firebase-Cloud%20Backend-FFCA28?style=for-the-badge&logo=firebase&logoColor=111111" alt="Firebase"/>
+  <img src="https://img.shields.io/badge/Google%20Gemini-AI%20Layer-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google Gemini"/>
+</p>
 
-## 🛠️ Tech Stack & Infrastructure Architecture
+<p>
+  <img src="https://img.shields.io/badge/Maps-Geospatial-34A853?style=flat-square&logo=googlemaps&logoColor=white"/>
+  <img src="https://img.shields.io/badge/OpenWeather-Real--Time%20Weather-EB6E4B?style=flat-square"/>
+  <img src="https://img.shields.io/badge/EmailJS-Feedback%20Relay-FF4A00?style=flat-square"/>
+  <img src="https://img.shields.io/badge/License-MIT-00C853?style=flat-square"/>
+</p>
 
-*   **Framework Architecture:** React Native / Expo (v6 SDK Router Router Core)
-*   **Cloud Infrastructure Database:** Firebase Auth & Cloud Firestore Real-time Database
-*   **Intelligence Model API:** Google Gemini Pro Integration Pipeline
-*   **Hardware Media Controller:** Expo Audio-Visual Streaming Kit (`expo-av`)
-*   **Design Token Matrix:** Custom Cyber-Glassmorphic Dark Mode Theme (Neon Magenta, Fluorescent Cyan, Cosmic Void Black)
+Predict the omission. Prepare before the ripple.
 
----
+</div>
 
-## 🛠️ Technology Stack
+✨ Visual Identity
 
-ForgetMeNot AI is architected as a highly modular, cross-platform mobile ecosystem powered by edge intelligence, flexible backend cloud routing, and dynamic LLM orchestration.
+<div align="center">
 
-### 📱 Frontend & Mobile Client
-*   **React Native & Expo:** Cross-platform native application container targeting iOS and Android platforms from a single codebase.
-*   **TypeScript:** Type-safe scripting language driving state management, UI orchestration, and strict component definition.
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:050509,50:111827,100:30104A&height=110&section=header&text=CONTEXT%20%E2%80%A2%20MEMORY%20%E2%80%A2%20PREDICTION&fontSize=24&fontColor=FFFFFF&animation=twinkling" width="90%"/>
 
-### 🤖 Artificial Intelligence & Cognitive Layer
-*   **Google Gemini API:** Native large language model integration managing structural prompt execution, cognitive synthesis, and contextual intent understanding.
-*   **Python:** Engine for supplementary data processing pipelines, algorithmic automation tasks, and underlying developer tooling.
+</div>
 
-### 🛡️ Cloud Infrastructure & BaaS (Backend-as-a-Service)
-*   **Google Firebase Suite:** Complete infrastructure backbone facilitating:
-    *   *Firebase Authentication:* Secure identity provision and active session verification.
-    *   *Cloud Firestore / Realtime DB:* Structured object state storage and immediate data synchronization.
-    *   *Firebase Storage:* Repository routing for file objects, binaries, and user media logs.
-    *   *Cloud Messaging (FCM):* Native client push alert distribution system.
-*   **Node.js Runtime:** Underlying engine powering cross-dependency management and ecosystem operational scripts.
+ForgetMeNot AI uses a Cyber-Glassmorphic Dark Mode design language built around:
 
-### 🌐 Integrated Core Service APIs
-*   **Google Maps API:** Native geospatial routing, point-of-interest calculation, and visual map rendering.
-*   **OpenWeather API:** Real-time atmospheric condition retrieval, historical metrics, and telemetry scraping.
-*   **EmailJS API:** Serverless client-side secure SMTP payload dispatching for immediate transaction and alert notification delivery.
+Cosmic Void Black · Neon Magenta · Fluorescent Cyan
 
----
+The interface combines predictive cards, signal traces, maps, timelines, context capture, and conversational AI into one operational workspace.
 
-## 🔄 System Data Architecture Flow
+📸 Add real product screenshots here when available
 
-```text
-┌────────────────────────────────────────────────────────┐
-│             Expo Mobile Client (React Native)          │
-└───────────┬────────────────────┬───────────────────▲───┘
-            │                    │                   │
-   Fetch Geo/Weather     Read/Write State      Push Alerts /
-            │                    │             Email Dispatches
-            ▼                    ▼                   │
-┌──────────────────────┐ ┌───────────────┐ ┌─────────┴──────────┐
-│ Google Maps &        │ │  Google       │ │ Firebase Messaging │
-│ OpenWeather Services │ │  Firebase     │ │ & EmailJS Pipelines│
-└───────────┬──────────┘ └───────┬───────┘ └─────────▲──────────┘
-            │                    │                   │
-            │  Compile Context   │                   │
-            ▼                    ▼                   │
-┌────────────────────────────────────────────────────┴──┐
-│             Google Gemini API (LLM Engine)            │
-└───────────────────────────────────────────────────────┘
-```
+Recommended repository structure:
+
+assets/
+├── forgetmenot-home.png
+├── forgetmenot-radar.png
+├── forgetmenot-prevention.png
+├── forgetmenot-chat.png
+└── forgetmenot-capture.png
 
 
-## 📋 Comprehensive Component Props Matrix Table
 
-| Component Name | File Path Source Target | Prop Key | Prop Type | Required? | Functional Description |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **`LoginGateScreen`** | `app/index.tsx` | `onAuthComplete` | `(userId: string) => void` | **Yes** | Triggered upon successful passcode validation; passes the verified user UID token back to the root router switchboard. |
-| **`ProfileScreen`** | `app/index.tsx` | `onNavigate` | `(screen: Screen) => void` | **Yes** | Updates navigation state context. Intercepts `home` target triggers to securely wipe current session data values during user logouts. |
-| **`HomeScreen`** | `app/index.tsx` | `onNavigate` | `(screen: Screen) => void` | **Yes** | Reroutes user coordinates from active hub cards into sub-level metrics view screens. |
-| | | `captured` | `CapturedItem[]` | **Yes** | Feeds an array listing locally saved text, note, and image signal markers into the chronological timeline component block. |
-| **`ScreenHeader`** | `app/index.tsx` | `title` | `string` | **Yes** | Displays target text header title inside top navbar elements. |
-| | | `subtitle` | `string` | No | Renders a subtext layout description or active user session email string address underneath the main title text. |
-| | | `onBack` | `() => void` | No | If supplied, mounts a backward arrow chevron icon button to navigate back up a frame layout. |
-| | | `right` | `React.ReactNode` | No | Injectable space container used to pass custom asset icons or operational control buttons into the right navbar slot. |
-| **`SectionTitle`** | `app/index.tsx` | `eyebrow` | `string` | No | Standard high-contrast, mini text readout marker summarizing sub-classification paths. |
-| | | `title` | `string` | **Yes** | Sets primary horizontal subsection title description. |
-| | | `action` | `string` | No | Formats selectable textual text shortcuts links on the trailing border block. |
-| | | `onAction` | `() => void` | No | Execution callback callback handler for the trailing header shortcut link elements. |
-| **`PredictionCard`** | `app/index.tsx` | `item` | `any` | **Yes** | Object containing title strings, category indicators, threat probability rates, and color hex keys fetched from Firestore. |
-| | | `onPress` | `() => void` | **Yes** | Route controller fired when user selects an active signal component card block. |
+![ForgetMeNot AI Home](assets/forgetmenot-home.png)
 
----
+✨ Product Vision
 
-## ⚡ Deployment & Quick-Start Execution
+From Multimodal Perception to Predictive Preparedness.
 
-## 🚀 Getting Started
+``````
+ForgetMeNot AI explores how contextual AI can move beyond simply responding to user commands and instead recognize relationships between:
 
-Follow these instructions to configure dependencies and spin up the local development environment.
+📅 Events
+📍 Places
+👥 People
+🧳 Travel
+📸 Images
+📝 Notes
+🎙️ Voice
+🌦️ Environmental conditions
+🧠 Historical context
+🔄 User activity patterns
 
-### 📦 1. Installation
+```````
 
-Clone the repository and install the standard dependencies:
+The objective is to convert these signals into meaningful context and potential omission-prevention guidance.
 
-```bash
-# Clone the repository
+🧭 Application at a Glance
+
+Module
+
+Purpose
+
+🔑 Login & Authentication
+
+Account registration, login, password recovery and 4-digit quick-access PIN
+
+🏠 Home Workspace
+
+Ambient context hub with predictive widgets and navigation
+
+🛰️ Omission Radar
+
+Maps potential physical oversights against recent context
+
+🛡️ Omission Prevention
+
+Analyzes signal variance, confidence and proactive actions
+
+📅 Calendar Sync
+
+Tracks schedules, travel timelines and event windows
+
+📸 Capture
+
+Captures notes, images and media for AI interpretation
+
+👤 Profile
+
+Profile telemetry, recent signals, nearby dining and itinerary intelligence
+
+📨 Contact Us
+
+EmailJS-powered feedback channel
+
+🔒 Logout
+
+Secure session termination and return to the authentication gate
+
+🎯 Complete Application Feature Index
+
+1. 🔑 Login Screen & Hardened Authentication Gate
+
+Identity Provisioning: Secure email/password login.
+
+Account Lifecycle Functions: New-user registration and forgot-password recovery.
+
+Multi-Tier Passcode Protection: Local 4-digit quick-access PIN linked to the user account with remote validation and reset configuration.
+
+2. 🏠 Core Workspace Hub — Home
+
+The primary ambient context stream combines 7 integrated predictive widgets:
+
+🌦️ Meteorological & Transit Telemetry — Local weather and train departure information.
+
+🛡️ Prevention Loop Widget — Evaluates behavioral anomalies and predicts potential oversight lapses.
+
+🧠 Recent Context Ledger — Displays recent signal traces and links to the Memory Screen.
+
+🎯 Intent Anchor Widget — Binds human data nodes into a chronological timeline.
+
+🛡️ Ripple Shield Widget — Displays dynamic security profiles and signal-boundary sensitivity.
+
+⚡ Prevent Omission Link — Shortcut to deeper oversight analysis.
+
+☕ Coffee Chat Agent AI — Conversational interface for querying the cognitive data layer.
+
+3. 🛰️ Omission Radar Screen
+
+Maps geographical points of interest and environmental hazards against recent context data to identify potential physical oversights within a 30-mile perimeter layout grid.
+
+4. 🛡️ Omission Prevention Screen
+
+A dedicated analytical workspace for:
+
+Signal variance analysis
+
+Risk confidence scores
+
+Proactive human-step instructions
+
+Active omission-prevention workflows
+
+5. 📅 Google Calendar Event Sync Engine
+
+A dedicated integration view / bottom-navigation component for schedules, travel timelines and event windows.
+
+6. 📸 Media & Note Capture Engine
+
+The Capture screen enables immediate note composition and camera/media-library uploads. Captured material can be dispatched to the Google Gemini API for structural intent parsing and persistence into Firestore.
+
+7. 👤 User Workspace Profile
+
+The Profile screen provides:
+
+Recent live signal trace data
+
+Localized nearby dining recommendations
+
+Italian, Spanish and US high-end restaurant discovery
+
+Gemini-generated day-trip itinerary planning
+
+8. 📨 Integrated Contact Us Module
+
+The Contact Us module is located in the lower Profile card area and uses an EmailJS background relay to send feedback to the configured development endpoint.
+
+9. 🔒 Secure Session Termination
+
+The final Profile action block clears active local authentication state, closes active data streams and returns the client to the root verification gate.
+
+------------------------------------------------------
+
+🖼️ Application Showcase
+
+Add your actual application screenshots to the repository and update the paths below.
+
+🏠 Home Dashboard
+<p align="center"> <img src="./assets/screenshots/home.png" width="900" alt="ForgetMeNot AI Home Dashboard"> </p>
+
+The central workspace brings together the application's predictive widgets and contextual signals.
+
+---------------------------------------------
+
+🧩 System Architecture
+
+<div align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:00F5D4,50:7A0F67,100:050509&height=90&section=header&text=MULTIMODAL%20CONTEXT%20PIPELINE&fontSize=22&fontColor=FFFFFF" width="85%"/>
+
+</div>
+
+flowchart TD
+A["📱 Expo / React Native Client"] --> B["🌍 Maps + Weather"]
+A --> C["🔥 Firebase"]
+A --> D["📨 Firebase Messaging + EmailJS"]
+
+    B --> E["🧠 Context Compilation"]
+    C --> E
+    D --> E
+
+    E --> F["✨ Google Gemini API"]
+    F --> G["🔎 Intent & Signal Analysis"]
+    G --> H["🛡️ Omission Prevention"]
+    G --> I["🛰️ Omission Radar"]
+    G --> J["☕ Coffee Chat"]
+    G --> K["🧠 Firestore Timeline"]
+
+Core Data Flow
+
+┌───────────────────────────────────────────────────────────────┐
+│                  Expo Mobile Client                           │
+│                 React Native / TypeScript                     │
+└──────────────┬───────────────────────┬────────────────────────┘
+│                       │
+Geo / Weather              State / Context
+│                       │
+▼                       ▼
+┌──────────────────┐     ┌──────────────────┐
+│ Google Maps +    │     │ Firebase Auth +  │
+│ OpenWeather      │     │ Firestore        │
+└────────┬─────────┘     └────────┬─────────┘
+│                        │
+└────────────┬───────────┘
+▼
+┌──────────────────┐
+│ Google Gemini API │
+│   LLM Engine      │
+└────────┬─────────┘
+│
+┌───────────┼───────────┐
+▼           ▼           ▼
+Prediction    Memory      Chat
+/ Prevention  / Timeline  / Intent
+
+🛠️ Technology Stack
+
+📱 Frontend & Mobile Client
+
+React Native + Expo — Cross-platform native application container targeting iOS and Android.
+
+TypeScript — Type-safe application logic, state management and component definitions.
+
+Expo Router — Application navigation architecture.
+
+Expo AV — Audio/video and media handling.
+
+Expo Speech — Text-to-speech voice output.
+
+🤖 Artificial Intelligence & Cognitive Layer
+
+Google Gemini API — Large-language-model integration for structural prompt execution, cognitive synthesis and contextual intent understanding.
+
+Python — Supplementary data-processing pipelines, automation and developer tooling.
+
+🛡️ Cloud Infrastructure
+
+Google Firebase Suite
+
+Firebase Authentication
+
+Cloud Firestore / Realtime Database
+
+Firebase Storage
+
+Firebase Cloud Messaging (FCM)
+
+Node.js — Runtime and ecosystem tooling.
+
+🌐 Integrated Core APIs
+
+Google Maps API — Geospatial routing, POI calculation and map rendering.
+
+OpenWeather API — Real-time atmospheric conditions and telemetry.
+
+EmailJS API — Client-side feedback and notification delivery.
+
+📋 Comprehensive Component Props Matrix
+
+Component
+
+Prop
+
+Type
+
+Required
+
+Functional Description
+
+LoginGateScreen
+
+onAuthComplete
+
+(userId: string) => void
+
+✅
+
+Returns verified user UID after passcode validation
+
+ProfileScreen
+
+onNavigate
+
+(screen: Screen) => void
+
+✅
+
+Controls navigation and logout routing
+
+HomeScreen
+
+onNavigate
+
+(screen: Screen) => void
+
+✅
+
+Routes from hub cards into detailed screens
+
+HomeScreen
+
+captured
+
+CapturedItem[]
+
+✅
+
+Supplies saved text, notes and image signals
+
+ScreenHeader
+
+title
+
+string
+
+✅
+
+Primary screen title
+
+ScreenHeader
+
+subtitle
+
+string
+
+❌
+
+Supporting description / session email
+
+ScreenHeader
+
+onBack
+
+() => void
+
+❌
+
+Back-navigation callback
+
+ScreenHeader
+
+right
+
+React.ReactNode
+
+❌
+
+Custom right-side control slot
+
+SectionTitle
+
+eyebrow
+
+string
+
+❌
+
+Small classification label
+
+SectionTitle
+
+title
+
+string
+
+✅
+
+Section title
+
+SectionTitle
+
+action
+
+string
+
+❌
+
+Trailing shortcut label
+
+SectionTitle
+
+onAction
+
+() => void
+
+❌
+
+Shortcut callback
+
+PredictionCard
+
+item
+
+any
+
+✅
+
+Signal, category, probability and color data
+
+PredictionCard
+
+onPress
+
+() => void
+
+✅
+
+Opens selected signal
+
+🚀 Getting Started
+
+Prerequisites
+
+Make sure your development environment includes:
+
+Node.js 18+
+
+npm or pnpm
+
+Expo CLI / Expo-compatible development environment
+
+Firebase project
+
+Google Gemini API access
+
+Google Maps API access
+
+OpenWeather API access
+
+1. Clone the Repository
+
 git clone https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai.git
 cd artifacts/forgetmenot-ai
-# Install core packages
+
+2. Install Dependencies
+
 npm install
-```
 
-To enable the text-to-speech engine for dynamic voiceovers, ensure you install the native `expo-speech` plugin module:
+For Expo Speech:
 
-```bash
-# Install native speech module via Expo CLI
 npx expo install expo-speech
 
-### 1. Prerequisites Setup
-Ensure your local environment runs Node.js (v18+) and your package architecture runs **pnpm** or **npm**.
+On Windows, if required:
 
-### 2. Configure Environment Secrets
-Create a `.env` file at the root of the project structure and populate it with your cloud endpoint keys and API tokens:
-```env
-# --- FIREBASE CORE ENDPOINTS ---
-EXPO_PUBLIC_FIREBASE_API_KEY=AIzaSy...
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=://firebaseapp.com
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=forgetmenot-ai
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=://appspot.com
-EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1234567890
-EXPO_PUBLIC_FIREBASE_APP_ID=1:12345:web:abcde
-
-# --- THIRD PARTY CORE SERVICE API INTELLIGENCE ---
-EXPO_PUBLIC_GEMINI_API_KEY=AIzaSyGeminiCoreKey...
-EXPO_PUBLIC_OPENWEATHER_API_KEY=55e7bc...
-EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyMapsCoreKey...
-```
-
-### 3. Install Package Bundles
-If running a Windows terminal command viewport shell, bypass Linux-specific script execution constraints securely using:
-```bash
 pnpm install --ignore-scripts
-```
 
-### 4. Build and Fire Up Metro Server
-Initiate a clean file structure crawl by executing:
-```bash
+3. Configure Environment Variables
+
+Create .env at the project root:
+
+# FIREBASE
+EXPO_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+EXPO_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
+
+# AI / DATA SERVICES
+EXPO_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
+EXPO_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+
+# EMAILJS
+EXPO_PUBLIC_EMAILJS_SERVICE_ID=your_emailjs_service_id
+EXPO_PUBLIC_EMAILJS_TEMPLATE_ID=your_emailjs_template_id
+EXPO_PUBLIC_EMAILJS_PUBLIC_KEY=your_emailjs_public_key
+
+🔐 Security: Never commit real API keys or production secrets to GitHub.
+
+4. Start Expo
+
 npx expo start --clear
-```
-*   Press **`w`** to view on an interactive web canvas viewport browser grid.
-*   Press **`r`** inside your active server prompt window to refresh compilation cache lines.
 
----
+Then:
 
-## 🖥️ Local Firebase Emulator Suite Installation
+Press w for web.
 
-To run, test, and debug database transactions locally without impacting your live cloud production environment records, install and fire up the local standalone Firebase toolkit:
+Press r to refresh the development session.
 
-### 1. Install Firebase CLI Globally
-```bash
+🖥️ Firebase Emulator Suite
+
+Use the local Firebase Emulator Suite for testing without modifying production data.
+
+Install Firebase CLI
+
 npm install -g firebase-tools
-```
 
-### 2. Authenticate the CLI with Your Account
-```bash
+Authenticate
+
 firebase login
-```
 
-### 3. Initialize the Local Workspace Configurations
-Run this from your root project directory and select `Firestore` and `Authentication` when prompted:
-```bash
+Initialize Emulators
+
 firebase init emulators
-```
 
-### 4. Fire Up the Local Emulator Suite
-```bash
+Select:
+
+Firestore
+
+Authentication
+
+Start
+
 firebase emulators:start
-```
-Once active, your local UI management panel tracks will build and stream on `http://localhost:4000`.
 
----
+The Firebase emulator UI is available at:
 
-## 📹 Video Background Application Requirements
+http://localhost:4000
 
-To avoid web-rendering lag or stuttering frame drops during authentication loops, ensure your workspace setup adheres to the following media parameters:
+📹 Video Background Requirements
 
-*   **Format Constraints:** The cinematic assets folder must contain an explicit **H.264 encoded `.mp4` container file**. Higher profile formats like HEVC/H.265 are natively rejected by most desktop browsers.
-*   **Web Playback Policy:** Desktop viewports (Chrome, Safari, Edge) strictly forbid video auto-play streams unless the component is forced to initialization state under an explicit **`isMuted={true}`** property flag. Audio loops must follow the async `Audio.Sound` pipeline separately.
-*   **Hardware Codec Acceleration:** For optimal canvas scaling, your **`metro.config.js`** must be configured to append and pass down binary asset allocations:
-    ```javascript
-    config.resolver.assetExts.push('mp4');
-    ```
+For reliable web rendering:
 
----
+Use an H.264 .mp4 asset.
 
-## 📹 Expo Text to Speech
+Avoid relying on HEVC/H.265 for desktop browser playback.
+
+Web autoplay should use muted playback where required.
+
+Audio loops should use the asynchronous Audio.Sound pipeline.
+
+Add MP4 assets to Metro:
+
+config.resolver.assetExts.push('mp4');
+
+🔊 Expo Text to Speech
+
+Install:
 
 npx expo install expo-speech
 
----
+📨 EmailJS Integration
 
-## 📨 EmailJS Background Integration & Custom Template Configuration
+ForgetMeNot AI uses EmailJS as a background REST relay for user feedback.
 
-ForgetMeNot AI utilizes a background REST API relay architecture via EmailJS to dispatch secure user feedback notes directly to your support inbox without prompting native device mailing wrappers or hitting paid cloud extension barriers.
+Environment
 
-### 1. Environment Variable Configuration
-Ensure your root `.env` environment configuration file has your unique developer account API keys loaded into the dynamic context layer:
-```env
-# --- EMAILJS BACKGROUND REST RELAY CREDS ---
-EXPO_PUBLIC_EMAILJS_SERVICE_ID=your_emailjs_service_id_here
-EXPO_PUBLIC_EMAILJS_TEMPLATE_ID=your_emailjs_template_id_here
-EXPO_PUBLIC_EMAILJS_PUBLIC_KEY=your_emailjs_public_key_here
-```
-*Note: Restart your local development environment bundle with `pnpm exec expo start -c` after making modifications to force cache initialization rules.*
+EXPO_PUBLIC_EMAILJS_SERVICE_ID=your_emailjs_service_id
+EXPO_PUBLIC_EMAILJS_TEMPLATE_ID=your_emailjs_template_id
+EXPO_PUBLIC_EMAILJS_PUBLIC_KEY=your_emailjs_public_key
 
-### 2. Live REST Endpoint Binding Specifications
-Background requests safely target the official EmailJS global JSON endpoint protocol rather than base domains to bypass client-side web CORS preflight constraints:
-*   **Target URI Route API :** `https://emailjs.com`
-*   **HTTP Method Payload:** `POST`
-*   **Encapsulation Content-Type:** `application/json`
+Restart Expo after changing environment variables:
 
-### 3. EmailJS Dashboard Custom Template Setup
-To display your beautiful high-fidelity customer notification design inside your inbox grid, build a template titled exactly **"Contact Us"** inside your [EmailJS Console](https://emailjs.com), toggle the editor into **`Source Code` (`<>`) mode**, and paste this custom HTML markup block:
+pnpm exec expo start -c
 
-```html
-<div style="font-family: system-ui, sans-serif, Arial; font-size: 12px; max-width: 600px; margin: 0 auto; color: #2c3e50;">
-  <div style="font-size: 14px; margin-bottom: 10px;">
-    A message by <strong>{{name}}</strong> has been received. Kindly respond at your earliest convenience.
-  </div>
-  
-  <div style="margin-top: 20px; padding: 20px 0; border-width: 1px 0; border-style: dashed; border-color: lightgrey;">
-    <table role="presentation" style="width: 100%; border-collapse: collapse;">
-      <tr>
-        <td style="vertical-align: top; width: 60px;">
-          <div style="padding: 10px; background-color: #f0f8ff; border-radius: 8px; font-size: 28px; text-align: center; line-height: 1;" role="img" aria-label="user-avatar">
-            👤
-          </div>
-        </td>
-        <td style="vertical-align: top; padding-left: 15px;">
-          <div style="color: #2c3e50; font-size: 16px; margin-bottom: 2px;">
-            <strong>{{name}}</strong>
-          </div>
-          <div style="color: #95a5a6; font-size: 12px; margin-bottom: 12px;">
-            {{time}}
-          </div>
-          <div style="font-size: 15px; color: #34495e; line-height: 1.6; white-space: pre-wrap; background-color: #fafbfc; padding: 12px; border-radius: 6px; border: 1px solid #f0f1f2;">
-            {{message}}
-          </div>
-        </td>
-      </tr>
-    </table>
-  </div>
-</div>
-```
+Template
 
-### 4. Reactive Parameters Data Injection Map
-The frontend payload automatically extracts verified user session context details and binds them directly onto your double-curly braces handles (`{{}}`) on execution:
-*   **`{{name}}`**: The exact secure sender email address the user logged into the system with (`currentFirebaseUser.email`).
-*   **`{{time}}`**: The localized, real-time native device timestamp log frame.
-*   **`{{message}}`**: The text note string captured inside the feedback input container.
-*   **`{{to_email}}`**: Statically set to deliver directly to `poppenspeladvies@gmail.com`.
-*   **`{{reply_to}}`**: Auto-populated to ensure clicking "Reply" inside your inbox targets the user's logged-in account immediately.
+Create a template named Contact Us in the EmailJS console and map the following fields:
 
----
+Parameter
 
-## 📊 API & Database Response Schema (`/analyses` Collection)
+Source
 
-The system records real-time cognitive timeline telemetry models inside Firestore documents using this specific nested JSON structure:
+{{name}}
 
-```json
+Logged-in user's email
+
+{{time}}
+
+Local device timestamp
+
+{{message}}
+
+Feedback message
+
+{{to_email}}
+
+Configured support inbox
+
+{{reply_to}}
+
+Logged-in user's email
+
+📊 Firestore Response Schema
+
+The /analyses collection records cognitive timeline telemetry.
+
 {
-  "document_id": "an29Fj831kLdM0429sXz",
-  "user_id": "Admin_ForgetMeNotAI",
-  "title": "Train to Central Departure Window",
-  "detail": "Inferred from recent calendar snapshot logs and a captured travel schedule photo.",
-  "tag": "PLACES",
-  "created_at": "2026-09-11T12:24:00.000Z",
-  "analysis": {
-    "signal": "Train to Central Departure Window",
-    "explanation": "Routine data routes trace an absolute variance conflict grid between your local schedule and departure slots.",
-    "confidence": 94,
-    "categoryTag": "PLACES",
-    "dependencyNodesCount": "5"
-  }
+"document_id": "an29Fj831kLdM0429sXz",
+"user_id": "Admin_ForgetMeNotAI",
+"title": "Train to Central Departure Window",
+"detail": "Inferred from recent calendar snapshot logs and a captured travel schedule photo.",
+"tag": "PLACES",
+"created_at": "2026-09-11T12:24:00.000Z",
+"analysis": {
+"signal": "Train to Central Departure Window",
+"explanation": "Routine data routes trace an absolute variance conflict grid between your local schedule and departure slots.",
+"confidence": 94,
+"categoryTag": "PLACES",
+"dependencyNodesCount": "5"
 }
-```
+}
 
----
+🔐 Cloud Firestore Security Rules
 
-## 🔐 Cloud Firestore Security Rules Configuration
-To allow users to register and modify their own credentials safely without database sync blocks, update your **Cloud Firestore Rules** tab in your online console to match this matrix schema:
+Use authenticated user-scoped access for user documents:
 
-```javascript
 rules_version = '2';
+
 service cloud.firestore {
-  match /databases/{database}/documents {
+match /databases/{database}/documents {
+
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write:
+        if request.auth != null
+        && request.auth.uid == userId;
     }
+
     match /analyses/{analysisId} {
-      allow read, write: if request.auth != null;
+      allow read, write:
+        if request.auth != null;
     }
-  }
 }
-```
+}
 
----
+⚠️ Review and harden production Firestore rules before deployment. The /analyses rule above permits any authenticated user to read/write that collection.
 
-## 📜 Licensing & Legal Registry
-FORGETMENOT AI Core System · Distributed under the terms of the **MIT License**. Created by Arpit & The ForgetMeNot Developer Team.
+🗂️ Recommended Repository Structure
+
+forget-me-not-mobile-app-ai/
+│
+├── app/
+│   ├── index.tsx
+│   └── ...
+│
+├── assets/
+│   ├── forgetmenot-home.png
+│   ├── forgetmenot-radar.png
+│   ├── forgetmenot-prevention.png
+│   ├── forgetmenot-chat.png
+│   └── forgetmenot-capture.png
+│
+├── components/
+├── services/
+├── hooks/
+├── utils/
+├── .env.example
+├── app.json
+├── package.json
+└── README.md
+
+🧠 Product Concept
+
+<div align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=rounded&color=0:050509,50:00F5D4,100:FF1493&height=120&section=header&text=FROM%20SIGNAL%20TO%20PREPAREDNESS&fontSize=24&fontColor=FFFFFF" width="90%"/>
+
+</div>
+
+Event + Context + User Pattern
+│
+▼
+┌─────────────────┐
+│ Predictive      │
+│ Omission Layer  │
+└────────┬────────┘
+│
+▼
+Predicted Omission
+│
+▼
+Preventive Signal
+│
+▼
+Human Action / Plan
+
+The application architecture connects capture, context, AI analysis, geographic information, schedules and memory into a predictive workflow.
+
+🧪 Development Notes
+
+The project contains several integrations that require environment-specific configuration:
+
+Firebase authentication and Firestore
+
+Gemini API
+
+Google Maps
+
+OpenWeather
+
+EmailJS
+
+Expo media and speech capabilities
+
+Web video playback / Metro asset handling
+
+Keep local development secrets in .env and maintain a sanitized .env.example for repository setup.
+
+📜 License & Legal Registry
+
+ForgetMeNot AI Core System is distributed under the terms of the MIT License.
+
+Created by Arpit & The ForgetMeNot Developer Team.
+
+<div align="center">
+
+🌌 ForgetMeNot AI
+
+Predictive Context Intelligence Engine
+
+Context. Memory. Prediction. Preparedness.
+
+<br/>
+
+<a href="#top">⬆️ Back to top</a>
+
+<br/><br/>
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:00F5D4,45:7A0F67,100:050509&height=120&section=footer" width="100%"/>
+
+</div>
