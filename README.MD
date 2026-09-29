@@ -197,37 +197,156 @@ The final Profile action block clears active local authentication state, closes 
 
 Add your actual application screenshots to the repository and update the paths below.
 
-🏠 Home Dashboard
+### 🏠 Home Dashboard
 <p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-HomeScreen-web.png" width="900" alt="ForgetMeNot AI Home Dashboard"> </p>
 
 The central workspace brings together the application's predictive widgets and contextual signals.
 
 ---------------------------------------------
-🛰️ Omission Radar
+
+### 🛰️ Omission Radar
 <p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-OmissionRadar_Screen.png" width="900" alt="ForgetMeNot AI Omission Radar"> </p>
 
 The Omission Radar maps geographical points of interest and environmental context against recent signals.
 
 ------------------------------------------------
 
-🛡️ Omission Prevention
+### 🛡️ Omission Prevention
 <p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-PreventOmissionScreen-%20web.png" width="900" alt="ForgetMeNot AI Omission Prevention"> </p>
 
 The prevention workspace analyzes signal variance and presents proactive guidance.
 
 ------------------------------------------------
 
-☕ Coffee Chat AI
+### ☕ Coffee Chat AI
 <p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-CoffeeAI-ChatScreen-web.png" width="900" alt="ForgetMeNot AI Chat"> </p>
 
 The conversational AI interface provides a natural-language gateway into the user's contextual data layer.
 
 ------------------------------------------------
 
-📸 Capture
+### 📸 Capture
 <p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeMot-CaptureScreenImageGeminiAnalysis-web.png" width="900" alt="ForgetMeNot AI Capture"> </p>
 
 Capture allows users to record notes, images, and contextual information for downstream AI analysis.
+
+--------------------------------------------------
+
+### 🧠 Memory Screen
+
+<p align="center"> <img src="./assets/screenshots/memory.png" width="900" alt="ForgetMeNot AI Memory Screen"> </p>
+
+The Memory Screen provides access to historical omission and contextual records associated with the active user.
+
+It allows the application to maintain a chronological view of previously captured context signals.
+
+-------------------------------------------------
+
+### 🎯 Intent Anchor
+
+<p align="center">
+  <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-IntentAnchor-web.png"
+       width="900"
+       alt="ForgetMeNot AI Intent Anchor">
+</p>
+
+<p align="center">
+  <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot_IntentAnchorScreen2%20-web.png"
+       width="900"
+       alt="ForgetMeNot AI Intent Anchor">
+</p>
+
+
+ Intent Anchor — Connecting Signals to Human Intent
+
+The **Intent Anchor** connects explicit human information with contextual
+signals and organizes them into an actionable chronological structure.
+
+-------------------------------------------------------------------
+
+### 🛡️ Ripple Shield
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-RippleShield-web.png" width="900" alt="ForgetMeNot AI Ripple Shield"> </p>
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMenNot-ThreatMitigationMatrix-web.png" width="900" alt="ForgetMeNot AI Ripple Shield"> </p>
+
+Ripple Shield — Context Protection Layer
+
+The Ripple Shield represents the application's dynamic contextual  protection layer.
+
+It visualizes active context boundaries and signal sensitivity while connecting current signals with potential omission risks.
+
+---------------------------------------------------------
+📅 Calendar & Event Intelligence
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-GoogleCalendarEventScreen-web.png" width="900" alt="ForgetMeNot AI Calendar and Event Intelligence"> </p>
+
+
+Event Context
+
+Calendar information provides an important contextual layer for the application.
+--------------------------------------------------
+
+👤 Profile Screen
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-ProfilePage1-web.png" width="900" alt="ForgetMeNot AI Profile Screen"> </p>
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-ProfilePage2-web.png" width="900" alt="ForgetMeNot AI Profile Screen"> </p>
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-ProfilePage3-web.png" width="900" alt="ForgetMeNot AI Profile Screen"> </p>
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-ProfilePage4-web.png" width="900" alt="ForgetMeNot AI Profile Screen"> </p>
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-ProfilePage5-web.png" width="900" alt="ForgetMeNot AI Profile Screen"> </p>
+
+
+Profile — Personal Context Workspace
+
+The Profile Screen provides the user's personal application workspace.
+
+It contains user-related contextual information and application controls.
+
+-------------------------------------------------------------
+
+### 📨 Contact Us
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-ContactUsScreen-web.png" width="900" alt="ForgetMeNot AI Contact Us"> </p>
+
+Contact & Feedback
+
+The Contact Us experience provides an integrated feedback channel through the application's EmailJS integration.
+
+Users can submit feedback directly from within the application.
+
+-----------------------------------------------------------
+
+
+### 🔐 Authentication
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/LoginPage_web.png" width="900" alt="ForgetMeNot AI Login"> </p>
+
+Secure Entry Point
+
+The authentication experience provides the application's initial access layer.
+
+-------------------------------------------
+
+### 🌦️ + 🚆 Environmental & Mobility Context
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot-WeatherWidget.png" width="850" alt="ForgetMeNot AI  for current The weather and Local Train Information"> </p>
+
+The weather and local transit experiences become more powerful when
+combined with the application's other contextual intelligence.
+
+----------------------------------------------
+
+### 🔮 Predictive Loop
+
+<p align="center"> <img src="https://github.com/Poppenspel-Advies/forget-me-not-mobile-app-ai/blob/main/artifacts/forgetmenot-ai/assets/images/ForgetMeNotAI-ScreenShots/ForgetMeNot_predictiveLoop-web.png" width="850" alt="ForgetMeNot AI Predictive Loop"> </p>
+
+
+The Predictive Loop is the intelligence layer of ForgetMeNot AI that continuously identifies potential omissions before they become real-world problems. It transforms contextual signals into prioritized, actionable prevention insights.
+
+----------------------------------------------------------------------------
 
 ## 🧩 System Architecture
 
